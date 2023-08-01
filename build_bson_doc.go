@@ -55,23 +55,29 @@ func buildBSONDoc(ctx context.Context, bsonDocRef interface{}, schemaTreeNode *T
 			return errors.New("bson doc is nil")
 		}
 
-		for index, c := range schemaTreeNode.Children {
+		bsonIdx := 0
+		for _, c := range schemaTreeNode.Children {
 			schemaNode := c
 
 			nodesMatch := true
 			// nodes do not match if bson doc is shorter than schema tree node or
 			// if bson doc key does not match schema tree node key
-			if index >= len(*bsonDoc) || schemaNode.BSONKey != (*bsonDoc)[index].Key {
+			if bsonIdx >= len(*bsonDoc) || schemaNode.BSONKey != (*bsonDoc)[bsonIdx].Key {
 				nodesMatch = false
 			}
 
 			// Schema Options related logic starts here
 
 			if !nodesMatch {
+				// skip the node if it is not required and has no default value
+				if !schemaNode.Props.Options.Required && schemaNode.Props.Options.Default == nil {
+					continue
+				}
+
 				isIDField := schemaNode.BSONKey == "_id"
 
 				// throw error if schema node is not _id field (special field) and is required but has no default value.
-				if !isIDField && schemaNode.Props.Options.Required && schemaNode.Props.Options.Default == nil {
+				if !isIDField && schemaNode.Props.Options.Default == nil {
 					logger.Error(ctx, fmt.Sprintf(
 						"schema and bson nodes are not equal. Path: %s, Model key: %s, Schema key: %s",
 						schemaNode.Path, schemaNode.Key, schemaNode.BSONKey,
@@ -102,20 +108,20 @@ func buildBSONDoc(ctx context.Context, bsonDocRef interface{}, schemaTreeNode *T
 					bsonNodeToAppend = bson.E{Key: schemaNode.BSONKey, Value: schemaNode.Props.Options.Default}
 				}
 
-				if index >= len(*bsonDoc) {
+				if bsonIdx >= len(*bsonDoc) {
 					// adding bson node with default value at the end of bson doc
 					*bsonDoc = append(*bsonDoc, bsonNodeToAppend)
-					continue
 				} else {
 					// adding bson node with default value at current index
-					*bsonDoc = append((*bsonDoc)[:index+1], (*bsonDoc)[index:]...)
-					(*bsonDoc)[index] = bsonNodeToAppend
+					*bsonDoc = append((*bsonDoc)[:bsonIdx+1], (*bsonDoc)[bsonIdx:]...)
+					(*bsonDoc)[bsonIdx] = bsonNodeToAppend
 				}
 
+				bsonIdx++
 				continue
 			}
 
-			bsonNode := (*bsonDoc)[index]
+			bsonNode := (*bsonDoc)[bsonIdx]
 
 			convertedVal, err := getConvertedValueForNode(ctx, bsonNode.Value, &schemaNode, translateTo)
 			if err != nil {
@@ -123,7 +129,9 @@ func buildBSONDoc(ctx context.Context, bsonDocRef interface{}, schemaTreeNode *T
 			}
 
 			bsonNode.Value = convertedVal
-			(*bsonDoc)[index] = bsonNode
+			(*bsonDoc)[bsonIdx] = bsonNode
+
+			bsonIdx++
 		}
 
 	case reflect.Slice:

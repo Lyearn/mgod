@@ -3,9 +3,9 @@ package metafield
 import (
 	"time"
 
+	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CreatedAtMetaField struct{}
@@ -25,8 +25,11 @@ func (m CreatedAtMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool
 }
 
 func (m CreatedAtMetaField) CheckIfValidValue(val interface{}) bool {
-	_, ok := val.(primitive.DateTime)
-	return ok
+	if val, ok := val.(string); ok && val != "" {
+		return true
+	}
+
+	return false
 }
 
 func (m CreatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
@@ -34,12 +37,14 @@ func (m CreatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 }
 
 func (m CreatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) {
-	(*doc)[index].Value = primitive.NewDateTimeFromTime(time.Now())
+	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
+	(*doc)[index].Value = isoString
 }
 
 func (m CreatedAtMetaField) FieldNotPresent(doc *bson.D) {
+	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
 	*doc = append(*doc, bson.E{
 		Key:   string(m.GetMetaFieldKey()),
-		Value: primitive.NewDateTimeFromTime(time.Now()),
+		Value: isoString,
 	})
 }

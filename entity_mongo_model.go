@@ -75,6 +75,8 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 		return bsonDoc, nil
 	}
 
+	metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions)
+
 	err = BuildBSONDoc(ctx, &bsonDoc, m.schema, BSONDocTranslateToEnumMongo)
 	if err != nil {
 		return nil, err
@@ -150,7 +152,7 @@ func (m entityMongoModel[T]) InsertOne(ctx context.Context, doc T,
 		return model, err
 	}
 
-	metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions)
+	// metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions)
 
 	// TODO: add an extra strict check to ensure that the doc to be inserted contains _id field
 
