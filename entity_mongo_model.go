@@ -194,8 +194,6 @@ func (m entityMongoModel[T]) InsertMany(ctx context.Context, docs []T,
 			return nil, err
 		}
 
-		metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions)
-
 		bsonDocs[i] = bsonDoc
 	}
 
@@ -237,7 +235,8 @@ func (m entityMongoModel[T]) InsertMany(ctx context.Context, docs []T,
 			})
 		}
 
-		if model, transformErr := m.getEntityModelFromMongoDoc(ctx, bsonDocs[i].(primitive.D)); transformErr != nil {
+		model, transformErr := m.getEntityModelFromMongoDoc(ctx, bsonDocs[i].(primitive.D))
+		if transformErr != nil {
 			return nil, transformErr
 		} else {
 			models = append(models, model)
