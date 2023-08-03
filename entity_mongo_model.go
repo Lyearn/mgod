@@ -16,8 +16,9 @@ type EntityMongoModel[T any] interface {
 	InsertOne(ctx context.Context, model T, opts ...*options.InsertOneOptions) (T, error)
 	InsertMany(ctx context.Context, docs []T, opts ...*options.InsertManyOptions) ([]T, error)
 	UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	BulkWrite(ctx context.Context, bulkWrites []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) ([]T, error)
-	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) (T, error)
+	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) (*T, error)
 	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...*options.FindOneAndUpdateOptions) (T, error)
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
@@ -142,6 +143,41 @@ func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, 
 	return updateQuery, nil
 }
 
+// Converts bulkWrite entity models to mongo models
+func (m entityMongoModel[T]) transformToBulkWriteBSONDocs(ctx context.Context, bulkWrites []mongo.WriteModel) error {
+	for _, bulkWrite := range bulkWrites {
+		switch bulkWriteType := bulkWrite.(type) {
+		case *mongo.InsertOneModel:
+			doc := bulkWriteType.Document
+			if doc == nil {
+				continue
+			}
+
+			bsonDoc, err := m.getMongoDocFromEntityModel(ctx, doc.(T))
+			if err != nil {
+				return err
+			}
+
+			bulkWriteType.Document = bsonDoc
+		case *mongo.UpdateOneModel:
+			updateQuery, err := m.handleTimestampsForUpdateQuery(bulkWriteType.Update, "BulkWrite")
+			if err != nil {
+				return err
+			}
+
+			bulkWriteType.Update = updateQuery
+		case *mongo.UpdateManyModel:
+			updateQuery, err := m.handleTimestampsForUpdateQuery(bulkWriteType.Update, "BulkWrite")
+			if err != nil {
+				return err
+			}
+
+			bulkWriteType.Update = updateQuery
+		}
+	}
+	return nil
+}
+
 func (m entityMongoModel[T]) InsertOne(ctx context.Context, doc T,
 	opts ...*options.InsertOneOptions,
 ) (T, error) {
@@ -262,6 +298,20 @@ func (m entityMongoModel[T]) UpdateMany(ctx context.Context, filter interface{},
 	return result, nil
 }
 
+func (m entityMongoModel[T]) BulkWrite(ctx context.Context, bulkWrites []mongo.WriteModel,
+	opts ...*options.BulkWriteOptions,
+) (*mongo.BulkWriteResult, error) {
+	err := m.transformToBulkWriteBSONDocs(ctx, bulkWrites)
+	if err != nil {
+		return nil, err
+	}
+	result, err := m.coll.BulkWrite(ctx, bulkWrites, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (m entityMongoModel[T]) Find(ctx context.Context, filter interface{},
 	opts ...*options.FindOptions,
 ) ([]T, error) {
@@ -290,7 +340,7 @@ func (m entityMongoModel[T]) Find(ctx context.Context, filter interface{},
 
 func (m entityMongoModel[T]) FindOne(ctx context.Context, filter interface{},
 	opts ...*options.FindOneOptions,
-) (T, error) {
+) (*T, error) {
 	cursor := m.coll.FindOne(ctx, filter, opts...)
 
 	var doc bson.D
@@ -299,15 +349,18 @@ func (m entityMongoModel[T]) FindOne(ctx context.Context, filter interface{},
 	var err error
 
 	if err = cursor.Decode(&doc); err != nil {
-		return model, err
+		if err.Error() == mongo.ErrNoDocuments.Error() {
+			return nil, nil
+		}
+		return nil, err
 	}
 
 	model, err = m.getEntityModelFromMongoDoc(ctx, doc)
 	if err != nil {
-		return model, err
+		return nil, err
 	}
 
-	return model, nil
+	return &model, nil
 }
 
 func (m entityMongoModel[T]) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{},
