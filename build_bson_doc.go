@@ -276,7 +276,8 @@ func getSchemaNodeForPath(ctx context.Context, path string, schemaNodes map[stri
 	if !ok {
 		// TODO: remove this check once all schemas are in sync.
 		// skip throwing error for nodes which are not present in actual entity schema but present in mongo doc.
-		if translateTo == BSONDocTranslateToEnumEntityModel {
+		if translateTo == BSONDocTranslateToEnumEntityModel ||
+			path == "$root.__v" || path == "$root.createdAt" || path == "$root.updatedAt" {
 			return nil, nil
 		}
 
