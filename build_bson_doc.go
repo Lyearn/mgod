@@ -173,6 +173,11 @@ func getConvertedValueForNode(
 	var modifiedVal interface{}
 	var err error
 
+	// if nodeVal is nil, then there is no need to do any conversion.
+	if nodeVal == nil {
+		return nil, nil
+	}
+
 	// this switch case provides type support for bson.D and bson.A type of elements.
 	// without this, *interface{} type of bsonDoc would be passed in the recursive call,
 	// which will then go to the default case and will not be able to handle any nested type.
