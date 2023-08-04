@@ -225,6 +225,11 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, path s
 	// $ is used to denote the slice elements.
 	path += ".$"
 
+	// if slice element is a pointer, then we need to get the underlying type first.
+	if sliceElemType.Kind() == reflect.Pointer {
+		sliceElemType = sliceElemType.Elem()
+	}
+
 	// slice will only have one child, which will be the slice element.
 	treeNode.Children = []TreeNode{
 		{
