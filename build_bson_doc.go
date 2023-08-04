@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/Lyearn/backend-universe/packages/common/logger"
 	"github.com/Lyearn/backend-universe/packages/observability/errorhandler"
+	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -19,7 +19,12 @@ const (
 	BSONDocTranslateToEnumEntityModel BSONDocTranslateToEnum = "entity_model"
 )
 
-func BuildBSONDoc(ctx context.Context, bsonDoc *bson.D, entityModelSchema *EntityModelSchema, translateTo BSONDocTranslateToEnum) error {
+func BuildBSONDoc(
+	ctx context.Context,
+	bsonDoc *bson.D,
+	entityModelSchema *EntityModelSchema,
+	translateTo BSONDocTranslateToEnum,
+) error {
 	if entityModelSchema == nil {
 		return nil
 	}
@@ -32,162 +37,126 @@ func BuildBSONDoc(ctx context.Context, bsonDoc *bson.D, entityModelSchema *Entit
 		return nil
 	}
 
-	return buildBSONDoc(ctx, bsonDoc, &entityModelSchema.Root, translateTo)
+	err := buildBSONDoc(ctx, bsonDoc, entityModelSchema.Nodes, entityModelSchema.Root.Path, translateTo)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func buildBSONDoc(ctx context.Context, bsonDocRef interface{}, schemaTreeNode *TreeNode, translateTo BSONDocTranslateToEnum) error {
-	if schemaTreeNode == nil {
+func buildBSONDoc(
+	ctx context.Context,
+	bsonDocRef interface{},
+	schemaNodes map[string]*TreeNode,
+	parent string,
+	translateTo BSONDocTranslateToEnum,
+) error {
+	if bsonDocRef == nil {
 		return nil
 	}
 
-	switch schemaTreeNode.Props.Type {
-	case reflect.Struct:
-		bsonDoc, ok := bsonDocRef.(*bson.D)
-		if !ok {
-			logger.Error(ctx, fmt.Sprintf(
-				"schema node is of type struct but bson node is not of type bson.D. Path: %s, Model key: %s, Schema key: %s",
-				schemaTreeNode.Path, schemaTreeNode.Key, schemaTreeNode.BSONKey,
-			))
-			return fmt.Errorf("invalid bson node type for key %s", schemaTreeNode.Key)
+	schemaNode, err := getSchemaNodeForPath(ctx, parent, schemaNodes, translateTo)
+	if err != nil {
+		return err
+	} else if schemaNode == nil {
+		return nil
+	}
+
+	switch bsonElem := bsonDocRef.(type) {
+	case *bson.D:
+		if bsonElem == nil {
+			return nil
 		}
 
-		if bsonDoc == nil {
-			return errors.New("bson doc is nil")
-		}
+		visitedSchemaNodes := make([]string, 0)
 
-		bsonIdx := 0
-		for _, c := range schemaTreeNode.Children {
-			schemaNode := c
+		for bsonIdx, bsonNode := range *bsonElem {
+			nodePath := GetPathForField(bsonNode.Key, parent)
+			visitedSchemaNodes = append(visitedSchemaNodes, nodePath)
 
-			nodesMatch := true
-			// nodes do not match if bson doc is shorter than schema tree node or
-			// if bson doc key does not match schema tree node key
-			if bsonIdx >= len(*bsonDoc) || schemaNode.BSONKey != (*bsonDoc)[bsonIdx].Key {
-				nodesMatch = false
-			}
-
-			// Schema Options related logic starts here
-
-			if !nodesMatch {
-				// skip the node if it is not required and has no default value
-				if !schemaNode.Props.Options.Required && schemaNode.Props.Options.Default == nil {
-					continue
-				}
-
-				isIDField := schemaNode.BSONKey == "_id"
-
-				// throw error if schema node is not _id field (special field) and is required but has no default value.
-				if !isIDField && schemaNode.Props.Options.Default == nil {
-					logger.Error(ctx, fmt.Sprintf(
-						"schema and bson nodes are not equal. Path: %s, Model key: %s, Schema key: %s",
-						schemaNode.Path, schemaNode.Key, schemaNode.BSONKey,
-					))
-
-					return fmt.Errorf("key %s not found at path %s bson doc", schemaNode.Key, schemaNode.Path)
-				}
-
-				var bsonNodeToAppend bson.E
-
-				// add bson node with default value if value is available. else skip this schema node as it is not compulsory.
-				// But _id is a special field and it needs to be populated with ObjectID if not available.
-				if isIDField {
-					var valueToAppend interface{}
-					// populate _id field only if translating this doc to mongo doc.
-					// in other cases, inserting a dummy _id node which will throw error in service logic.
-					// reason being, while translating to entity model, if _id is not available, then this
-					// logic will populate new objectId every time for the same object and cause FE unique key issue.
-					// expectation here is if mgoID property of any field is changed to true in schema,
-					// then it should be populated via script beforehand.
-					if translateTo == BSONDocTranslateToEnumMongo {
-						valueToAppend = primitive.NewObjectID()
-					} else {
-						valueToAppend = ""
-					}
-					bsonNodeToAppend = bson.E{Key: "_id", Value: valueToAppend}
-				} else {
-					bsonNodeToAppend = bson.E{Key: schemaNode.BSONKey, Value: schemaNode.Props.Options.Default}
-				}
-
-				if bsonIdx >= len(*bsonDoc) {
-					// adding bson node with default value at the end of bson doc
-					*bsonDoc = append(*bsonDoc, bsonNodeToAppend)
-				} else {
-					// adding bson node with default value at current index
-					*bsonDoc = append((*bsonDoc)[:bsonIdx+1], (*bsonDoc)[bsonIdx:]...)
-					(*bsonDoc)[bsonIdx] = bsonNodeToAppend
-				}
-
-				bsonIdx++
-				continue
-			}
-
-			bsonNode := (*bsonDoc)[bsonIdx]
-
-			convertedVal, err := getConvertedValueForNode(ctx, bsonNode.Value, &schemaNode, translateTo)
+			convertedValue, err := getConvertedValueForNode(ctx, bsonNode.Value, schemaNodes, nodePath, translateTo)
 			if err != nil {
 				return err
 			}
 
-			bsonNode.Value = convertedVal
-			(*bsonDoc)[bsonIdx] = bsonNode
+			bsonNode.Value = convertedValue
 
-			bsonIdx++
+			(*bsonElem)[bsonIdx] = bsonNode
 		}
 
-	case reflect.Slice:
-		bsonDoc, ok := bsonDocRef.(*bson.A)
-		if !ok || bsonDoc == nil {
-			return errors.New("bson doc is nil but entity model schema is not empty")
+		// check if there are any missing nodes in the bson doc at the current level as compared to the schema.
+		immediateChildren := lo.Map(schemaNode.Children, func(child TreeNode, _ int) string {
+			return child.Path
+		})
+		uniqVisitedSchemaNodes := lo.Uniq(visitedSchemaNodes)
+
+		if len(uniqVisitedSchemaNodes) != len(immediateChildren) {
+			err := addMissingNodes(ctx, bsonElem, immediateChildren, uniqVisitedSchemaNodes, schemaNodes, translateTo)
+			if err != nil {
+				return err
+			}
 		}
 
-		schemaNodeSliceElem := schemaTreeNode.Children[0]
+	case *bson.A:
+		if bsonElem == nil || len(*bsonElem) == 0 {
+			return nil
+		}
 
-		for index, elem := range *bsonDoc {
-			bsonNodeSliceElem, err := getConvertedValueForNode(ctx, elem, &schemaNodeSliceElem, translateTo)
+		// array elements are represented as $.
+		nodePath := GetPathForField("$", parent)
+
+		for arrIdx := range *bsonElem {
+			elemVal := (*bsonElem)[arrIdx]
+
+			convertedValue, err := getConvertedValueForNode(ctx, elemVal, schemaNodes, nodePath, translateTo)
 			if err != nil {
 				return err
 			}
 
-			(*bsonDoc)[index] = bsonNodeSliceElem
+			(*bsonElem)[arrIdx] = convertedValue
 		}
 
-	// default case handles all primitive types i.e. all leaf nodes of schema tree
+	// default case handles all primitive types i.e. all leaf nodes of schema tree or all bson doc
+	// elements which are not of type bson.D or bson.A.
 	default:
 		// Transformations related logic starts here
 
-		if len(schemaTreeNode.Props.Transformers) != 0 {
-			for _, transformer := range schemaTreeNode.Props.Transformers {
-				if transformer == nil {
-					continue
-				}
+		if len(schemaNode.Props.Transformers) == 0 {
+			return nil
+		}
 
-				var elemVal interface{}
-				if _, ok := bsonDocRef.(*interface{}); !ok {
-					// this case handles only elements of array which are passed as reference from the above *bson.A case.
-					// hence, reject any other type.
-					return nil
-				} else {
-					elemVal = *(bsonDocRef.(*interface{}))
-				}
-
-				var modifiedBSONNodeVal interface{}
-				var err error
-
-				switch translateTo {
-				case BSONDocTranslateToEnumMongo:
-					modifiedBSONNodeVal, err = transformer.TransformForMongoDoc(elemVal)
-				case BSONDocTranslateToEnumEntityModel:
-					modifiedBSONNodeVal, err = transformer.TransformForEntityModelDoc(elemVal)
-				default:
-					err = fmt.Errorf("unknown translate from enum value %s", translateTo)
-				}
-
-				if err != nil {
-					return err
-				}
-
-				*(bsonDocRef.(*interface{})) = modifiedBSONNodeVal
+		for _, transformer := range schemaNode.Props.Transformers {
+			if transformer == nil {
+				continue
 			}
+
+			var elemVal interface{}
+			if _, ok := bsonDocRef.(*interface{}); !ok {
+				// this case handles only elements of array which are passed as reference from the above *bson.A case.
+				// hence, reject any other type.
+				return nil
+			} else {
+				elemVal = *(bsonDocRef.(*interface{}))
+			}
+
+			var modifiedBSONNodeVal interface{}
+			var err error
+
+			switch translateTo {
+			case BSONDocTranslateToEnumMongo:
+				modifiedBSONNodeVal, err = transformer.TransformForMongoDoc(elemVal)
+			case BSONDocTranslateToEnumEntityModel:
+				modifiedBSONNodeVal, err = transformer.TransformForEntityModelDoc(elemVal)
+			default:
+				err = fmt.Errorf("unknown translateTo enum value %s", translateTo)
+			}
+
+			if err != nil {
+				return err
+			}
+
+			*(bsonDocRef.(*interface{})) = modifiedBSONNodeVal
 		}
 	}
 
@@ -197,7 +166,8 @@ func buildBSONDoc(ctx context.Context, bsonDocRef interface{}, schemaTreeNode *T
 func getConvertedValueForNode(
 	ctx context.Context,
 	nodeVal interface{},
-	schemaTreeNode *TreeNode,
+	schemaNodes map[string]*TreeNode,
+	parent string,
 	translateTo BSONDocTranslateToEnum,
 ) (interface{}, error) {
 	var modifiedVal interface{}
@@ -208,21 +178,20 @@ func getConvertedValueForNode(
 	// which will then go to the default case and will not be able to handle any nested type.
 	switch typedValue := nodeVal.(type) {
 	case bson.D:
-		err = buildBSONDoc(ctx, &typedValue, schemaTreeNode, translateTo)
+		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	case bson.A:
-		err = buildBSONDoc(ctx, &typedValue, schemaTreeNode, translateTo)
+		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	case interface{}:
-		err = buildBSONDoc(ctx, &typedValue, schemaTreeNode, translateTo)
+		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	default:
 		errorParams := map[string]interface{}{
-			"key": schemaTreeNode.BSONKey,
-			"val": typedValue,
+			"doc": typedValue,
 		}
 		return nil, errorhandler.NewBadRequestError(errorhandler.CommonErrorProps{
 			Message: "Invalid bson doc type",
@@ -236,4 +205,81 @@ func getConvertedValueForNode(
 	}
 
 	return modifiedVal, err
+}
+
+// addMissingNodes appends missing nodes in bson doc which have default value.
+func addMissingNodes(
+	ctx context.Context,
+	bsonElem *bson.D,
+	immediateChildren []string,
+	uniqVisitedSchemaNodes []string,
+	schemaNodes map[string]*TreeNode,
+	translateTo BSONDocTranslateToEnum,
+) error {
+	missingSchemaPaths, _ := lo.Difference(immediateChildren, uniqVisitedSchemaNodes)
+	for _, missingSchemaPath := range missingSchemaPaths {
+		missingSchemaNode, err := getSchemaNodeForPath(ctx, missingSchemaPath, schemaNodes, translateTo)
+		if err != nil {
+			return err
+		} else if missingSchemaNode == nil {
+			continue
+		}
+
+		// skip the node if it is not required and has no default value
+		if !missingSchemaNode.Props.Options.Required && missingSchemaNode.Props.Options.Default == nil {
+			continue
+		}
+
+		isIDField := missingSchemaNode.BSONKey == "_id"
+
+		// throw error if schema node is not _id field (special field) and is required but has no default value.
+		if !isIDField && missingSchemaNode.Props.Options.Default == nil {
+			return fmt.Errorf("required field at path %s is missing in bson doc", missingSchemaPath)
+		}
+
+		var bsonNodeToAppend bson.E
+
+		// add bson node with default value if value is available. else skip this schema node as it is not compulsory.
+		// But _id is a special field and it needs to be populated with ObjectID if not available.
+		if isIDField {
+			var valueToAppend interface{}
+			// populate _id field only if translating this doc to mongo doc.
+			// in other cases, inserting a dummy _id node which will throw error in service logic.
+			// reason being, while translating to entity model, if _id is not available, then this
+			// logic will populate new objectId every time for the same object and cause FE unique key issue.
+			// expectation here is if mgoID property of any field is changed to true in schema,
+			// then it should be populated via script beforehand.
+			if translateTo == BSONDocTranslateToEnumMongo {
+				valueToAppend = primitive.NewObjectID()
+			} else {
+				valueToAppend = ""
+			}
+			bsonNodeToAppend = bson.E{Key: "_id", Value: valueToAppend}
+		} else {
+			bsonNodeToAppend = bson.E{Key: missingSchemaNode.BSONKey, Value: missingSchemaNode.Props.Options.Default}
+		}
+
+		// by default, add missing nodes at the end of bson doc.
+		(*bsonElem) = append(*bsonElem, bsonNodeToAppend)
+	}
+
+	return nil
+}
+
+func getSchemaNodeForPath(ctx context.Context, path string, schemaNodes map[string]*TreeNode, translateTo BSONDocTranslateToEnum) (*TreeNode, error) {
+	schemaNode, ok := schemaNodes[path]
+	if !ok {
+		// TODO: remove this check once all schemas are in sync.
+		// skip throwing error for nodes which are not present in actual entity schema but present in mongo doc.
+		if translateTo == BSONDocTranslateToEnumEntityModel {
+			return nil, nil
+		}
+
+		logger.Error(ctx, fmt.Sprintf(
+			"schema doesn't contains any node at path %s found in bsonDoc", path))
+
+		return nil, fmt.Errorf("unknown path %s found in bson doc", path)
+	}
+
+	return schemaNode, nil
 }

@@ -76,7 +76,9 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 		return bsonDoc, nil
 	}
 
-	metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions)
+	if err = metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions); err != nil {
+		return nil, err
+	}
 
 	err = BuildBSONDoc(ctx, &bsonDoc, m.schema, BSONDocTranslateToEnumMongo)
 	if err != nil {

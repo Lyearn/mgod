@@ -38,9 +38,15 @@ func (m UpdatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 	(*doc)[index].Value = isoString
 }
 
-func (m UpdatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) {
-	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
+func (m UpdatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
+	isoString, err := dateformatter.New(time.Now().UTC()).GetISOString()
+	if err != nil {
+		return err
+	}
+
 	(*doc)[index].Value = isoString
+
+	return nil
 }
 
 func (m UpdatedAtMetaField) FieldNotPresent(doc *bson.D) {

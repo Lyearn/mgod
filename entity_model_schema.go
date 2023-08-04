@@ -14,6 +14,9 @@ type EntityModelSchema struct {
 	// root node is a dummy node, it's not a real field in the model.
 	// actual doc parsing starts from the children of root node.
 	Root TreeNode
+
+	// nodes map is used to quickly access the schema tree node by path.
+	Nodes map[string]*TreeNode
 }
 
 type TreeNode struct {
@@ -37,8 +40,11 @@ func BuildSchemaForModel[T any](model T) (*EntityModelSchema, error) {
 	schemaTree := make([]TreeNode, 0)
 	rootNode := GetDefaultSchemaTreeRootNode()
 
+	nodes := make(map[string]*TreeNode)
+	nodes[rootNode.Path] = &rootNode
+
 	opts := NewEntityModelSchemaOptions().SetXIDRequired(rootNode.Props.Options.XID)
-	err := buildSchema(model, &schemaTree, "", *opts)
+	err := buildSchema(model, &schemaTree, nodes, rootNode.BSONKey, *opts)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +52,8 @@ func BuildSchemaForModel[T any](model T) (*EntityModelSchema, error) {
 	rootNode.Children = schemaTree
 
 	schema := &EntityModelSchema{
-		Root: rootNode,
+		Root:  rootNode,
+		Nodes: nodes,
 	}
 
 	return schema, nil
@@ -54,7 +61,7 @@ func BuildSchemaForModel[T any](model T) (*EntityModelSchema, error) {
 
 func GetDefaultSchemaTreeRootNode() TreeNode {
 	rootNode := TreeNode{
-		Path:    "",
+		Path:    "$root",
 		Key:     "$root",
 		BSONKey: "$root",
 		Props: SchemaFieldProps{
@@ -69,7 +76,7 @@ func GetDefaultSchemaTreeRootNode() TreeNode {
 	return rootNode
 }
 
-func buildSchema[T any](model T, treeRef *[]TreeNode, parent string, opts EntityModelSchemaOptions) error {
+func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string, opts EntityModelSchemaOptions) error {
 	v := reflect.ValueOf(model)
 
 	// converting pointer to value
@@ -153,28 +160,28 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, parent string, opts Entity
 				}
 
 				opts := NewEntityModelSchemaOptions().SetBSONInlineParent(true).SetParentBSONFields(existingBSONFields)
-				inlineFieldsErr := buildSchema(field.Interface(), &toAppendTreeNodes, parent, *opts)
+				inlineFieldsErr := buildSchema(field.Interface(), &toAppendTreeNodes, nodes, parent, *opts)
 				if inlineFieldsErr != nil {
 					return inlineFieldsErr
 				}
 
-				*treeRef = append(*treeRef, toAppendTreeNodes...)
+				AddTreeNodesToSchema(treeRef, nodes, toAppendTreeNodes...)
 
 				// no need to add inline struct as a child node
 				continue
 			}
 
-			recurseErr = handleStructTypeField(field, &treeNode, path)
+			recurseErr = handleStructTypeField(field, &treeNode, nodes, path)
 
 		case reflect.Slice:
-			recurseErr = handleSliceTypeField(structField.Type.Elem(), &treeNode, path)
+			recurseErr = handleSliceTypeField(structField.Type.Elem(), &treeNode, nodes, path)
 		}
 
 		if recurseErr != nil {
 			return recurseErr
 		}
 
-		*treeRef = append(*treeRef, treeNode)
+		AddTreeNodesToSchema(treeRef, nodes, treeNode)
 	}
 
 	// if _id is not found and is required for model, then insert it at the beginning.
@@ -205,18 +212,19 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, parent string, opts Entity
 			},
 		}
 
-		*treeRef = append([]TreeNode{xidNode}, *treeRef...)
+		AddTreeNodesToSchema(treeRef, nodes, xidNode)
 	}
 
 	return nil
 }
 
-func handleStructTypeField(field reflect.Value, treeNode *TreeNode, path string) error {
+func handleStructTypeField(field reflect.Value, treeNode *TreeNode, nodes map[string]*TreeNode, path string) error {
 	opts := NewEntityModelSchemaOptions().SetXIDRequired(treeNode.Props.Options.XID)
-	return buildSchema(field.Interface(), &treeNode.Children, path, *opts)
+
+	return buildSchema(field.Interface(), &treeNode.Children, nodes, path, *opts)
 }
 
-func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, path string) error {
+func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes map[string]*TreeNode, path string) error {
 	// In case of slice, transformations are applicable on the slice elements only,
 	// whereas options are applicable on the slice itself.
 	parentTransformers := treeNode.Props.Transformers
@@ -231,29 +239,45 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, path s
 	}
 
 	// slice will only have one child, which will be the slice element.
-	treeNode.Children = []TreeNode{
-		{
-			Path:    path,
-			BSONKey: "$",
-			Key:     "$",
-			Props: SchemaFieldProps{
-				Type:         sliceElemType.Kind(),
-				Transformers: parentTransformers,
-			},
+	childNode := TreeNode{
+		Path:    path,
+		BSONKey: "$",
+		Key:     "$",
+		Props: SchemaFieldProps{
+			Type:         sliceElemType.Kind(),
+			Transformers: parentTransformers,
 		},
 	}
 
+	AddTreeNodesToSchema(&treeNode.Children, nodes, childNode)
+
+	// if slice element is a struct, then we need to recurse.
 	if sliceElemType.Kind() == reflect.Struct {
+		// creating a new instance of slice element type to pass to buildSchema
 		sliceElemModel := reflect.New(sliceElemType).Interface()
 
 		opts := NewEntityModelSchemaOptions().SetXIDRequired(treeNode.Props.Options.XID)
-		err := buildSchema(sliceElemModel, &treeNode.Children[0].Children, path, *opts)
+		err := buildSchema(sliceElemModel, &treeNode.Children[0].Children, nodes, path, *opts)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// AddTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
+func AddTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAddTreeNodes ...TreeNode) {
+	*treeRef = append(*treeRef, make([]TreeNode, len(toAddTreeNodes))...)
+
+	// assigning the address of the new nodes to the nodes map.
+	// need to do this after appending to the treeRef, because the addresses of the appended nodes will change.
+	for i := range toAddTreeNodes {
+		parentIdx := len(*treeRef) - len(toAddTreeNodes) + i
+
+		(*treeRef)[parentIdx] = toAddTreeNodes[i]
+		nodes[toAddTreeNodes[i].Path] = &(*treeRef)[parentIdx]
+	}
 }
 
 func GetCurrentLevelBSONFields(s reflect.Value) []string {

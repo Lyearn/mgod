@@ -21,7 +21,7 @@ type MetaField interface {
 
 	// FieldPresentWithIncorrectVal modifies the doc at the provided index if the field is already present in the doc
 	// but is not of the expected type.
-	FieldPresentWithIncorrectVal(doc *bson.D, index int)
+	FieldPresentWithIncorrectVal(doc *bson.D, index int) error
 
 	// FieldNotPresent appends the missing field in the doc.
 	FieldNotPresent(doc *bson.D)
@@ -33,12 +33,16 @@ var availableMetaFields = []MetaField{
 	docVersionMetaFieldInstance,
 }
 
-func AddMetaFields(bsonDoc *bson.D, schemaOptions model.SchemaOptions) {
+func AddMetaFields(bsonDoc *bson.D, schemaOptions model.SchemaOptions) error {
 	for _, metaField := range availableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue
 		}
 
-		ValidatedAndAddFieldValue(bsonDoc, metaField)
+		if err := ValidatedAndAddFieldValue(bsonDoc, metaField); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }

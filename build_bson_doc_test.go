@@ -2,14 +2,11 @@ package mongomodel_test
 
 import (
 	"context"
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/schemaopt"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -61,163 +58,30 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		return sessionId.Hex()
 	})
 
-	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
-	rootNode.Children = []mongomodel.TreeNode{
-		{
-			Path:    "_id",
-			BSONKey: "_id",
-			Key:     "ID",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.String,
-				Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: true,
-				},
-			},
-		},
-		{
-			Path:    "name",
-			BSONKey: "name",
-			Key:     "Name",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.TypeOf((*string)(nil)).Kind(),
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: false,
-				},
-			},
-		},
-		{
-			Path:    "age",
-			BSONKey: "age",
-			Key:     "Age",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.Int,
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: true,
-					Default:  18,
-				},
-			},
-		},
-		{
-			Path:    "meta",
-			BSONKey: "meta",
-			Key:     "Metadata",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.Struct,
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					XID:      true,
-					Required: true,
-				},
-			},
-			Children: []mongomodel.TreeNode{
-				{
-					Path:    "meta._id",
-					BSONKey: "_id",
-					Key:     "XID",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-				},
-				{
-					Path:    "meta.onboardAt",
-					BSONKey: "onboardAt",
-					Key:     "OnboardAt",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-				},
-				{
-					Path:    "meta.tagIds",
-					BSONKey: "tagIds",
-					Key:     "TagIDs",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.Slice,
-						Transformers: []transformer.Transformer{},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-					Children: []mongomodel.TreeNode{
-						{
-							Path:    "meta.tagIds.$",
-							BSONKey: "$",
-							Key:     "$", // to identify slice element
-							Props: mongomodel.SchemaFieldProps{
-								Type:         reflect.String,
-								Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-							},
-						},
-					},
-				},
-				{
-					Path:    "meta.activeSessions",
-					BSONKey: "activeSessions",
-					Key:     "ActiveSessions",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.Slice,
-						Transformers: []transformer.Transformer{},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-							Default:  bson.A{},
-						},
-					},
-					Children: []mongomodel.TreeNode{
-						{
-							Path:    "meta.activeSessions.$",
-							BSONKey: "$",
-							Key:     "$",
-							Props: mongomodel.SchemaFieldProps{
-								Type:         reflect.Struct,
-								Transformers: []transformer.Transformer{},
-							},
-							Children: []mongomodel.TreeNode{
-								{
-									Path:    "meta.activeSessions.$.sessionId",
-									BSONKey: "sessionId",
-									Key:     "SessionID",
-									Props: mongomodel.SchemaFieldProps{
-										Type:         reflect.String,
-										Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-										Options: schemaopt.SchemaFieldOptions{
-											Required: true,
-										},
-									},
-								},
-								{
-									Path:    "meta.activeSessions.$.lastLoginAt",
-									BSONKey: "lastLoginAt",
-									Key:     "LastLoginAt",
-									Props: mongomodel.SchemaFieldProps{
-										Type:         reflect.String,
-										Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
-										Options: schemaopt.SchemaFieldOptions{
-											Required: true,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+	type ActiveSession struct {
+		SessionID   string `bson:"sessionId" mgoType:"id"`
+		LastLoginAt string `bson:"lastLoginAt" mgoType:"date"`
 	}
+
+	type Metadata struct {
+		OnboardAt      string          `bson:"onboardAt" mgoType:"date"`
+		TagIDs         []string        `bson:"tagIds" mgoType:"id"`
+		ActiveSessions []ActiveSession `bson:"activeSessions" mgoID:"false" mgoDefault:"[]"`
+	}
+
+	type NestedModelWithAllTypes struct {
+		ID       string    `bson:"_id" mgoType:"id"`
+		Name     *string   `bson:",omitempty"`
+		Age      int       `mgoDefault:"18"`
+		Metadata *Metadata `bson:"meta"`
+	}
+
+	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModelWithAllTypes{})
 
 	nestedDocWithAllTypes := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
 
-		EntityModelSchema: mongomodel.EntityModelSchema{Root: rootNode},
+		EntityModelSchema: *actualSchema,
 
 		InputDoc: bson.D{
 			{
@@ -227,6 +91,10 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 			{
 				Key:   "name",
 				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
 			},
 			{
 				Key: "meta",
@@ -333,16 +201,12 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	nestedDocCheckForDefaultValues := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
 
-		EntityModelSchema: mongomodel.EntityModelSchema{Root: rootNode},
+		EntityModelSchema: *actualSchema,
 
 		InputDoc: bson.D{
 			{
 				Key:   "_id",
 				Value: id.Hex(),
-			},
-			{
-				Key:   "name",
-				Value: "user",
 			},
 			{
 				Key: "meta",
@@ -352,14 +216,18 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
-					},
-					{
 						Key:   "tagIds",
 						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
 					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAtStr,
+					},
 				},
+			},
+			{
+				Key:   "name",
+				Value: "user",
 			},
 		},
 
@@ -369,14 +237,6 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 				Value: id,
 			},
 			{
-				Key:   "name",
-				Value: "user",
-			},
-			{
-				Key:   "age",
-				Value: 18,
-			},
-			{
 				Key: "meta",
 				Value: bson.D{
 					{
@@ -384,18 +244,26 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
-					},
-					{
 						Key:   "tagIds",
 						Value: bson.A{tagIDs[0], tagIDs[1]},
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAt,
 					},
 					{
 						Key:   "activeSessions",
 						Value: bson.A{},
 					},
 				},
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
 			},
 		},
 	}
@@ -424,90 +292,23 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	onboardAt := primitive.NewDateTimeFromTime(time.Now())
 	onboardAtStr, _ := dateformatter.New(onboardAt.Time()).GetISOString()
 
-	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
-	rootNode.Children = []mongomodel.TreeNode{
-		{
-			Path:    "_id",
-			BSONKey: "_id",
-			Key:     "ID",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.String,
-				Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: true,
-				},
-			},
-		},
-		{
-			Path:    "name",
-			BSONKey: "name",
-			Key:     "Name",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.TypeOf((*string)(nil)).Kind(),
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: false,
-				},
-			},
-		},
-		{
-			Path:    "age",
-			BSONKey: "age",
-			Key:     "Age",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.Int,
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					Required: true,
-					Default:  18,
-				},
-			},
-		},
-		{
-			Path:    "meta",
-			BSONKey: "meta",
-			Key:     "Metadata",
-			Props: mongomodel.SchemaFieldProps{
-				Type:         reflect.Struct,
-				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
-					XID:      true,
-					Required: true,
-				},
-			},
-			Children: []mongomodel.TreeNode{
-				{
-					Path:    "meta._id",
-					BSONKey: "_id",
-					Key:     "XID",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-				},
-				{
-					Path:    "meta.onboardAt",
-					BSONKey: "onboardAt",
-					Key:     "OnboardAt",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-				},
-			},
-		},
+	type Metadata struct {
+		OnboardAt string `bson:"onboardAt" mgoType:"date"`
 	}
+
+	type NestedModel struct {
+		ID       string    `bson:"_id" mgoType:"id"`
+		Name     *string   `bson:",omitempty"`
+		Age      int       `mgoDefault:"18"`
+		Metadata *Metadata `bson:"meta"`
+	}
+
+	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModel{})
 
 	docWithoutIDCase := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
 
-		EntityModelSchema: mongomodel.EntityModelSchema{Root: rootNode},
+		EntityModelSchema: *actualSchema,
 
 		InputDoc: bson.D{
 			{
@@ -530,9 +331,9 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	err := mongomodel.BuildBSONDoc(context.TODO(), &doc, &docWithoutIDCase.EntityModelSchema, docWithoutIDCase.TranslateTo)
 
 	s.Nil(err)
-	s.True(doc[0].Key == "_id")
-	s.True(doc[0].Value.(primitive.ObjectID).Hex() != "")
-	s.True(doc[3].Key == "meta")
-	s.True(doc[3].Value.(primitive.D)[0].Key == "_id")
-	s.True(doc[3].Value.(primitive.D)[0].Value.(primitive.ObjectID).Hex() != "")
+	s.True(doc[2].Key == "_id")
+	s.True(doc[2].Value.(primitive.ObjectID).Hex() != "")
+	s.True(doc[1].Key == "meta")
+	s.True(doc[1].Value.(primitive.D)[1].Key == "_id")
+	s.True(doc[1].Value.(primitive.D)[1].Value.(primitive.ObjectID).Hex() != "")
 }

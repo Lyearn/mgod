@@ -28,8 +28,9 @@ func (s *EntityModelSchemaSuite) SetupTest() {
 
 func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	type TestCase struct {
-		Model  any
-		Schema mongomodel.EntityModelSchema
+		Model                 any
+		Schema                mongomodel.EntityModelSchema
+		ValidSchemaNodesCount int
 	}
 
 	type ActiveSession struct {
@@ -69,7 +70,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
 	rootNode.Children = []mongomodel.TreeNode{
 		{
-			Path:    "_id",
+			Path:    "$root._id",
 			BSONKey: "_id",
 			Key:     "ID",
 			Props: mongomodel.SchemaFieldProps{
@@ -81,7 +82,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "name",
+			Path:    "$root.name",
 			BSONKey: "name",
 			Key:     "Name",
 			Props: mongomodel.SchemaFieldProps{
@@ -94,7 +95,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "age",
+			Path:    "$root.age",
 			BSONKey: "age",
 			Key:     "Age",
 			Props: mongomodel.SchemaFieldProps{
@@ -107,7 +108,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "meta",
+			Path:    "$root.meta",
 			BSONKey: "meta",
 			Key:     "Metadata",
 			Props: mongomodel.SchemaFieldProps{
@@ -121,7 +122,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 			Children: []mongomodel.TreeNode{
 				{
-					Path:    "meta._id",
+					Path:    "$root.meta._id",
 					BSONKey: "_id",
 					Key:     "XID",
 					Props: mongomodel.SchemaFieldProps{
@@ -133,7 +134,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 				},
 				{
-					Path:    "meta.onboardat",
+					Path:    "$root.meta.onboardat",
 					BSONKey: "onboardat",
 					Key:     "OnboardAt",
 					Props: mongomodel.SchemaFieldProps{
@@ -145,7 +146,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 				},
 				{
-					Path:    "meta.tagIds",
+					Path:    "$root.meta.tagIds",
 					BSONKey: "tagIds",
 					Key:     "TagIDs",
 					Props: mongomodel.SchemaFieldProps{
@@ -157,7 +158,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 					Children: []mongomodel.TreeNode{
 						{
-							Path:    "meta.tagIds.$",
+							Path:    "$root.meta.tagIds.$",
 							BSONKey: "$",
 							Key:     "$", // to identify slice element
 							Props: mongomodel.SchemaFieldProps{
@@ -168,7 +169,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 				},
 				{
-					Path:    "meta.activeSessions",
+					Path:    "$root.meta.activeSessions",
 					BSONKey: "activeSessions",
 					Key:     "ActiveSessions",
 					Props: mongomodel.SchemaFieldProps{
@@ -181,7 +182,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 					Children: []mongomodel.TreeNode{
 						{
-							Path:    "meta.activeSessions.$",
+							Path:    "$root.meta.activeSessions.$",
 							BSONKey: "$",
 							Key:     "$",
 							Props: mongomodel.SchemaFieldProps{
@@ -190,7 +191,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 							},
 							Children: []mongomodel.TreeNode{
 								{
-									Path:    "meta.activeSessions.$.sessionid",
+									Path:    "$root.meta.activeSessions.$.sessionid",
 									BSONKey: "sessionid",
 									Key:     "SessionID",
 									Props: mongomodel.SchemaFieldProps{
@@ -202,7 +203,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 									},
 								},
 								{
-									Path:    "meta.activeSessions.$.lastLoginAt",
+									Path:    "$root.meta.activeSessions.$.lastLoginAt",
 									BSONKey: "lastLoginAt",
 									Key:     "LastLoginAt",
 									Props: mongomodel.SchemaFieldProps{
@@ -220,7 +221,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "inlineFloat",
+			Path:    "$root.inlineFloat",
 			BSONKey: "inlineFloat",
 			Key:     "InlineFloat",
 			Props: mongomodel.SchemaFieldProps{
@@ -232,7 +233,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "inlineBool",
+			Path:    "$root.inlineBool",
 			BSONKey: "inlineBool",
 			Key:     "InlineBool",
 			Props: mongomodel.SchemaFieldProps{
@@ -244,7 +245,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "inlinestring",
+			Path:    "$root.inlinestring",
 			BSONKey: "inlinestring",
 			Key:     "InlineString",
 			Props: mongomodel.SchemaFieldProps{
@@ -256,7 +257,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 		{
-			Path:    "height",
+			Path:    "$root.height",
 			BSONKey: "height",
 			Key:     "Height",
 			Props: mongomodel.SchemaFieldProps{
@@ -271,8 +272,9 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	nestedModelWithAllTypesSchema := mongomodel.EntityModelSchema{Root: rootNode}
 
 	nestedModelWithAllTypesTestCase := TestCase{
-		Model:  NestedModelWithAllTypes{},
-		Schema: nestedModelWithAllTypesSchema,
+		Model:                 NestedModelWithAllTypes{},
+		Schema:                nestedModelWithAllTypesSchema,
+		ValidSchemaNodesCount: 17,
 	}
 
 	testCases := []TestCase{
@@ -281,9 +283,11 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 
 	for _, tc := range testCases {
 		actualSchema, err := mongomodel.BuildSchemaForModel(tc.Model)
+
 		s.Nil(err)
-		if !reflect.DeepEqual(tc.Schema, *actualSchema) {
+		if !reflect.DeepEqual(tc.Schema.Root, actualSchema.Root) {
 			s.Fail("Schema mismatch", "Expected: %v, Got: %v", tc.Schema, *actualSchema)
 		}
+		s.Equal(tc.ValidSchemaNodesCount, len(actualSchema.Nodes))
 	}
 }

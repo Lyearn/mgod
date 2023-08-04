@@ -32,8 +32,10 @@ func (m DocVersionMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 	(*doc)[index].Value = (*doc)[index].Value.(int) + 1
 }
 
-func (m DocVersionMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) {
+func (m DocVersionMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
 	(*doc)[index].Value = 0
+
+	return nil
 }
 
 func (m DocVersionMetaField) FieldNotPresent(doc *bson.D) {
