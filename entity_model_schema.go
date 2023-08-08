@@ -90,6 +90,10 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 	for i := 0; i < v.NumField(); i++ {
 		structField := v.Type().Field(i)
 		fieldName := typeutil.GetBSONFieldName(structField)
+		if fieldName == "" {
+			// skipping unexported fields
+			continue
+		}
 
 		// if we are processing an inline struct, then need to check if parent already contains
 		// the current field. if yes, then we can skip processing the field because bson util

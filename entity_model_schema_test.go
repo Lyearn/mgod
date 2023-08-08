@@ -42,6 +42,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 		OnboardAt      string          `mgoType:"date"`
 		TagIDs         []string        `bson:"tagIds" mgoType:"id"`
 		ActiveSessions []ActiveSession `bson:"activeSessions" mgoID:"false" mgoDefault:"[]"`
+		SkipField      string          `bson:"-"`
 	}
 
 	type NestedInlineProps struct {
@@ -59,12 +60,13 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	}
 
 	type NestedModelWithAllTypes struct {
-		ID       string      `bson:"_id" mgoType:"id"`
-		Name     *string     `bson:",omitempty"`
-		Age      int         `mgoDefault:"18"`
-		Metadata *Metadata   `bson:"meta"`
-		Props    InlineProps `bson:",inline"`
-		Height   float64
+		ID        string      `bson:"_id" mgoType:"id"`
+		Name      *string     `bson:",omitempty"`
+		Age       int         `mgoDefault:"18"`
+		Metadata  *Metadata   `bson:"meta"`
+		Props     InlineProps `bson:",inline"`
+		Height    float64
+		SkipField bool `bson:"-"`
 	}
 
 	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
@@ -121,18 +123,6 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 				},
 			},
 			Children: []mongomodel.TreeNode{
-				{
-					Path:    "$root.meta._id",
-					BSONKey: "_id",
-					Key:     "XID",
-					Props: mongomodel.SchemaFieldProps{
-						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
-							Required: true,
-						},
-					},
-				},
 				{
 					Path:    "$root.meta.onboardat",
 					BSONKey: "onboardat",
@@ -215,6 +205,18 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 									},
 								},
 							},
+						},
+					},
+				},
+				{
+					Path:    "$root.meta._id",
+					BSONKey: "_id",
+					Key:     "XID",
+					Props: mongomodel.SchemaFieldProps{
+						Type:         reflect.String,
+						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
+						Options: schemaopt.SchemaFieldOptions{
+							Required: true,
 						},
 					},
 				},
