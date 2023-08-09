@@ -1,6 +1,7 @@
 package metafield
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
@@ -16,8 +17,12 @@ func newUpdatedAtMetaField() MetaField {
 
 var updatedAtMetaFieldInstance = newUpdatedAtMetaField()
 
-func (m UpdatedAtMetaField) GetMetaFieldKey() MetaFieldKey {
+func (m UpdatedAtMetaField) GetKey() MetaFieldKey {
 	return MetaFieldKeyUpdatedAt
+}
+
+func (m UpdatedAtMetaField) GetReflectKind() reflect.Kind {
+	return reflect.String
 }
 
 func (m UpdatedAtMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool {
@@ -52,7 +57,7 @@ func (m UpdatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int)
 func (m UpdatedAtMetaField) FieldNotPresent(doc *bson.D) {
 	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
 	*doc = append(*doc, bson.E{
-		Key:   string(m.GetMetaFieldKey()),
+		Key:   string(m.GetKey()),
 		Value: isoString,
 	})
 }

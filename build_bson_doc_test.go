@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
+	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
+	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
@@ -58,6 +60,9 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		return sessionId.Hex()
 	})
 
+	createdAt := primitive.NewDateTimeFromTime(time.Now())
+	updatedAt := primitive.NewDateTimeFromTime(time.Now())
+
 	type ActiveSession struct {
 		SessionID   string `bson:"sessionId" mgoType:"id"`
 		LastLoginAt string `bson:"lastLoginAt" mgoType:"date"`
@@ -72,13 +77,17 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	type NestedModelWithAllTypes struct {
 		ID       string    `bson:"_id" mgoType:"id"`
 		Name     *string   `bson:",omitempty"`
-		Age      int       `mgoDefault:"18"`
+		Age      *int      `bson:",omitempty" mgoDefault:"18"`
 		Metadata *Metadata `bson:"meta"`
 	}
 
-	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModelWithAllTypes{})
+	actualSchema, _ := mongomodel.BuildSchemaForModel(
+		NestedModelWithAllTypes{},
+		model.SchemaOptions{VersionKey: typeutil.GetPointerForConstType(false)},
+	)
 
-	nestedDocWithAllTypes := &TestCase{
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocWithAllTypes_toMongo := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
@@ -198,7 +207,129 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		},
 	}
 
-	nestedDocCheckForDefaultValues := &TestCase{
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocWithAllTypes_toEntityModel := &TestCase{
+		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+
+		EntityModelSchema: *actualSchema,
+
+		InputDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id,
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID,
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAt,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDs[0], tagIDs[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[1],
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		ExpectedDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id.Hex(),
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID.Hex(),
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAtStr,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[1],
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocCheckForDefaultValues_toMongo := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
@@ -268,9 +399,350 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		},
 	}
 
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocCheckForDefaultValues_toEntityModel := &TestCase{
+		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+
+		EntityModelSchema: *actualSchema,
+
+		InputDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDs[0], tagIDs[1]},
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAt,
+					},
+				},
+			},
+		},
+
+		ExpectedDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id.Hex(),
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID.Hex(),
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAtStr,
+					},
+					{
+						Key:   "activeSessions",
+						Value: bson.A{},
+					},
+				},
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+		},
+	}
+
+	schemaForNestedDocWithSchemaOpts, _ := mongomodel.BuildSchemaForModel(
+		NestedModelWithAllTypes{},
+		model.SchemaOptions{
+			Timestamps: true,
+			// VersionKey enabled by default
+		},
+	)
+
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocWithAllTypesAndSchemaOpts_toMongo := &TestCase{
+		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
+
+		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
+
+		InputDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id.Hex(),
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID.Hex(),
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAtStr,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[1],
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		ExpectedDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id,
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID,
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAt,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDs[0], tagIDs[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[1],
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	//nolint:stylecheck,revive // ignore linter for test case
+	nestedDocWithAllTypesAndSchemaOpts_toEntityModel := &TestCase{
+		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+
+		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
+
+		InputDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id,
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID,
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAt,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDs[0], tagIDs[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIds[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessions[1],
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Key:   "createdAt",
+				Value: createdAt,
+			},
+			{
+				Key:   "updatedAt",
+				Value: updatedAt,
+			},
+			{
+				Key:   "__v",
+				Value: 0,
+			},
+		},
+
+		ExpectedDoc: bson.D{
+			{
+				Key:   "_id",
+				Value: id.Hex(),
+			},
+			{
+				Key:   "name",
+				Value: "user",
+			},
+			{
+				Key:   "age",
+				Value: 18,
+			},
+			{
+				Key: "meta",
+				Value: bson.D{
+					{
+						Key:   "_id",
+						Value: metaID.Hex(),
+					},
+					{
+						Key:   "onboardAt",
+						Value: onboardAtStr,
+					},
+					{
+						Key:   "tagIds",
+						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+					},
+					{
+						Key: "activeSessions",
+						Value: bson.A{
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[0],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[0],
+								},
+							},
+							bson.D{
+								{
+									Key:   "sessionId",
+									Value: sessionIdsStr[1],
+								},
+								{
+									Key:   "lastLoginAt",
+									Value: activeSessionsStr[1],
+								},
+							},
+						},
+					},
+				},
+			},
+			{
+				Key:   "createdAt",
+				Value: createdAt,
+			},
+			{
+				Key:   "updatedAt",
+				Value: updatedAt,
+			},
+			{
+				Key:   "__v",
+				Value: 0,
+			},
+		},
+	}
+
 	testCases := []*TestCase{
-		nestedDocWithAllTypes,
-		nestedDocCheckForDefaultValues,
+		nestedDocWithAllTypes_toMongo,
+		nestedDocWithAllTypes_toEntityModel,
+		nestedDocCheckForDefaultValues_toMongo,
+		nestedDocCheckForDefaultValues_toEntityModel,
+		nestedDocWithAllTypesAndSchemaOpts_toMongo,
+		nestedDocWithAllTypesAndSchemaOpts_toEntityModel,
 	}
 
 	for _, testCase := range testCases {
@@ -303,7 +775,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 		Metadata *Metadata `bson:"meta"`
 	}
 
-	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModel{})
+	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModel{}, model.SchemaOptions{})
 
 	docWithoutIDCase := &TestCase{
 		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,

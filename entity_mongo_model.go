@@ -46,7 +46,7 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 	}
 
 	var model T
-	schema, err := BuildSchemaForModel(model)
+	schema, err := BuildSchemaForModel(model, opts.schemaOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, 
 	return updateQuery, nil
 }
 
-// Converts bulkWrite entity models to mongo models
+// Converts bulkWrite entity models to mongo models.
 func (m entityMongoModel[T]) transformToBulkWriteBSONDocs(ctx context.Context, bulkWrites []mongo.WriteModel) error {
 	for _, bulkWrite := range bulkWrites {
 		switch bulkWriteType := bulkWrite.(type) {
@@ -352,6 +352,7 @@ func (m entityMongoModel[T]) FindOne(ctx context.Context, filter interface{},
 
 	if err = cursor.Decode(&doc); err != nil {
 		if err.Error() == mongo.ErrNoDocuments.Error() {
+			//nolint:nilnil // this is the expected behavior
 			return nil, nil
 		}
 		return nil, err

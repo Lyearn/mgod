@@ -1,6 +1,8 @@
 package metafield
 
 import (
+	"reflect"
+
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -13,13 +15,21 @@ func newDocVersionMetaField() MetaField {
 
 var docVersionMetaFieldInstance = newDocVersionMetaField()
 
-func (m DocVersionMetaField) GetMetaFieldKey() MetaFieldKey {
+func (m DocVersionMetaField) GetKey() MetaFieldKey {
 	return MetaFieldKeyDocVersion
 }
 
+func (m DocVersionMetaField) GetReflectKind() reflect.Kind {
+	return reflect.Int
+}
+
 func (m DocVersionMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool {
-	// doc versioning is enabled by default.
-	return true
+	if schemaOptions.VersionKey == nil {
+		// doc versioning is enabled by default.
+		return true
+	}
+
+	return *schemaOptions.VersionKey
 }
 
 func (m DocVersionMetaField) CheckIfValidValue(val interface{}) bool {
@@ -40,7 +50,7 @@ func (m DocVersionMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int
 
 func (m DocVersionMetaField) FieldNotPresent(doc *bson.D) {
 	*doc = append(*doc, bson.E{
-		Key:   string(m.GetMetaFieldKey()),
+		Key:   string(m.GetKey()),
 		Value: 0,
 	})
 }

@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
+	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel/schemaopt"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
@@ -30,6 +32,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	type TestCase struct {
 		Model                 any
 		Schema                mongomodel.EntityModelSchema
+		SchemaOpts            model.SchemaOptions
 		ValidSchemaNodesCount int
 	}
 
@@ -70,7 +73,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	}
 
 	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
-	rootNode.Children = []mongomodel.TreeNode{
+
+	// TC 1: NestedModelWithAllTypes
+	nestedModelWithAllTypesRootNode := rootNode
+	nestedModelWithAllTypesRootNode.Children = []mongomodel.TreeNode{
 		{
 			Path:    "$root._id",
 			BSONKey: "_id",
@@ -271,20 +277,69 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			},
 		},
 	}
-	nestedModelWithAllTypesSchema := mongomodel.EntityModelSchema{Root: rootNode}
+	nestedModelWithAllTypesSchema := mongomodel.EntityModelSchema{Root: nestedModelWithAllTypesRootNode}
 
 	nestedModelWithAllTypesTestCase := TestCase{
-		Model:                 NestedModelWithAllTypes{},
-		Schema:                nestedModelWithAllTypesSchema,
+		Model:  NestedModelWithAllTypes{},
+		Schema: nestedModelWithAllTypesSchema,
+		SchemaOpts: model.SchemaOptions{
+			VersionKey: typeutil.GetPointerForConstType(false),
+		},
 		ValidSchemaNodesCount: 17,
+	}
+
+	// TC 2: NestedModelWithAllTypes with all schema options enabled
+	nestedModelWithSchemaOptsRootNode := nestedModelWithAllTypesRootNode
+
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+		Path:    "$root.createdAt",
+		BSONKey: "createdAt",
+		Key:     "createdAt",
+		Props: mongomodel.SchemaFieldProps{
+			Type:    reflect.String,
+			Options: schemaopt.SchemaFieldOptions{Required: false},
+		},
+	})
+
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+		Path:    "$root.updatedAt",
+		BSONKey: "updatedAt",
+		Key:     "updatedAt",
+		Props: mongomodel.SchemaFieldProps{
+			Type:    reflect.String,
+			Options: schemaopt.SchemaFieldOptions{Required: false},
+		},
+	})
+
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+		Path:    "$root.__v",
+		BSONKey: "__v",
+		Key:     "__v",
+		Props: mongomodel.SchemaFieldProps{
+			Type:    reflect.Int,
+			Options: schemaopt.SchemaFieldOptions{Required: false},
+		},
+	})
+
+	nestedModelWithAllTypesAndSchemaOptsSchema := mongomodel.EntityModelSchema{Root: nestedModelWithSchemaOptsRootNode}
+
+	nestedModelWithAllTypesAndSchemaOptsTestCase := TestCase{
+		Model:  NestedModelWithAllTypes{},
+		Schema: nestedModelWithAllTypesAndSchemaOptsSchema,
+		SchemaOpts: model.SchemaOptions{
+			VersionKey: typeutil.GetPointerForConstType(true),
+			Timestamps: true,
+		},
+		ValidSchemaNodesCount: 20,
 	}
 
 	testCases := []TestCase{
 		nestedModelWithAllTypesTestCase,
+		nestedModelWithAllTypesAndSchemaOptsTestCase,
 	}
 
 	for _, tc := range testCases {
-		actualSchema, err := mongomodel.BuildSchemaForModel(tc.Model)
+		actualSchema, err := mongomodel.BuildSchemaForModel(tc.Model, tc.SchemaOpts)
 
 		s.Nil(err)
 		if !reflect.DeepEqual(tc.Schema.Root, actualSchema.Root) {

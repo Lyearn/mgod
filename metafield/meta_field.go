@@ -1,12 +1,16 @@
 package metafield
 
 import (
+	"reflect"
+
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type MetaField interface {
-	GetMetaFieldKey() MetaFieldKey
+	GetKey() MetaFieldKey
+
+	GetReflectKind() reflect.Kind
 
 	// IsApplicable returns true if the meta field is applicable for the given schema options.
 	// Meta field is processed against the doc only if it is applicable.
@@ -27,14 +31,14 @@ type MetaField interface {
 	FieldNotPresent(doc *bson.D)
 }
 
-var availableMetaFields = []MetaField{
+var AvailableMetaFields = []MetaField{
 	createdAtMetaFieldInstance,
 	updatedAtMetaFieldInstance,
 	docVersionMetaFieldInstance,
 }
 
 func AddMetaFields(bsonDoc *bson.D, schemaOptions model.SchemaOptions) error {
-	for _, metaField := range availableMetaFields {
+	for _, metaField := range AvailableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue
 		}

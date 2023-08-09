@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
+	"github.com/Lyearn/backend-universe/packages/store/acl/model"
+	"github.com/Lyearn/backend-universe/packages/store/mongomodel/metafield"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel/schemaopt"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"github.com/samber/lo"
@@ -36,7 +38,7 @@ type SchemaFieldProps struct {
 	Options      schemaopt.SchemaFieldOptions
 }
 
-func BuildSchemaForModel[T any](model T) (*EntityModelSchema, error) {
+func BuildSchemaForModel[T any](model T, schemaOpts model.SchemaOptions) (*EntityModelSchema, error) {
 	schemaTree := make([]TreeNode, 0)
 	rootNode := GetDefaultSchemaTreeRootNode()
 
@@ -48,6 +50,8 @@ func BuildSchemaForModel[T any](model T) (*EntityModelSchema, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	addMetaFields(model, schemaOpts, &schemaTree, nodes, rootNode.BSONKey)
 
 	rootNode.Children = schemaTree
 
@@ -154,7 +158,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 				field = reflect.New(structField.Type)
 			}
 
-			if IsBSONInlineField(structField) {
+			if isBSONInlineField(structField) {
 				toAppendTreeNodes := make([]TreeNode, 0)
 
 				// combining all ancestor fields for current child
@@ -169,7 +173,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 					return inlineFieldsErr
 				}
 
-				AddTreeNodesToSchema(treeRef, nodes, toAppendTreeNodes...)
+				addTreeNodesToSchema(treeRef, nodes, toAppendTreeNodes...)
 
 				// no need to add inline struct as a child node
 				continue
@@ -185,7 +189,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 			return recurseErr
 		}
 
-		AddTreeNodesToSchema(treeRef, nodes, treeNode)
+		addTreeNodesToSchema(treeRef, nodes, treeNode)
 	}
 
 	// if _id is not found and is required for model, then insert it at the beginning.
@@ -216,7 +220,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 			},
 		}
 
-		AddTreeNodesToSchema(treeRef, nodes, xidNode)
+		addTreeNodesToSchema(treeRef, nodes, xidNode)
 	}
 
 	return nil
@@ -253,7 +257,7 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes 
 		},
 	}
 
-	AddTreeNodesToSchema(&treeNode.Children, nodes, childNode)
+	addTreeNodesToSchema(&treeNode.Children, nodes, childNode)
 
 	// if slice element is a struct, then we need to recurse.
 	if sliceElemType.Kind() == reflect.Struct {
@@ -270,8 +274,55 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes 
 	return nil
 }
 
-// AddTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
-func AddTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAddTreeNodes ...TreeNode) {
+// addMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
+// of fields not found in the tree (Meta fields are appended to the bson doc based on the schema options dynamically).
+func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string) {
+	v := reflect.ValueOf(model)
+
+	// converting pointer to value
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	rootStructFields := GetCurrentLevelBSONFields(v)
+
+	for _, metaField := range metafield.AvailableMetaFields {
+		if !metaField.IsApplicable(schemaOptions) {
+			continue
+		}
+
+		if lo.Contains(rootStructFields, string(metaField.GetKey())) {
+			// meta field is already present in the model, so no need to add it.
+			continue
+		}
+
+		field := string(metaField.GetKey())
+		path := GetPathForField(field, parent)
+
+		// append meta field in the schema tree.
+		toAppendTreeNode := TreeNode{
+			Path:    path,
+			BSONKey: field,
+			Key:     field,
+			Props: SchemaFieldProps{
+				Type: metaField.GetReflectKind(),
+				Options: schemaopt.SchemaFieldOptions{
+					// not keeping meta fields as required to prevent any errors while building the bson doc.
+					// meta fields are always added if enabled in schema options and not present in the bson doc.
+					Required: false,
+				},
+				// not adding transformers for meta fields because while building the bson doc to insert into mongo,
+				// correct values for meta fields will be added by AddMetaFields function. And while reading from mongo,
+				// meta fields are anyways not required to be transformed if they are not present in the model struct.
+			},
+		}
+
+		addTreeNodesToSchema(treeRef, nodes, toAppendTreeNode)
+	}
+}
+
+// addTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
+func addTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAddTreeNodes ...TreeNode) {
 	*treeRef = append(*treeRef, make([]TreeNode, len(toAddTreeNodes))...)
 
 	// assigning the address of the new nodes to the nodes map.
@@ -297,7 +348,7 @@ func GetCurrentLevelBSONFields(s reflect.Value) []string {
 	return currentLevelBSONFields
 }
 
-func IsBSONInlineField(field reflect.StructField) bool {
+func isBSONInlineField(field reflect.StructField) bool {
 	bsonTagVal := field.Tag.Get("bson")
 	if bsonTagVal == "" || bsonTagVal == "-" {
 		return false

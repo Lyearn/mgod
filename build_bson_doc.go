@@ -175,6 +175,7 @@ func getConvertedValueForNode(
 
 	// if nodeVal is nil, then there is no need to do any conversion.
 	if nodeVal == nil {
+		//nolint:nilnil // this is a valid case
 		return nil, nil
 	}
 
@@ -274,10 +275,9 @@ func addMissingNodes(
 func getSchemaNodeForPath(ctx context.Context, path string, schemaNodes map[string]*TreeNode, translateTo BSONDocTranslateToEnum) (*TreeNode, error) {
 	schemaNode, ok := schemaNodes[path]
 	if !ok {
-		// TODO: remove this check once all schemas are in sync.
 		// skip throwing error for nodes which are not present in actual entity schema but present in mongo doc.
-		if translateTo == BSONDocTranslateToEnumEntityModel ||
-			path == "$root.__v" || path == "$root.createdAt" || path == "$root.updatedAt" {
+		if translateTo == BSONDocTranslateToEnumEntityModel {
+			//nolint:nilnil // there might be extra fields in mongo doc which are not present in entity schema.
 			return nil, nil
 		}
 

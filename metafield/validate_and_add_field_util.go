@@ -5,7 +5,7 @@ import (
 )
 
 func ValidatedAndAddFieldValue(doc *bson.D, metaField MetaField) error {
-	field := string(metaField.GetMetaFieldKey())
+	field := string(metaField.GetKey())
 
 	for index, elem := range *doc {
 		if elem.Key != field {
