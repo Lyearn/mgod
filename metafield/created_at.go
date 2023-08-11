@@ -6,6 +6,7 @@ import (
 
 	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
+	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -23,6 +24,10 @@ func (m CreatedAtMetaField) GetKey() MetaFieldKey {
 
 func (m CreatedAtMetaField) GetReflectKind() reflect.Kind {
 	return reflect.String
+}
+
+func (m CreatedAtMetaField) GetApplicableTransformers() []transformer.Transformer {
+	return []transformer.Transformer{transformer.DateTransformerInstance}
 }
 
 func (m CreatedAtMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool {

@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
+	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -11,6 +12,10 @@ type MetaField interface {
 	GetKey() MetaFieldKey
 
 	GetReflectKind() reflect.Kind
+
+	// GetApplicableTransformers returns the list of transformers applicable for the meta field.
+	// Meta fields are added to the bson doc before calling the BuildBSONDoc method which transforms the doc.
+	GetApplicableTransformers() []transformer.Transformer
 
 	// IsApplicable returns true if the meta field is applicable for the given schema options.
 	// Meta field is processed against the doc only if it is applicable.

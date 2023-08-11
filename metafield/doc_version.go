@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
+	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -30,6 +31,10 @@ func (m DocVersionMetaField) IsApplicable(schemaOptions model.SchemaOptions) boo
 	}
 
 	return *schemaOptions.VersionKey
+}
+
+func (m DocVersionMetaField) GetApplicableTransformers() []transformer.Transformer {
+	return []transformer.Transformer{}
 }
 
 func (m DocVersionMetaField) CheckIfValidValue(val interface{}) bool {

@@ -311,9 +311,7 @@ func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[
 					// meta fields are always added if enabled in schema options and not present in the bson doc.
 					Required: false,
 				},
-				// not adding transformers for meta fields because while building the bson doc to insert into mongo,
-				// correct values for meta fields will be added by AddMetaFields function. And while reading from mongo,
-				// meta fields are anyways not required to be transformed if they are not present in the model struct.
+				Transformers: metaField.GetApplicableTransformers(),
 			},
 		}
 
