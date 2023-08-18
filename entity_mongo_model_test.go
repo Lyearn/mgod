@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
+	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
 	"github.com/stretchr/testify/require"
@@ -65,7 +65,7 @@ func (s *EntityMongoModelSuite) TestFind() {
 
 	s.mt.RunOpts("find", s.mtOpts, func(mt *mtest.T) {
 		currentTime := time.Now()
-		currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
+		currentTimeStr, _ := dateutil.New(currentTime).GetISOString()
 
 		firstID := primitive.NewObjectID()
 		secondID := primitive.NewObjectID()
@@ -116,7 +116,7 @@ func (s *EntityMongoModelSuite) TestFindOne() {
 
 	s.mt.RunOpts("find one", s.mtOpts, func(mt *mtest.T) {
 		currentTime := time.Now()
-		currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
+		currentTimeStr, _ := dateutil.New(currentTime).GetISOString()
 
 		id := primitive.NewObjectID()
 
@@ -153,7 +153,7 @@ func (s *EntityMongoModelSuite) TestInsertOne() {
 
 	id := primitive.NewObjectID()
 	currentTime := time.Now()
-	currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
+	currentTimeStr, _ := dateutil.New(currentTime).GetISOString()
 
 	s.mt.RunOpts("insert one", s.mtOpts, func(mt *mtest.T) {
 		entity := TestEntity{

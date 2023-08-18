@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
+	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
 	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
@@ -42,7 +42,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	metaID := primitive.NewObjectID()
 
 	onboardAt := primitive.NewDateTimeFromTime(time.Now())
-	onboardAtStr, _ := dateformatter.New(onboardAt.Time()).GetISOString()
+	onboardAtStr, _ := dateutil.New(onboardAt.Time()).GetISOString()
 
 	tagIDs := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID()}
 	tagIDsStr := lo.Map(tagIDs, func(tagID primitive.ObjectID, _ int) string {
@@ -51,7 +51,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	activeSessions := []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now()), primitive.NewDateTimeFromTime(time.Now())}
 	activeSessionsStr := lo.Map(activeSessions, func(activeSession primitive.DateTime, _ int) string {
-		requestTimestamp, _ := dateformatter.New(activeSession.Time()).GetISOString()
+		requestTimestamp, _ := dateutil.New(activeSession.Time()).GetISOString()
 		return requestTimestamp
 	})
 
@@ -762,7 +762,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	}
 
 	onboardAt := primitive.NewDateTimeFromTime(time.Now())
-	onboardAtStr, _ := dateformatter.New(onboardAt.Time()).GetISOString()
+	onboardAtStr, _ := dateutil.New(onboardAt.Time()).GetISOString()
 
 	type Metadata struct {
 		OnboardAt string `bson:"onboardAt" mgoType:"date"`

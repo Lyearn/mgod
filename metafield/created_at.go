@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/dateformatter"
+	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"
 	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,7 +47,7 @@ func (m CreatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 }
 
 func (m CreatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
-	isoString, err := dateformatter.New(time.Now().UTC()).GetISOString()
+	isoString, err := dateutil.New(time.Now().UTC()).GetISOString()
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (m CreatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int)
 }
 
 func (m CreatedAtMetaField) FieldNotPresent(doc *bson.D) {
-	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
+	isoString, _ := dateutil.New(time.Now().UTC()).GetISOString()
 	*doc = append(*doc, bson.E{
 		Key:   string(m.GetKey()),
 		Value: isoString,
