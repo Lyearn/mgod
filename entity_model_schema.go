@@ -63,6 +63,10 @@ func BuildSchemaForModel[T any](model T, schemaOpts model.SchemaOptions) (*Entit
 	return schema, nil
 }
 
+func GetSchemaNameForModel[T any](model T) string {
+	return reflect.TypeOf(model).Name()
+}
+
 func GetDefaultSchemaTreeRootNode() TreeNode {
 	rootNode := TreeNode{
 		Path:    "$root",
