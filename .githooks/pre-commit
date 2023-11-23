@@ -1,0 +1,22 @@
+#!/bin/bash
+
+STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
+
+if [[ "$STAGED_GO_FILES" = "" ]]; then
+  printf "No Go files staged. Skipping pre-commit hook.\n"
+  exit 0
+fi
+
+for FILE in $STAGED_GO_FILES
+do
+  # Format & stage any staged file that succeeds vet
+  gofumpt -e -l -w . || true # Strict format the entire directory. Optionally pass the check if gofumpt tool not found.
+  gofmt -e -s -w "$FILE"
+  git add "$FILE"
+done
+
+# Format the entire directory but dont stage it.
+gofumpt -e -l -w . || true
+gofmt -e -l -s -w .
+
+exit 0

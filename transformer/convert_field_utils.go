@@ -54,6 +54,7 @@ func convertDateTimeToString(dateTimes ...primitive.DateTime) ([]string, error) 
 	return dates, nil
 }
 
+//nolint:unparam // error field added to keep the signature of convert field functions consistent
 func convertObjectIDToString(objectIDs ...primitive.ObjectID) ([]string, error) {
 	ids := []string{}
 

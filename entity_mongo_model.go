@@ -17,11 +17,11 @@ type EntityMongoModel[T any] interface {
 	GetDocToInsert(ctx context.Context, model T) (bson.D, error)
 	InsertOne(ctx context.Context, model interface{}, opts ...*options.InsertOneOptions) (T, error)
 	InsertMany(ctx context.Context, docs interface{}, opts ...*options.InsertManyOptions) ([]T, error)
-	UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	UpdateMany(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
 	BulkWrite(ctx context.Context, bulkWrites []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) ([]T, error)
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) (*T, error)
-	FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{}, opts ...*options.FindOneAndUpdateOptions) (T, error)
+	FindOneAndUpdate(ctx context.Context, filter, update interface{}, opts ...*options.FindOneAndUpdateOptions) (T, error)
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
 	CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error)
@@ -254,13 +254,13 @@ func (m entityMongoModel[T]) InsertOne(ctx context.Context, doc interface{},
 	var err error
 
 	switch typedDoc := doc.(type) {
+	case bson.D:
+		bsonDoc = typedDoc
 	case T:
 		bsonDoc, err = m.getMongoDocFromEntityModel(ctx, typedDoc)
 		if err != nil {
 			return model, err
 		}
-	case bson.D:
-		bsonDoc = typedDoc
 	}
 
 	// TODO: add an extra strict check to ensure that the doc to be inserted contains _id field
@@ -362,7 +362,7 @@ func (m entityMongoModel[T]) InsertMany(ctx context.Context, docs interface{},
 	return models, err
 }
 
-func (m entityMongoModel[T]) UpdateMany(ctx context.Context, filter interface{}, update interface{},
+func (m entityMongoModel[T]) UpdateMany(ctx context.Context, filter, update interface{},
 	opts ...*options.UpdateOptions,
 ) (*mongo.UpdateResult, error) {
 	updateQuery, err := m.handleTimestampsForUpdateQuery(update, "UpdateMany")
@@ -444,7 +444,7 @@ func (m entityMongoModel[T]) FindOne(ctx context.Context, filter interface{},
 	return &model, nil
 }
 
-func (m entityMongoModel[T]) FindOneAndUpdate(ctx context.Context, filter interface{}, update interface{},
+func (m entityMongoModel[T]) FindOneAndUpdate(ctx context.Context, filter, update interface{},
 	opts ...*options.FindOneAndUpdateOptions,
 ) (T, error) {
 	model := m.getEntityModel()
