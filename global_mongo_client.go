@@ -1,4 +1,4 @@
-package mongomodel
+package mgod
 
 /*
  * This file is exact replica of mongoclient/mongodb_client.go file.

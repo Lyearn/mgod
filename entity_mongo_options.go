@@ -1,4 +1,4 @@
-package mongomodel
+package mgod
 
 import (
 	"github.com/Lyearn/backend-universe/packages/store/acl/model"

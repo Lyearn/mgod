@@ -1,4 +1,4 @@
-package mongomodel
+package mgod
 
 import "go.mongodb.org/mongo-driver/bson"
 

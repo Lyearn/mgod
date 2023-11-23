@@ -1,4 +1,4 @@
-package mongomodel
+package mgod
 
 type EntityModelSchemaOptions struct {
 	xidRequired      bool

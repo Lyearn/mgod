@@ -1,4 +1,4 @@
-package mongomodel_test
+package mgod_test
 
 import (
 	"reflect"
