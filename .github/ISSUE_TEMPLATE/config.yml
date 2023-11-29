@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions or Need Support
+    url: https://github.com/Lyearn/mgod/discussions
+    about: Github Discussions is the place to ask a question or discuss with other community members
