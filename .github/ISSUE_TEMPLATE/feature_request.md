@@ -1,9 +1,7 @@
 ---
-name: Feature request
-about: "\U0001F4A1 Spark an Idea: Propose a Feature for this Project! ✨"
-title: "✨ FEATURE: [Add Your Title Here] \U0001F680"
-labels: ''
-assignees: ''
+Name: Feature request
+About: "\U0001F4A1 Spark an Idea: Propose a Feature for this Project! ✨"
+Title: "✨ FEATURE: [Add Your Title Here] \U0001F680"
 
 ---
 
