@@ -1,9 +1,7 @@
 ---
-name: Bug report
-about: "\U0001F41B Spot a Bug? Report It to Help Us Improve! \U0001F680"
-title: "\U0001F41E Bug Alert: [Add Your Title Here] \U0001F6A8"
-labels: ''
-assignees: ''
+Name: Bug report
+About: "\U0001F41B Spot a Bug? Report It to Help Us Improve! \U0001F680"
+Title: "\U0001F41E Bug Alert: [Add Your Title Here] \U0001F6A8"
 
 ---
 
@@ -16,7 +14,7 @@ Provide a brief overview of the key actions or conditions that consistently lead
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Desktop (please complete the following information):**
+**Environment (please complete the following information):**
 - OS: [e.g. Windows]
 - GO (e.g. 1.21.4)
 - Package version [e.g. 0.12.2] (please check if the bug still exist in newest release)
