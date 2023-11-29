@@ -1,4 +1,4 @@
-package schemaopt
+package fieldopt
 
 import (
 	"reflect"
@@ -9,7 +9,7 @@ import (
 
 type RequiredOption struct{}
 
-func newRequiredOption() SchemaOption {
+func newRequiredOption() FieldOption {
 	return &RequiredOption{}
 }
 

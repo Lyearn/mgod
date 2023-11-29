@@ -1,4 +1,4 @@
-package schemaopt
+package fieldopt
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 
 type DefaultValueOption struct{}
 
-func newDefaultValueOption() SchemaOption {
+func newDefaultValueOption() FieldOption {
 	return &DefaultValueOption{}
 }
 

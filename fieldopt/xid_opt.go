@@ -1,10 +1,10 @@
-package schemaopt
+package fieldopt
 
 import "reflect"
 
 type XIDOption struct{}
 
-func newXIDOption() SchemaOption {
+func newXIDOption() FieldOption {
 	return &XIDOption{}
 }
 

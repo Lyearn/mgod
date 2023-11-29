@@ -2,13 +2,11 @@ package mgod
 
 import (
 	"reflect"
-	"strings"
 
-	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/metafield"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/schemaopt"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
+	"github.com/Lyearn/mgod/fieldopt"
+	"github.com/Lyearn/mgod/metafield"
+	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/transformer"
 	"github.com/samber/lo"
 )
 
@@ -35,10 +33,10 @@ type SchemaFieldProps struct {
 	Type         reflect.Kind              // contains struct field type or the underlying type in case of pointer.
 	IsPointer    bool                      // will be used to identify pointer type of fields.
 	Transformers []transformer.Transformer // reference to id, date, etc. transformers
-	Options      schemaopt.SchemaFieldOptions
+	Options      fieldopt.SchemaFieldOptions
 }
 
-func BuildSchemaForModel[T any](model T, schemaOpts model.SchemaOptions) (*EntityModelSchema, error) {
+func BuildSchemaForModel[T any](model T, schemaOpts schemaopt.SchemaOptions) (*EntityModelSchema, error) {
 	schemaTree := make([]TreeNode, 0)
 	rootNode := GetDefaultSchemaTreeRootNode()
 
@@ -63,27 +61,6 @@ func BuildSchemaForModel[T any](model T, schemaOpts model.SchemaOptions) (*Entit
 	return schema, nil
 }
 
-func GetSchemaNameForModel[T any](model T) string {
-	return reflect.TypeOf(model).Name()
-}
-
-func GetDefaultSchemaTreeRootNode() TreeNode {
-	rootNode := TreeNode{
-		Path:    "$root",
-		Key:     "$root",
-		BSONKey: "$root",
-		Props: SchemaFieldProps{
-			Type: reflect.Struct,
-			Options: schemaopt.SchemaFieldOptions{
-				// _id is required by default at root of the doc
-				XID: true,
-			},
-		},
-	}
-
-	return rootNode
-}
-
 func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string, opts EntityModelSchemaOptions) error {
 	v := reflect.ValueOf(model)
 
@@ -92,12 +69,12 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 		v = v.Elem()
 	}
 
-	currentLevelBSONFields := GetCurrentLevelBSONFields(v)
+	currentLevelBSONFields := getCurrentLevelBSONFields(v)
 	xidFound := false
 
 	for i := 0; i < v.NumField(); i++ {
 		structField := v.Type().Field(i)
-		fieldName := typeutil.GetBSONFieldName(structField)
+		fieldName := getBSONFieldName(structField)
 		if fieldName == "" {
 			// skipping unexported fields
 			continue
@@ -127,12 +104,12 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 		}
 
 		transformers := transformer.GetRequiredTransformersForField(structField)
-		options, err := schemaopt.GetSchemaOptionsForField(structField)
+		options, err := fieldopt.GetSchemaOptionsForField(structField)
 		if err != nil {
 			return err
 		}
 
-		path := GetPathForField(fieldName, parent)
+		path := getPathForField(fieldName, parent)
 
 		treeNode := TreeNode{
 			Path:    path,
@@ -204,14 +181,14 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 			Tag:  `bson:"_id" mgoType:"id"`,
 		}
 
-		fieldName := typeutil.GetBSONFieldName(xidField)
+		fieldName := getBSONFieldName(xidField)
 		transformers := transformer.GetRequiredTransformersForField(xidField)
-		options, err := schemaopt.GetSchemaOptionsForField(xidField)
+		options, err := fieldopt.GetSchemaOptionsForField(xidField)
 		if err != nil {
 			return err
 		}
 
-		path := GetPathForField(fieldName, parent)
+		path := getPathForField(fieldName, parent)
 
 		xidNode := TreeNode{
 			Path:    path,
@@ -280,7 +257,7 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes 
 
 // addMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
 // of fields not found in the tree (Meta fields are appended to the bson doc based on the schema options dynamically).
-func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string) {
+func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string) {
 	v := reflect.ValueOf(model)
 
 	// converting pointer to value
@@ -288,7 +265,7 @@ func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[
 		v = v.Elem()
 	}
 
-	rootStructFields := GetCurrentLevelBSONFields(v)
+	rootStructFields := getCurrentLevelBSONFields(v)
 
 	for _, metaField := range metafield.AvailableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
@@ -301,7 +278,7 @@ func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[
 		}
 
 		field := string(metaField.GetKey())
-		path := GetPathForField(field, parent)
+		path := getPathForField(field, parent)
 
 		// append meta field in the schema tree.
 		toAppendTreeNode := TreeNode{
@@ -310,7 +287,7 @@ func addMetaFields[T any](model T, schemaOptions model.SchemaOptions, treeRef *[
 			Key:     field,
 			Props: SchemaFieldProps{
 				Type: metaField.GetReflectKind(),
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					// not keeping meta fields as required to prevent any errors while building the bson doc.
 					// meta fields are always added if enabled in schema options and not present in the bson doc.
 					Required: false,
@@ -337,38 +314,28 @@ func addTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAdd
 	}
 }
 
-func GetCurrentLevelBSONFields(s reflect.Value) []string {
-	currentLevelBSONFields := make([]string, 0)
-
-	for i := 0; i < s.NumField(); i++ {
-		structField := s.Type().Field(i)
-		fieldName := typeutil.GetBSONFieldName(structField)
-
-		currentLevelBSONFields = append(currentLevelBSONFields, fieldName)
-	}
-
-	return currentLevelBSONFields
+func GetSchemaNameForModel[T any](model T) string {
+	return reflect.TypeOf(model).Name()
 }
 
-func isBSONInlineField(field reflect.StructField) bool {
-	bsonTagVal := field.Tag.Get("bson")
-	if bsonTagVal == "" || bsonTagVal == "-" {
-		return false
+func GetDefaultSchemaTreeRootNode() TreeNode {
+	rootNode := TreeNode{
+		Path:    "$root",
+		Key:     "$root",
+		BSONKey: "$root",
+		Props: SchemaFieldProps{
+			Type: reflect.Struct,
+			Options: fieldopt.SchemaFieldOptions{
+				// _id is required by default at root of the doc
+				XID: true,
+			},
+		},
 	}
 
-	tagValues := strings.Split(bsonTagVal, ",")
-	flags := tagValues[1:]
-
-	for _, flag := range flags {
-		if flag == "inline" {
-			return true
-		}
-	}
-
-	return false
+	return rootNode
 }
 
-func GetPathForField(field, parent string) string {
+func getPathForField(field, parent string) string {
 	path := field
 	if parent != "" {
 		path = parent + "." + field

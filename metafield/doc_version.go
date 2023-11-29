@@ -3,8 +3,8 @@ package metafield
 import (
 	"reflect"
 
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
+	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -24,7 +24,7 @@ func (m DocVersionMetaField) GetReflectKind() reflect.Kind {
 	return reflect.Int
 }
 
-func (m DocVersionMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool {
+func (m DocVersionMetaField) IsApplicable(schemaOptions schemaopt.SchemaOptions) bool {
 	if schemaOptions.VersionKey == nil {
 		// doc versioning is enabled by default.
 		return true

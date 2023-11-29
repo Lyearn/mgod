@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
+	"github.com/Lyearn/mgod/dateformatter"
+	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -30,7 +30,7 @@ func (m CreatedAtMetaField) GetApplicableTransformers() []transformer.Transforme
 	return []transformer.Transformer{transformer.DateTransformerInstance}
 }
 
-func (m CreatedAtMetaField) IsApplicable(schemaOptions model.SchemaOptions) bool {
+func (m CreatedAtMetaField) IsApplicable(schemaOptions schemaopt.SchemaOptions) bool {
 	return schemaOptions.Timestamps
 }
 
@@ -47,7 +47,7 @@ func (m CreatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 }
 
 func (m CreatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
-	isoString, err := dateutil.New(time.Now().UTC()).GetISOString()
+	isoString, err := dateformatter.New(time.Now().UTC()).GetISOString()
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (m CreatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int)
 }
 
 func (m CreatedAtMetaField) FieldNotPresent(doc *bson.D) {
-	isoString, _ := dateutil.New(time.Now().UTC()).GetISOString()
+	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
 	*doc = append(*doc, bson.E{
 		Key:   string(m.GetKey()),
 		Value: isoString,

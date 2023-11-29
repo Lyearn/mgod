@@ -5,7 +5,7 @@ import "reflect"
 // Used only for debugging in tests.
 // Reason: reflect.DeepEqual doesn't provide enough information about the difference.
 // Replace reflect.DeepEqual with this function in test file and start a debugger to get more information.
-func (s *EntityModelSchema) Compare(c *EntityModelSchema) bool {
+func (s *EntityModelSchema) IsEqual(c *EntityModelSchema) bool {
 	// schema tree
 	sTree := &s.Root.Children
 

@@ -4,11 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/schemaopt"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
+	"github.com/Lyearn/mgod"
+	"github.com/Lyearn/mgod/fieldopt"
+	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/transformer"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,21 +30,21 @@ func (s *EntityModelSchemaSuite) SetupTest() {
 func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	type TestCase struct {
 		Model                 any
-		Schema                mongomodel.EntityModelSchema
-		SchemaOpts            model.SchemaOptions
+		Schema                mgod.EntityModelSchema
+		SchemaOpts            schemaopt.SchemaOptions
 		ValidSchemaNodesCount int
 	}
 
-	type ActiveSession struct {
-		SessionID   string `mgoType:"id"`
-		LastLoginAt string `bson:"lastLoginAt" mgoType:"date"`
+	type UserProject struct {
+		ProjectID   string `mgoType:"id"`
+		CompletedAt string `bson:"completedAt" mgoType:"date"`
 	}
 
 	type Metadata struct {
-		OnboardAt      string          `mgoType:"date"`
-		TagIDs         []string        `bson:"tagIds" mgoType:"id"`
-		ActiveSessions []ActiveSession `bson:"activeSessions" mgoID:"false" mgoDefault:"[]"`
-		SkipField      string          `bson:"-"`
+		JoinedOn  string        `mgoType:"date"`
+		TeamIDs   []string      `bson:"teamIds" mgoType:"id"`
+		Projects  []UserProject `bson:"projects" mgoID:"false" mgoDefault:"[]"`
+		SkipField string        `bson:"-"`
 	}
 
 	type NestedInlineProps struct {
@@ -72,19 +71,19 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 		SkipField bool `bson:"-"`
 	}
 
-	rootNode := mongomodel.GetDefaultSchemaTreeRootNode()
+	rootNode := mgod.GetDefaultSchemaTreeRootNode()
 
 	// TC 1: NestedModelWithAllTypes
 	nestedModelWithAllTypesRootNode := rootNode
-	nestedModelWithAllTypesRootNode.Children = []mongomodel.TreeNode{
+	nestedModelWithAllTypesRootNode.Children = []mgod.TreeNode{
 		{
 			Path:    "$root._id",
 			BSONKey: "_id",
 			Key:     "ID",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.String,
 				Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
 			},
@@ -93,11 +92,11 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.name",
 			BSONKey: "name",
 			Key:     "Name",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.String,
 				IsPointer:    true,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: false,
 				},
 			},
@@ -106,10 +105,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.age",
 			BSONKey: "age",
 			Key:     "Age",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.Int,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 					Default:  18,
 				},
@@ -119,45 +118,45 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.meta",
 			BSONKey: "meta",
 			Key:     "Metadata",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.Struct,
 				IsPointer:    true,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					XID:      true,
 					Required: true,
 				},
 			},
-			Children: []mongomodel.TreeNode{
+			Children: []mgod.TreeNode{
 				{
-					Path:    "$root.meta.onboardat",
-					BSONKey: "onboardat",
-					Key:     "OnboardAt",
-					Props: mongomodel.SchemaFieldProps{
+					Path:    "$root.meta.joinedon",
+					BSONKey: "joinedon",
+					Key:     "JoinedOn",
+					Props: mgod.SchemaFieldProps{
 						Type:         reflect.String,
 						Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
+						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 						},
 					},
 				},
 				{
-					Path:    "$root.meta.tagIds",
-					BSONKey: "tagIds",
-					Key:     "TagIDs",
-					Props: mongomodel.SchemaFieldProps{
+					Path:    "$root.meta.teamIds",
+					BSONKey: "teamIds",
+					Key:     "TeamIDs",
+					Props: mgod.SchemaFieldProps{
 						Type:         reflect.Slice,
 						Transformers: []transformer.Transformer{},
-						Options: schemaopt.SchemaFieldOptions{
+						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 						},
 					},
-					Children: []mongomodel.TreeNode{
+					Children: []mgod.TreeNode{
 						{
-							Path:    "$root.meta.tagIds.$",
+							Path:    "$root.meta.teamIds.$",
 							BSONKey: "$",
 							Key:     "$", // to identify slice element
-							Props: mongomodel.SchemaFieldProps{
+							Props: mgod.SchemaFieldProps{
 								Type:         reflect.String,
 								Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
 							},
@@ -165,47 +164,47 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					},
 				},
 				{
-					Path:    "$root.meta.activeSessions",
-					BSONKey: "activeSessions",
-					Key:     "ActiveSessions",
-					Props: mongomodel.SchemaFieldProps{
+					Path:    "$root.meta.projects",
+					BSONKey: "projects",
+					Key:     "Projects",
+					Props: mgod.SchemaFieldProps{
 						Type:         reflect.Slice,
 						Transformers: []transformer.Transformer{},
-						Options: schemaopt.SchemaFieldOptions{
+						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 							Default:  bson.A{},
 						},
 					},
-					Children: []mongomodel.TreeNode{
+					Children: []mgod.TreeNode{
 						{
-							Path:    "$root.meta.activeSessions.$",
+							Path:    "$root.meta.projects.$",
 							BSONKey: "$",
 							Key:     "$",
-							Props: mongomodel.SchemaFieldProps{
+							Props: mgod.SchemaFieldProps{
 								Type:         reflect.Struct,
 								Transformers: []transformer.Transformer{},
 							},
-							Children: []mongomodel.TreeNode{
+							Children: []mgod.TreeNode{
 								{
-									Path:    "$root.meta.activeSessions.$.sessionid",
-									BSONKey: "sessionid",
-									Key:     "SessionID",
-									Props: mongomodel.SchemaFieldProps{
+									Path:    "$root.meta.projects.$.projectid",
+									BSONKey: "projectid",
+									Key:     "ProjectID",
+									Props: mgod.SchemaFieldProps{
 										Type:         reflect.String,
 										Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-										Options: schemaopt.SchemaFieldOptions{
+										Options: fieldopt.SchemaFieldOptions{
 											Required: true,
 										},
 									},
 								},
 								{
-									Path:    "$root.meta.activeSessions.$.lastLoginAt",
-									BSONKey: "lastLoginAt",
-									Key:     "LastLoginAt",
-									Props: mongomodel.SchemaFieldProps{
+									Path:    "$root.meta.projects.$.completedAt",
+									BSONKey: "completedAt",
+									Key:     "CompletedAt",
+									Props: mgod.SchemaFieldProps{
 										Type:         reflect.String,
 										Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
-										Options: schemaopt.SchemaFieldOptions{
+										Options: fieldopt.SchemaFieldOptions{
 											Required: true,
 										},
 									},
@@ -218,10 +217,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					Path:    "$root.meta._id",
 					BSONKey: "_id",
 					Key:     "XID",
-					Props: mongomodel.SchemaFieldProps{
+					Props: mgod.SchemaFieldProps{
 						Type:         reflect.String,
 						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
-						Options: schemaopt.SchemaFieldOptions{
+						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 						},
 					},
@@ -232,10 +231,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.inlineFloat",
 			BSONKey: "inlineFloat",
 			Key:     "InlineFloat",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.Float64,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
 			},
@@ -244,10 +243,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.inlineBool",
 			BSONKey: "inlineBool",
 			Key:     "InlineBool",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.Bool,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
 			},
@@ -256,10 +255,10 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.inlinestring",
 			BSONKey: "inlinestring",
 			Key:     "InlineString",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.String,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
 			},
@@ -268,22 +267,23 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Path:    "$root.height",
 			BSONKey: "height",
 			Key:     "Height",
-			Props: mongomodel.SchemaFieldProps{
+			Props: mgod.SchemaFieldProps{
 				Type:         reflect.Float64,
 				Transformers: []transformer.Transformer{},
-				Options: schemaopt.SchemaFieldOptions{
+				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
 			},
 		},
 	}
-	nestedModelWithAllTypesSchema := mongomodel.EntityModelSchema{Root: nestedModelWithAllTypesRootNode}
+	nestedModelWithAllTypesSchema := mgod.EntityModelSchema{Root: nestedModelWithAllTypesRootNode}
 
+	versionKeyEnabled := false
 	nestedModelWithAllTypesTestCase := TestCase{
 		Model:  NestedModelWithAllTypes{},
 		Schema: nestedModelWithAllTypesSchema,
-		SchemaOpts: model.SchemaOptions{
-			VersionKey: typeutil.GetPointerForConstType(false),
+		SchemaOpts: schemaopt.SchemaOptions{
+			VersionKey: &versionKeyEnabled,
 		},
 		ValidSchemaNodesCount: 17,
 	}
@@ -291,44 +291,47 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	// TC 2: NestedModelWithAllTypes with all schema options enabled
 	nestedModelWithSchemaOptsRootNode := nestedModelWithAllTypesRootNode
 
-	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mgod.TreeNode{
 		Path:    "$root.createdAt",
 		BSONKey: "createdAt",
 		Key:     "createdAt",
-		Props: mongomodel.SchemaFieldProps{
-			Type:    reflect.String,
-			Options: schemaopt.SchemaFieldOptions{Required: false},
+		Props: mgod.SchemaFieldProps{
+			Type:         reflect.String,
+			Options:      fieldopt.SchemaFieldOptions{Required: false},
+			Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
 		},
 	})
 
-	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mgod.TreeNode{
 		Path:    "$root.updatedAt",
 		BSONKey: "updatedAt",
 		Key:     "updatedAt",
-		Props: mongomodel.SchemaFieldProps{
-			Type:    reflect.String,
-			Options: schemaopt.SchemaFieldOptions{Required: false},
+		Props: mgod.SchemaFieldProps{
+			Type:         reflect.String,
+			Options:      fieldopt.SchemaFieldOptions{Required: false},
+			Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
 		},
 	})
 
-	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mongomodel.TreeNode{
+	nestedModelWithSchemaOptsRootNode.Children = append(nestedModelWithSchemaOptsRootNode.Children, mgod.TreeNode{
 		Path:    "$root.__v",
 		BSONKey: "__v",
 		Key:     "__v",
-		Props: mongomodel.SchemaFieldProps{
-			Type:    reflect.Int,
-			Options: schemaopt.SchemaFieldOptions{Required: false},
+		Props: mgod.SchemaFieldProps{
+			Type:         reflect.Int,
+			Options:      fieldopt.SchemaFieldOptions{Required: false},
+			Transformers: []transformer.Transformer{},
 		},
 	})
 
-	nestedModelWithAllTypesAndSchemaOptsSchema := mongomodel.EntityModelSchema{Root: nestedModelWithSchemaOptsRootNode}
+	nestedModelWithAllTypesAndSchemaOptsSchema := mgod.EntityModelSchema{Root: nestedModelWithSchemaOptsRootNode}
 
 	nestedModelWithAllTypesAndSchemaOptsTestCase := TestCase{
 		Model:  NestedModelWithAllTypes{},
 		Schema: nestedModelWithAllTypesAndSchemaOptsSchema,
-		SchemaOpts: model.SchemaOptions{
-			VersionKey: typeutil.GetPointerForConstType(true),
+		SchemaOpts: schemaopt.SchemaOptions{
 			Timestamps: true,
+			// version key enabled by default
 		},
 		ValidSchemaNodesCount: 20,
 	}
@@ -339,11 +342,11 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 	}
 
 	for _, tc := range testCases {
-		actualSchema, err := mongomodel.BuildSchemaForModel(tc.Model, tc.SchemaOpts)
+		actualSchema, err := mgod.BuildSchemaForModel(tc.Model, tc.SchemaOpts)
 
 		s.Nil(err)
 		if !reflect.DeepEqual(tc.Schema.Root, actualSchema.Root) {
-			s.Fail("Schema mismatch", "Expected: %v, Got: %v", tc.Schema, *actualSchema)
+			s.Fail("Schema mismatch", "Expected: %v, Got: %v", tc.Schema.Root, actualSchema.Root)
 		}
 		s.Equal(tc.ValidSchemaNodesCount, len(actualSchema.Nodes))
 	}

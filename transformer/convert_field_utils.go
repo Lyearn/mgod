@@ -3,7 +3,7 @@ package transformer
 import (
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
+	"github.com/Lyearn/mgod/dateformatter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -43,7 +43,7 @@ func convertDateTimeToString(dateTimes ...primitive.DateTime) ([]string, error) 
 	dates := []string{}
 
 	for _, dateTime := range dateTimes {
-		date, err := dateutil.New(dateTime.Time()).GetISOString()
+		date, err := dateformatter.New(dateTime.Time()).GetISOString()
 		if err != nil {
 			return nil, err
 		}

@@ -2,11 +2,10 @@ package mgod
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log/slog"
 
-	"github.com/Lyearn/backend-universe/packages/common/logger"
-	"github.com/Lyearn/backend-universe/packages/observability/errorhandler"
+	"github.com/Lyearn/mgod/errors"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,7 +29,12 @@ func BuildBSONDoc(
 	}
 
 	if bsonDoc == nil && len(entityModelSchema.Root.Children) != 0 {
-		return errors.New("BSON doc is nil but entity model schema is not empty")
+		slog.ErrorContext(ctx, "BSON doc is nil but entity model schema is not empty")
+		return errors.NewBadRequestError(errors.BadRequestError{
+			Underlying: "bson doc",
+			Got:        "nil",
+			Expected:   "schema fields",
+		})
 	}
 
 	if len(*bsonDoc) == 0 && len(entityModelSchema.Root.Children) == 0 {
@@ -72,7 +76,7 @@ func buildBSONDoc(
 		visitedSchemaNodes := make([]string, 0)
 
 		for bsonIdx, bsonNode := range *bsonElem {
-			nodePath := GetPathForField(bsonNode.Key, parent)
+			nodePath := getPathForField(bsonNode.Key, parent)
 			visitedSchemaNodes = append(visitedSchemaNodes, nodePath)
 
 			convertedValue, err := getConvertedValueForNode(ctx, bsonNode.Value, schemaNodes, nodePath, translateTo)
@@ -104,7 +108,7 @@ func buildBSONDoc(
 		}
 
 		// array elements are represented as $.
-		nodePath := GetPathForField("$", parent)
+		nodePath := getPathForField("$", parent)
 
 		for arrIdx := range *bsonElem {
 			elemVal := (*bsonElem)[arrIdx]
@@ -196,13 +200,10 @@ func getConvertedValueForNode(
 		modifiedVal = typedValue
 
 	default:
-		errorParams := map[string]interface{}{
-			"doc": typedValue,
-		}
-		return nil, errorhandler.NewBadRequestError(errorhandler.CommonErrorProps{
-			Message: "Invalid bson doc type",
-			Where:   "mongomodel.getConvertedValueForNode",
-			Params:  &errorParams,
+		return nil, errors.NewBadRequestError(errors.BadRequestError{
+			Underlying: "bson doc field value",
+			Got:        fmt.Sprintf("%T", typedValue),
+			Expected:   "bson.D or bson.A or interface{}",
 		})
 	}
 
@@ -281,7 +282,7 @@ func getSchemaNodeForPath(ctx context.Context, path string, schemaNodes map[stri
 			return nil, nil
 		}
 
-		logger.Error(ctx, fmt.Sprintf(
+		slog.ErrorContext(ctx, fmt.Sprintf(
 			"schema doesn't contains any node at path %s found in bsonDoc", path))
 
 		return nil, fmt.Errorf("unknown path %s found in bson doc", path)

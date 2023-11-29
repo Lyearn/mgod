@@ -3,8 +3,8 @@ package metafield
 import (
 	"reflect"
 
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/transformer"
+	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -19,7 +19,7 @@ type MetaField interface {
 
 	// IsApplicable returns true if the meta field is applicable for the given schema options.
 	// Meta field is processed against the doc only if it is applicable.
-	IsApplicable(schemaOptions model.SchemaOptions) bool
+	IsApplicable(schemaOptions schemaopt.SchemaOptions) bool
 
 	// CheckIfValidValue validates the type of the provided value against the expected type.
 	CheckIfValidValue(val interface{}) bool
@@ -42,7 +42,7 @@ var AvailableMetaFields = []MetaField{
 	docVersionMetaFieldInstance,
 }
 
-func AddMetaFields(bsonDoc *bson.D, schemaOptions model.SchemaOptions) error {
+func AddMetaFields(bsonDoc *bson.D, schemaOptions schemaopt.SchemaOptions) error {
 	for _, metaField := range AvailableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue

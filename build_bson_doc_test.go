@@ -5,10 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Lyearn/backend-universe/packages/common/util/dateutil"
-	"github.com/Lyearn/backend-universe/packages/common/util/typeutil"
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel"
+	"github.com/Lyearn/mgod"
+	"github.com/Lyearn/mgod/dateformatter"
+	"github.com/Lyearn/mgod/schemaopt"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -32,8 +31,8 @@ func (s *BuildBSONDocSuite) SetupTest() {
 
 func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	type TestCase struct {
-		TranslateTo       mongomodel.BSONDocTranslateToEnum
-		EntityModelSchema mongomodel.EntityModelSchema
+		TranslateTo       mgod.BSONDocTranslateToEnum
+		EntityModelSchema mgod.EntityModelSchema
 		InputDoc          bson.D
 		ExpectedDoc       bson.D
 	}
@@ -41,37 +40,39 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	id := primitive.NewObjectID()
 	metaID := primitive.NewObjectID()
 
-	onboardAt := primitive.NewDateTimeFromTime(time.Now())
-	onboardAtStr, _ := dateutil.New(onboardAt.Time()).GetISOString()
+	joinedOn := primitive.NewDateTimeFromTime(time.Now())
+	joinedOnStr, _ := dateformatter.New(joinedOn.Time()).GetISOString()
 
-	tagIDs := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID()}
-	tagIDsStr := lo.Map(tagIDs, func(tagID primitive.ObjectID, _ int) string {
-		return tagID.Hex()
+	teamIDs := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID()}
+	teamIDsStr := lo.Map(teamIDs, func(teamID primitive.ObjectID, _ int) string {
+		return teamID.Hex()
 	})
 
-	activeSessions := []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now()), primitive.NewDateTimeFromTime(time.Now())}
-	activeSessionsStr := lo.Map(activeSessions, func(activeSession primitive.DateTime, _ int) string {
-		requestTimestamp, _ := dateutil.New(activeSession.Time()).GetISOString()
+	projectsCompletedAt := []primitive.DateTime{primitive.NewDateTimeFromTime(time.Now()), primitive.NewDateTimeFromTime(time.Now())}
+	projectsCompletedAtStr := lo.Map(projectsCompletedAt, func(projectCompletedAt primitive.DateTime, _ int) string {
+		requestTimestamp, _ := dateformatter.New(projectCompletedAt.Time()).GetISOString()
 		return requestTimestamp
 	})
 
-	sessionIds := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID()}
-	sessionIdsStr := lo.Map(sessionIds, func(sessionId primitive.ObjectID, _ int) string {
-		return sessionId.Hex()
+	projectIDs := []primitive.ObjectID{primitive.NewObjectID(), primitive.NewObjectID()}
+	projectIDsStr := lo.Map(projectIDs, func(projectID primitive.ObjectID, _ int) string {
+		return projectID.Hex()
 	})
 
 	createdAt := primitive.NewDateTimeFromTime(time.Now())
+	createdAtTimestamp, _ := dateformatter.New(createdAt.Time()).GetISOString()
 	updatedAt := primitive.NewDateTimeFromTime(time.Now())
+	updatedAtTimestamp, _ := dateformatter.New(updatedAt.Time()).GetISOString()
 
-	type ActiveSession struct {
-		SessionID   string `bson:"sessionId" mgoType:"id"`
-		LastLoginAt string `bson:"lastLoginAt" mgoType:"date"`
+	type UserProject struct {
+		ProjectID   string `bson:"projectId" mgoType:"id"`
+		CompletedAt string `bson:"completedAt" mgoType:"date"`
 	}
 
 	type Metadata struct {
-		OnboardAt      string          `bson:"onboardAt" mgoType:"date"`
-		TagIDs         []string        `bson:"tagIds" mgoType:"id"`
-		ActiveSessions []ActiveSession `bson:"activeSessions" mgoID:"false" mgoDefault:"[]"`
+		JoinedOn string        `bson:"joinedOn" mgoType:"date"`
+		TeamIDs  []string      `bson:"teamIds" mgoType:"id"`
+		Projects []UserProject `bson:"projects" mgoID:"false" mgoDefault:"[]"`
 	}
 
 	type NestedModelWithAllTypes struct {
@@ -81,14 +82,15 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		Metadata *Metadata `bson:"meta"`
 	}
 
-	actualSchema, _ := mongomodel.BuildSchemaForModel(
+	versionKeyEnabled := false
+	actualSchema, _ := mgod.BuildSchemaForModel(
 		NestedModelWithAllTypes{},
-		model.SchemaOptions{VersionKey: typeutil.GetPointerForConstType(false)},
+		schemaopt.SchemaOptions{VersionKey: &versionKeyEnabled},
 	)
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypes_toMongo := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
+		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -113,34 +115,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[0],
+									Key:   "projectId",
+									Value: projectIDsStr[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[1],
+									Key:   "projectId",
+									Value: projectIDsStr[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[1],
 								},
 							},
 						},
@@ -170,34 +172,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[0],
+									Key:   "projectId",
+									Value: projectIDs[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[1],
+									Key:   "projectId",
+									Value: projectIDs[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[1],
 								},
 							},
 						},
@@ -209,7 +211,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypes_toEntityModel := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
 
 		EntityModelSchema: *actualSchema,
 
@@ -234,34 +236,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[0],
+									Key:   "projectId",
+									Value: projectIDs[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[1],
+									Key:   "projectId",
+									Value: projectIDs[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[1],
 								},
 							},
 						},
@@ -291,34 +293,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[0],
+									Key:   "projectId",
+									Value: projectIDsStr[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[1],
+									Key:   "projectId",
+									Value: projectIDsStr[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[1],
 								},
 							},
 						},
@@ -330,7 +332,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocCheckForDefaultValues_toMongo := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
+		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -347,12 +349,12 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 				},
 			},
@@ -375,15 +377,15 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 					{
-						Key:   "activeSessions",
+						Key:   "projects",
 						Value: bson.A{},
 					},
 				},
@@ -401,7 +403,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocCheckForDefaultValues_toEntityModel := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
 
 		EntityModelSchema: *actualSchema,
 
@@ -418,12 +420,12 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 				},
 			},
@@ -442,15 +444,15 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 					{
-						Key:   "activeSessions",
+						Key:   "projects",
 						Value: bson.A{},
 					},
 				},
@@ -462,9 +464,9 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		},
 	}
 
-	schemaForNestedDocWithSchemaOpts, _ := mongomodel.BuildSchemaForModel(
+	schemaForNestedDocWithSchemaOpts, _ := mgod.BuildSchemaForModel(
 		NestedModelWithAllTypes{},
-		model.SchemaOptions{
+		schemaopt.SchemaOptions{
 			Timestamps: true,
 			// VersionKey enabled by default
 		},
@@ -472,7 +474,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypesAndSchemaOpts_toMongo := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
+		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
 
@@ -497,34 +499,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[0],
+									Key:   "projectId",
+									Value: projectIDsStr[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[1],
+									Key:   "projectId",
+									Value: projectIDsStr[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[1],
 								},
 							},
 						},
@@ -554,34 +556,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[0],
+									Key:   "projectId",
+									Value: projectIDs[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[1],
+									Key:   "projectId",
+									Value: projectIDs[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[1],
 								},
 							},
 						},
@@ -593,7 +595,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypesAndSchemaOpts_toEntityModel := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
 
 		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
 
@@ -618,34 +620,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID,
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAt,
+						Key:   "joinedOn",
+						Value: joinedOn,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDs[0], tagIDs[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDs[0], teamIDs[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[0],
+									Key:   "projectId",
+									Value: projectIDs[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIds[1],
+									Key:   "projectId",
+									Value: projectIDs[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessions[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAt[1],
 								},
 							},
 						},
@@ -687,34 +689,34 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 						Value: metaID.Hex(),
 					},
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 					{
-						Key:   "tagIds",
-						Value: bson.A{tagIDsStr[0], tagIDsStr[1]},
+						Key:   "teamIds",
+						Value: bson.A{teamIDsStr[0], teamIDsStr[1]},
 					},
 					{
-						Key: "activeSessions",
+						Key: "projects",
 						Value: bson.A{
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[0],
+									Key:   "projectId",
+									Value: projectIDsStr[0],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[0],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[0],
 								},
 							},
 							bson.D{
 								{
-									Key:   "sessionId",
-									Value: sessionIdsStr[1],
+									Key:   "projectId",
+									Value: projectIDsStr[1],
 								},
 								{
-									Key:   "lastLoginAt",
-									Value: activeSessionsStr[1],
+									Key:   "completedAt",
+									Value: projectsCompletedAtStr[1],
 								},
 							},
 						},
@@ -723,11 +725,11 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 			},
 			{
 				Key:   "createdAt",
-				Value: createdAt,
+				Value: createdAtTimestamp,
 			},
 			{
 				Key:   "updatedAt",
-				Value: updatedAt,
+				Value: updatedAtTimestamp,
 			},
 			{
 				Key:   "__v",
@@ -747,7 +749,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	for _, testCase := range testCases {
 		doc := testCase.InputDoc
-		err := mongomodel.BuildBSONDoc(context.TODO(), &doc, &testCase.EntityModelSchema, testCase.TranslateTo)
+		err := mgod.BuildBSONDoc(context.TODO(), &doc, &testCase.EntityModelSchema, testCase.TranslateTo)
 
 		s.Nil(err)
 		s.Equal(testCase.ExpectedDoc, doc)
@@ -756,16 +758,16 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	type TestCase struct {
-		TranslateTo       mongomodel.BSONDocTranslateToEnum
-		EntityModelSchema mongomodel.EntityModelSchema
+		TranslateTo       mgod.BSONDocTranslateToEnum
+		EntityModelSchema mgod.EntityModelSchema
 		InputDoc          bson.D
 	}
 
-	onboardAt := primitive.NewDateTimeFromTime(time.Now())
-	onboardAtStr, _ := dateutil.New(onboardAt.Time()).GetISOString()
+	joinedOn := primitive.NewDateTimeFromTime(time.Now())
+	joinedOnStr, _ := dateformatter.New(joinedOn.Time()).GetISOString()
 
 	type Metadata struct {
-		OnboardAt string `bson:"onboardAt" mgoType:"date"`
+		JoinedOn string `bson:"joinedOn" mgoType:"date"`
 	}
 
 	type NestedModel struct {
@@ -775,10 +777,10 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 		Metadata *Metadata `bson:"meta"`
 	}
 
-	actualSchema, _ := mongomodel.BuildSchemaForModel(NestedModel{}, model.SchemaOptions{})
+	actualSchema, _ := mgod.BuildSchemaForModel(NestedModel{}, schemaopt.SchemaOptions{})
 
 	docWithoutIDCase := &TestCase{
-		TranslateTo: mongomodel.BSONDocTranslateToEnumMongo,
+		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -791,8 +793,8 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 				Key: "meta",
 				Value: bson.D{
 					{
-						Key:   "onboardAt",
-						Value: onboardAtStr,
+						Key:   "joinedOn",
+						Value: joinedOnStr,
 					},
 				},
 			},
@@ -800,7 +802,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	}
 
 	doc := docWithoutIDCase.InputDoc
-	err := mongomodel.BuildBSONDoc(context.TODO(), &doc, &docWithoutIDCase.EntityModelSchema, docWithoutIDCase.TranslateTo)
+	err := mgod.BuildBSONDoc(context.TODO(), &doc, &docWithoutIDCase.EntityModelSchema, docWithoutIDCase.TranslateTo)
 
 	s.Nil(err)
 	s.True(doc[2].Key == "_id")

@@ -2,10 +2,10 @@ package mgod
 
 import (
 	"context"
-	"net/http"
+	"fmt"
 
-	"github.com/Lyearn/backend-universe/packages/observability/errorhandler"
-	"github.com/Lyearn/backend-universe/packages/store/mongomodel/metafield"
+	"github.com/Lyearn/mgod/errors"
+	"github.com/Lyearn/mgod/metafield"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -42,12 +42,8 @@ type entityMongoModel[T any] struct {
 
 func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMongoModel[T], error) {
 	dbConnection := opts.dbConnection
-
-	// Use global client if no connection is provided
 	if dbConnection == nil {
-		if conn, err := GetGlobalConnection(); err == nil {
-			dbConnection = conn
-		}
+		return nil, errors.ErrNoDatabaseConnection
 	}
 
 	coll := dbConnection.Collection(opts.schemaOptions.Collection)
@@ -116,7 +112,7 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 	}
 
 	if m.isUnionType {
-		discriminatorVal := GetFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
+		discriminatorVal := getFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
 		if discriminatorVal == nil {
 			discriminatorVal = GetSchemaNameForModel(m.modelType)
 			bsonDoc = append(bsonDoc, primitive.E{
@@ -145,7 +141,7 @@ func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bso
 	entityModelSchema := m.schema
 
 	if m.isUnionType {
-		discriminatorVal := GetFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
+		discriminatorVal := getFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
 		if discriminatorVal != nil {
 			cacheKey := GetSchemaCacheKey(m.coll.Name(), discriminatorVal.(string))
 			if unionElemSchema, err := entityModelSchemaCacheInstance.GetSchema(cacheKey); err == nil {
@@ -175,14 +171,10 @@ func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bso
 func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, funcName string) (interface{}, error) {
 	updateQuery, ok := update.(bson.D)
 	if !ok {
-		return nil, errorhandler.NewLyearnError(errorhandler.LyearnErrorProps{
-			Message:    "Update query is not of required type bson.D",
-			Where:      "entityMongoModel." + funcName,
-			HttpStatus: http.StatusInternalServerError,
-			Params: &map[string]interface{}{
-				"updateQuery": update,
-			},
-			ReportBug: true,
+		return nil, errors.NewBadRequestError(errors.BadRequestError{
+			Underlying: "update query",
+			Got:        fmt.Sprintf("%T", update),
+			Expected:   "bson.D",
 		})
 	}
 
@@ -265,25 +257,10 @@ func (m entityMongoModel[T]) InsertOne(ctx context.Context, doc interface{},
 
 	// TODO: add an extra strict check to ensure that the doc to be inserted contains _id field
 
-	result, err := m.coll.InsertOne(ctx, bsonDoc, opts...)
+	_, err = m.coll.InsertOne(ctx, bsonDoc, opts...)
 	if err != nil {
 		return model, err
 	}
-
-	if _, ok := result.InsertedID.(primitive.ObjectID); !ok {
-		return model, errorhandler.NewLyearnError(errorhandler.LyearnErrorProps{
-			Message:    "Invalid doc id returned while inserting document in mongo",
-			Where:      "entityMongoModel.Create",
-			HttpStatus: http.StatusInternalServerError,
-			Params: &map[string]interface{}{
-				"docId":    result.InsertedID,
-				"inputDoc": doc,
-			},
-			ReportBug: true,
-		})
-	}
-
-	// TODO: add an extra strict check to ensure that the docID returned by mongo is the same as the one passed in bsonDoc
 
 	model, err = m.getEntityModelFromMongoDoc(ctx, bsonDoc)
 
@@ -310,48 +287,24 @@ func (m entityMongoModel[T]) InsertMany(ctx context.Context, docs interface{},
 			return typedDoc
 		})
 	default:
-		return nil, errorhandler.NewLyearnError(errorhandler.LyearnErrorProps{
-			Message:    "Invalid type of docs passed to InsertMany",
-			Where:      "entityMongoModel.InsertMany",
-			HttpStatus: http.StatusInternalServerError,
-			ReportBug:  true,
+		var dummyTypedVar T
+		return nil, errors.NewBadRequestError(errors.BadRequestError{
+			Underlying: "insertMany docs",
+			Got:        fmt.Sprintf("%T", typedDocs),
+			Expected:   fmt.Sprintf("array of %T or bson.D", dummyTypedVar),
 		})
 	}
 
-	result, err := m.coll.InsertMany(ctx, bsonDocs, opts...)
+	_, err := m.coll.InsertMany(ctx, bsonDocs, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	if result == nil || len(result.InsertedIDs) != len(bsonDocs) {
-		return nil, errorhandler.NewLyearnError(errorhandler.LyearnErrorProps{
-			Message:    "Failed to create some documents in mongo",
-			Where:      "entityMongoModel.InsertMany",
-			HttpStatus: http.StatusInternalServerError,
-			Params: &map[string]interface{}{
-				"mongoResult": result,
-				"inputDocs":   docs,
-			},
-			ReportBug: true,
-		})
-	}
-
 	models := []T{}
 
-	for i, insertedID := range result.InsertedIDs {
-		if _, ok := insertedID.(primitive.ObjectID); !ok {
-			return nil, errorhandler.NewLyearnError(errorhandler.LyearnErrorProps{
-				Message:    "Invalid doc id returned while inserting document in mongo",
-				Where:      "entityMongoModel.InsertMany",
-				HttpStatus: http.StatusInternalServerError,
-				Params: &map[string]interface{}{
-					"insertedDocId": insertedID,
-				},
-				ReportBug: true,
-			})
-		}
-
-		model, transformErr := m.getEntityModelFromMongoDoc(ctx, bsonDocs[i].(primitive.D))
+	// TODO: transform and return only those docs which are inserted successfully (use result from InsertMany)
+	for _, bsonDoc := range bsonDocs {
+		model, transformErr := m.getEntityModelFromMongoDoc(ctx, bsonDoc.(primitive.D))
 		if transformErr != nil {
 			return nil, transformErr
 		} else {

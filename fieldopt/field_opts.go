@@ -1,4 +1,4 @@
-package schemaopt
+package fieldopt
 
 import (
 	"reflect"
@@ -6,7 +6,7 @@ import (
 	"github.com/samber/lo"
 )
 
-type SchemaOption interface {
+type FieldOption interface {
 	// GetOptName returns the name of the schema option. This name is used to identify the unique option.
 	// NOTE: Make sure to return the same name as the name of the struct field.
 	GetOptName() string
@@ -24,13 +24,13 @@ type SchemaFieldOptions struct {
 	Select   bool
 }
 
-var availableSchemaOptions = []SchemaOption{
+var availableSchemaOptions = []FieldOption{
 	requiredOptionInstance,
 	xidOptionInstance,
 	defaultValueOptionInstance,
 }
 
-var optNameToSchemaOptionMap = lo.KeyBy(availableSchemaOptions, func(opt SchemaOption) string {
+var optNameToSchemaOptionMap = lo.KeyBy(availableSchemaOptions, func(opt FieldOption) string {
 	return opt.GetOptName()
 })
 

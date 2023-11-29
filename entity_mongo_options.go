@@ -1,25 +1,22 @@
 package mgod
 
 import (
-	"github.com/Lyearn/backend-universe/packages/store/acl/model"
+	"github.com/Lyearn/mgod/schemaopt"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type EntityMongoOptions struct {
-	schemaOptions model.SchemaOptions
+	schemaOptions schemaopt.SchemaOptions
 	dbConnection  *mongo.Database
 }
 
-func NewEntityMongoOptions() *EntityMongoOptions {
-	return &EntityMongoOptions{}
+func NewEntityMongoOptions(db *mongo.Database) *EntityMongoOptions {
+	return &EntityMongoOptions{
+		dbConnection: db,
+	}
 }
 
-func (o *EntityMongoOptions) SetSchemaOptions(schemaOptions model.SchemaOptions) *EntityMongoOptions {
+func (o *EntityMongoOptions) SetSchemaOptions(schemaOptions schemaopt.SchemaOptions) *EntityMongoOptions {
 	o.schemaOptions = schemaOptions
-	return o
-}
-
-func (o *EntityMongoOptions) SetConnection(db *mongo.Database) *EntityMongoOptions {
-	o.dbConnection = db
 	return o
 }
