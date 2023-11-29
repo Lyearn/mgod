@@ -3,8 +3,8 @@ package metafield
 import (
 	"reflect"
 
-	"github.com/Lyearn/mgod/schemaopt"
-	"github.com/Lyearn/mgod/transformer"
+	"github.com/Lyearn/mgod/schema/schemaopt"
+	"github.com/Lyearn/mgod/schema/transformer"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

@@ -1,7 +1,7 @@
 package mgod
 
 import (
-	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/schema/schemaopt"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

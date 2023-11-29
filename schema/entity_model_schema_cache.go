@@ -1,4 +1,4 @@
-package mgod
+package schema
 
 import (
 	"fmt"
@@ -36,4 +36,4 @@ func (c *entityModelSchemaCache) SetSchema(schemaName string, schema *EntityMode
 	c.cache[schemaName] = schema
 }
 
-var entityModelSchemaCacheInstance = newEntityModelSchemaCache()
+var EntityModelSchemaCacheInstance = newEntityModelSchemaCache()

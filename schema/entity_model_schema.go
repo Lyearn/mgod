@@ -1,12 +1,12 @@
-package mgod
+package schema
 
 import (
 	"reflect"
 
-	"github.com/Lyearn/mgod/fieldopt"
-	"github.com/Lyearn/mgod/metafield"
-	"github.com/Lyearn/mgod/schemaopt"
-	"github.com/Lyearn/mgod/transformer"
+	"github.com/Lyearn/mgod/schema/fieldopt"
+	"github.com/Lyearn/mgod/schema/metafield"
+	"github.com/Lyearn/mgod/schema/schemaopt"
+	"github.com/Lyearn/mgod/schema/transformer"
 	"github.com/samber/lo"
 )
 
@@ -109,7 +109,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 			return err
 		}
 
-		path := getPathForField(fieldName, parent)
+		path := GetPathForField(fieldName, parent)
 
 		treeNode := TreeNode{
 			Path:    path,
@@ -188,7 +188,7 @@ func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode
 			return err
 		}
 
-		path := getPathForField(fieldName, parent)
+		path := GetPathForField(fieldName, parent)
 
 		xidNode := TreeNode{
 			Path:    path,
@@ -278,7 +278,7 @@ func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRe
 		}
 
 		field := string(metaField.GetKey())
-		path := getPathForField(field, parent)
+		path := GetPathForField(field, parent)
 
 		// append meta field in the schema tree.
 		toAppendTreeNode := TreeNode{
@@ -312,34 +312,4 @@ func addTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAdd
 		(*treeRef)[parentIdx] = toAddTreeNodes[i]
 		nodes[toAddTreeNodes[i].Path] = &(*treeRef)[parentIdx]
 	}
-}
-
-func GetSchemaNameForModel[T any](model T) string {
-	return reflect.TypeOf(model).Name()
-}
-
-func GetDefaultSchemaTreeRootNode() TreeNode {
-	rootNode := TreeNode{
-		Path:    "$root",
-		Key:     "$root",
-		BSONKey: "$root",
-		Props: SchemaFieldProps{
-			Type: reflect.Struct,
-			Options: fieldopt.SchemaFieldOptions{
-				// _id is required by default at root of the doc
-				XID: true,
-			},
-		},
-	}
-
-	return rootNode
-}
-
-func getPathForField(field, parent string) string {
-	path := field
-	if parent != "" {
-		path = parent + "." + field
-	}
-
-	return path
 }

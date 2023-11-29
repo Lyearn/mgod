@@ -1,4 +1,4 @@
-package mgod
+package bsondoc
 
 import (
 	"context"
@@ -6,23 +6,24 @@ import (
 	"log/slog"
 
 	"github.com/Lyearn/mgod/errors"
+	"github.com/Lyearn/mgod/schema"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type BSONDocTranslateToEnum string
+type TranslateToEnum string
 
 const (
-	BSONDocTranslateToEnumMongo       BSONDocTranslateToEnum = "mongo"
-	BSONDocTranslateToEnumEntityModel BSONDocTranslateToEnum = "entity_model"
+	TranslateToEnumMongo       TranslateToEnum = "mongo"
+	TranslateToEnumEntityModel TranslateToEnum = "entity_model"
 )
 
-func BuildBSONDoc(
+func Build(
 	ctx context.Context,
 	bsonDoc *bson.D,
-	entityModelSchema *EntityModelSchema,
-	translateTo BSONDocTranslateToEnum,
+	entityModelSchema *schema.EntityModelSchema,
+	translateTo TranslateToEnum,
 ) error {
 	if entityModelSchema == nil {
 		return nil
@@ -41,7 +42,7 @@ func BuildBSONDoc(
 		return nil
 	}
 
-	err := buildBSONDoc(ctx, bsonDoc, entityModelSchema.Nodes, entityModelSchema.Root.Path, translateTo)
+	err := build(ctx, bsonDoc, entityModelSchema.Nodes, entityModelSchema.Root.Path, translateTo)
 	if err != nil {
 		return err
 	}
@@ -49,12 +50,12 @@ func BuildBSONDoc(
 	return nil
 }
 
-func buildBSONDoc(
+func build(
 	ctx context.Context,
 	bsonDocRef interface{},
-	schemaNodes map[string]*TreeNode,
+	schemaNodes map[string]*schema.TreeNode,
 	parent string,
-	translateTo BSONDocTranslateToEnum,
+	translateTo TranslateToEnum,
 ) error {
 	if bsonDocRef == nil {
 		return nil
@@ -76,7 +77,7 @@ func buildBSONDoc(
 		visitedSchemaNodes := make([]string, 0)
 
 		for bsonIdx, bsonNode := range *bsonElem {
-			nodePath := getPathForField(bsonNode.Key, parent)
+			nodePath := schema.GetPathForField(bsonNode.Key, parent)
 			visitedSchemaNodes = append(visitedSchemaNodes, nodePath)
 
 			convertedValue, err := getConvertedValueForNode(ctx, bsonNode.Value, schemaNodes, nodePath, translateTo)
@@ -90,7 +91,7 @@ func buildBSONDoc(
 		}
 
 		// check if there are any missing nodes in the bson doc at the current level as compared to the schema.
-		immediateChildren := lo.Map(schemaNode.Children, func(child TreeNode, _ int) string {
+		immediateChildren := lo.Map(schemaNode.Children, func(child schema.TreeNode, _ int) string {
 			return child.Path
 		})
 		uniqVisitedSchemaNodes := lo.Uniq(visitedSchemaNodes)
@@ -108,7 +109,7 @@ func buildBSONDoc(
 		}
 
 		// array elements are represented as $.
-		nodePath := getPathForField("$", parent)
+		nodePath := schema.GetPathForField("$", parent)
 
 		for arrIdx := range *bsonElem {
 			elemVal := (*bsonElem)[arrIdx]
@@ -148,9 +149,9 @@ func buildBSONDoc(
 			var err error
 
 			switch translateTo {
-			case BSONDocTranslateToEnumMongo:
+			case TranslateToEnumMongo:
 				modifiedBSONNodeVal, err = transformer.TransformForMongoDoc(elemVal)
-			case BSONDocTranslateToEnumEntityModel:
+			case TranslateToEnumEntityModel:
 				modifiedBSONNodeVal, err = transformer.TransformForEntityModelDoc(elemVal)
 			default:
 				err = fmt.Errorf("unknown translateTo enum value %s", translateTo)
@@ -170,9 +171,9 @@ func buildBSONDoc(
 func getConvertedValueForNode(
 	ctx context.Context,
 	nodeVal interface{},
-	schemaNodes map[string]*TreeNode,
+	schemaNodes map[string]*schema.TreeNode,
 	parent string,
-	translateTo BSONDocTranslateToEnum,
+	translateTo TranslateToEnum,
 ) (interface{}, error) {
 	var modifiedVal interface{}
 	var err error
@@ -188,15 +189,15 @@ func getConvertedValueForNode(
 	// which will then go to the default case and will not be able to handle any nested type.
 	switch typedValue := nodeVal.(type) {
 	case bson.D:
-		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
+		err = build(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	case bson.A:
-		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
+		err = build(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	case interface{}:
-		err = buildBSONDoc(ctx, &typedValue, schemaNodes, parent, translateTo)
+		err = build(ctx, &typedValue, schemaNodes, parent, translateTo)
 		modifiedVal = typedValue
 
 	default:
@@ -220,8 +221,8 @@ func addMissingNodes(
 	bsonElem *bson.D,
 	immediateChildren []string,
 	uniqVisitedSchemaNodes []string,
-	schemaNodes map[string]*TreeNode,
-	translateTo BSONDocTranslateToEnum,
+	schemaNodes map[string]*schema.TreeNode,
+	translateTo TranslateToEnum,
 ) error {
 	missingSchemaPaths, _ := lo.Difference(immediateChildren, uniqVisitedSchemaNodes)
 	for _, missingSchemaPath := range missingSchemaPaths {
@@ -256,7 +257,7 @@ func addMissingNodes(
 			// logic will populate new objectId every time for the same object and cause FE unique key issue.
 			// expectation here is if mgoID property of any field is changed to true in schema,
 			// then it should be populated via script beforehand.
-			if translateTo == BSONDocTranslateToEnumMongo {
+			if translateTo == TranslateToEnumMongo {
 				valueToAppend = primitive.NewObjectID()
 			} else {
 				valueToAppend = ""
@@ -273,11 +274,16 @@ func addMissingNodes(
 	return nil
 }
 
-func getSchemaNodeForPath(ctx context.Context, path string, schemaNodes map[string]*TreeNode, translateTo BSONDocTranslateToEnum) (*TreeNode, error) {
+func getSchemaNodeForPath(
+	ctx context.Context,
+	path string,
+	schemaNodes map[string]*schema.TreeNode,
+	translateTo TranslateToEnum,
+) (*schema.TreeNode, error) {
 	schemaNode, ok := schemaNodes[path]
 	if !ok {
 		// skip throwing error for nodes which are not present in actual entity schema but present in mongo doc.
-		if translateTo == BSONDocTranslateToEnumEntityModel {
+		if translateTo == TranslateToEnumEntityModel {
 			//nolint:nilnil // there might be extra fields in mongo doc which are not present in entity schema.
 			return nil, nil
 		}

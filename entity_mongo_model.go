@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Lyearn/mgod/bsondoc"
 	"github.com/Lyearn/mgod/errors"
-	"github.com/Lyearn/mgod/metafield"
+	"github.com/Lyearn/mgod/schema"
+	"github.com/Lyearn/mgod/schema/metafield"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -34,7 +36,7 @@ type entityMongoModel[T any] struct {
 	opts      EntityMongoOptions
 	coll      *mongo.Collection
 
-	schema *EntityModelSchema
+	schema *schema.EntityModelSchema
 
 	isUnionType      bool
 	discriminatorKey string
@@ -48,20 +50,20 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 
 	coll := dbConnection.Collection(opts.schemaOptions.Collection)
 
-	modelName := GetSchemaNameForModel(modelType)
+	modelName := schema.GetSchemaNameForModel(modelType)
 	schemaCacheKey := GetSchemaCacheKey(coll.Name(), modelName)
 
-	var schema *EntityModelSchema
+	var entityModelSchema *schema.EntityModelSchema
 	var err error
 
 	// build schema if not cached.
-	if schema, err = entityModelSchemaCacheInstance.GetSchema(schemaCacheKey); err != nil {
-		schema, err = BuildSchemaForModel(modelType, opts.schemaOptions)
+	if entityModelSchema, err = schema.EntityModelSchemaCacheInstance.GetSchema(schemaCacheKey); err != nil {
+		entityModelSchema, err = schema.BuildSchemaForModel(modelType, opts.schemaOptions)
 		if err != nil {
 			return nil, err
 		}
 
-		entityModelSchemaCacheInstance.SetSchema(schemaCacheKey, schema)
+		schema.EntityModelSchemaCacheInstance.SetSchema(schemaCacheKey, entityModelSchema)
 	}
 
 	isUnionTypeModel := opts.schemaOptions.IsUnionType
@@ -75,7 +77,7 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 		modelType:        modelType,
 		opts:             opts,
 		coll:             coll,
-		schema:           schema,
+		schema:           entityModelSchema,
 		isUnionType:      isUnionTypeModel,
 		discriminatorKey: discriminatorKey,
 	}, nil
@@ -106,15 +108,15 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 		return nil, err
 	}
 
-	err = BuildBSONDoc(ctx, &bsonDoc, m.schema, BSONDocTranslateToEnumMongo)
+	err = bsondoc.Build(ctx, &bsonDoc, m.schema, bsondoc.TranslateToEnumMongo)
 	if err != nil {
 		return nil, err
 	}
 
 	if m.isUnionType {
-		discriminatorVal := getFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
+		discriminatorVal := bsondoc.GetFieldValueFromRootDoc(&bsonDoc, m.discriminatorKey)
 		if discriminatorVal == nil {
-			discriminatorVal = GetSchemaNameForModel(m.modelType)
+			discriminatorVal = schema.GetSchemaNameForModel(m.modelType)
 			bsonDoc = append(bsonDoc, primitive.E{
 				Key:   m.discriminatorKey,
 				Value: discriminatorVal,
@@ -122,8 +124,8 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 		}
 
 		cacheKey := GetSchemaCacheKey(m.coll.Name(), discriminatorVal.(string))
-		if _, err := entityModelSchemaCacheInstance.GetSchema(cacheKey); err != nil {
-			entityModelSchemaCacheInstance.SetSchema(cacheKey, m.schema)
+		if _, err := schema.EntityModelSchemaCacheInstance.GetSchema(cacheKey); err != nil {
+			schema.EntityModelSchemaCacheInstance.SetSchema(cacheKey, m.schema)
 		}
 	}
 
@@ -141,16 +143,16 @@ func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bso
 	entityModelSchema := m.schema
 
 	if m.isUnionType {
-		discriminatorVal := getFieldValueFromBSONRootDoc(&bsonDoc, m.discriminatorKey)
+		discriminatorVal := bsondoc.GetFieldValueFromRootDoc(&bsonDoc, m.discriminatorKey)
 		if discriminatorVal != nil {
 			cacheKey := GetSchemaCacheKey(m.coll.Name(), discriminatorVal.(string))
-			if unionElemSchema, err := entityModelSchemaCacheInstance.GetSchema(cacheKey); err == nil {
+			if unionElemSchema, err := schema.EntityModelSchemaCacheInstance.GetSchema(cacheKey); err == nil {
 				entityModelSchema = unionElemSchema
 			}
 		}
 	}
 
-	err := BuildBSONDoc(ctx, &bsonDoc, entityModelSchema, BSONDocTranslateToEnumEntityModel)
+	err := bsondoc.Build(ctx, &bsonDoc, entityModelSchema, bsondoc.TranslateToEnumEntityModel)
 	if err != nil {
 		return model, err
 	}

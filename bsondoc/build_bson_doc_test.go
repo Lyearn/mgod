@@ -1,13 +1,14 @@
-package mgod_test
+package bsondoc_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/Lyearn/mgod"
+	"github.com/Lyearn/mgod/bsondoc"
 	"github.com/Lyearn/mgod/dateformatter"
-	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/schema"
+	"github.com/Lyearn/mgod/schema/schemaopt"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -31,8 +32,8 @@ func (s *BuildBSONDocSuite) SetupTest() {
 
 func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	type TestCase struct {
-		TranslateTo       mgod.BSONDocTranslateToEnum
-		EntityModelSchema mgod.EntityModelSchema
+		TranslateTo       bsondoc.TranslateToEnum
+		EntityModelSchema schema.EntityModelSchema
 		InputDoc          bson.D
 		ExpectedDoc       bson.D
 	}
@@ -83,14 +84,14 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 	}
 
 	versionKeyEnabled := false
-	actualSchema, _ := mgod.BuildSchemaForModel(
+	actualSchema, _ := schema.BuildSchemaForModel(
 		NestedModelWithAllTypes{},
 		schemaopt.SchemaOptions{VersionKey: &versionKeyEnabled},
 	)
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypes_toMongo := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
+		TranslateTo: bsondoc.TranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -211,7 +212,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypes_toEntityModel := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: bsondoc.TranslateToEnumEntityModel,
 
 		EntityModelSchema: *actualSchema,
 
@@ -332,7 +333,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocCheckForDefaultValues_toMongo := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
+		TranslateTo: bsondoc.TranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -403,7 +404,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocCheckForDefaultValues_toEntityModel := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: bsondoc.TranslateToEnumEntityModel,
 
 		EntityModelSchema: *actualSchema,
 
@@ -464,7 +465,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 		},
 	}
 
-	schemaForNestedDocWithSchemaOpts, _ := mgod.BuildSchemaForModel(
+	schemaForNestedDocWithSchemaOpts, _ := schema.BuildSchemaForModel(
 		NestedModelWithAllTypes{},
 		schemaopt.SchemaOptions{
 			Timestamps: true,
@@ -474,7 +475,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypesAndSchemaOpts_toMongo := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
+		TranslateTo: bsondoc.TranslateToEnumMongo,
 
 		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
 
@@ -595,7 +596,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	//nolint:stylecheck,revive // ignore linter for test case
 	nestedDocWithAllTypesAndSchemaOpts_toEntityModel := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumEntityModel,
+		TranslateTo: bsondoc.TranslateToEnumEntityModel,
 
 		EntityModelSchema: *schemaForNestedDocWithSchemaOpts,
 
@@ -749,7 +750,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 	for _, testCase := range testCases {
 		doc := testCase.InputDoc
-		err := mgod.BuildBSONDoc(context.TODO(), &doc, &testCase.EntityModelSchema, testCase.TranslateTo)
+		err := bsondoc.Build(context.TODO(), &doc, &testCase.EntityModelSchema, testCase.TranslateTo)
 
 		s.Nil(err)
 		s.Equal(testCase.ExpectedDoc, doc)
@@ -758,8 +759,8 @@ func (s *BuildBSONDocSuite) TestBuildBSONDoc() {
 
 func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	type TestCase struct {
-		TranslateTo       mgod.BSONDocTranslateToEnum
-		EntityModelSchema mgod.EntityModelSchema
+		TranslateTo       bsondoc.TranslateToEnum
+		EntityModelSchema schema.EntityModelSchema
 		InputDoc          bson.D
 	}
 
@@ -777,10 +778,10 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 		Metadata *Metadata `bson:"meta"`
 	}
 
-	actualSchema, _ := mgod.BuildSchemaForModel(NestedModel{}, schemaopt.SchemaOptions{})
+	actualSchema, _ := schema.BuildSchemaForModel(NestedModel{}, schemaopt.SchemaOptions{})
 
 	docWithoutIDCase := &TestCase{
-		TranslateTo: mgod.BSONDocTranslateToEnumMongo,
+		TranslateTo: bsondoc.TranslateToEnumMongo,
 
 		EntityModelSchema: *actualSchema,
 
@@ -802,7 +803,7 @@ func (s *BuildBSONDocSuite) TestBuildBSONDocWithoutID() {
 	}
 
 	doc := docWithoutIDCase.InputDoc
-	err := mgod.BuildBSONDoc(context.TODO(), &doc, &docWithoutIDCase.EntityModelSchema, docWithoutIDCase.TranslateTo)
+	err := bsondoc.Build(context.TODO(), &doc, &docWithoutIDCase.EntityModelSchema, docWithoutIDCase.TranslateTo)
 
 	s.Nil(err)
 	s.True(doc[2].Key == "_id")

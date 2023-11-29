@@ -1,4 +1,4 @@
-package mgod
+package schema
 
 type EntityModelSchemaOptions struct {
 	xidRequired      bool

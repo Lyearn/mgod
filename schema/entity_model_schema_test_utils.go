@@ -1,4 +1,4 @@
-package mgod
+package schema
 
 import "reflect"
 

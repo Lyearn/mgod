@@ -7,7 +7,7 @@ import (
 
 	"github.com/Lyearn/mgod"
 	"github.com/Lyearn/mgod/dateformatter"
-	"github.com/Lyearn/mgod/schemaopt"
+	"github.com/Lyearn/mgod/schema/schemaopt"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
