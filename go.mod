@@ -1,6 +1,6 @@
 module github.com/Lyearn/mgod
 
-go 1.21.0
+go 1.18
 
 require (
 	github.com/samber/lo v1.38.1

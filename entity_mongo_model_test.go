@@ -70,11 +70,13 @@ func (s *EntityMongoModelSuite) TestFind() {
 		firstID := primitive.NewObjectID()
 		secondID := primitive.NewObjectID()
 
+		//nolint:govet // this is a mock entity.
 		firstEntity := TestEntity{
 			ID:       firstID.Hex(),
 			Name:     "test1",
 			JoinedOn: currentTimeStr,
 		}
+		//nolint:govet // this is a mock entity.
 		secondEntity := TestEntity{
 			ID:       secondID.Hex(),
 			Name:     "test2",
@@ -119,6 +121,7 @@ func (s *EntityMongoModelSuite) TestFindOne() {
 
 		id := primitive.NewObjectID()
 
+		//nolint:govet // this is a mock entity.
 		entity := TestEntity{
 			ID:       id.Hex(),
 			Name:     "test",
