@@ -99,7 +99,7 @@ users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 ## Motivation
 Creating `mgod` was driven by the need to **simplify MongoDB interactions** while keeping **one schema for all** in Go. Traditionally, working with MongoDB in Go involved either using separate structs for database and service logic or manually converting service structs to MongoDB documents, a process that was both time-consuming and error-prone. This lack of integration often led to redundant coding, especially when dealing with union types or adding meta fields for each MongoDB operation.
 
-Inspired by the easy interface of MongoDB handling using [Mongoose](https://github.com/Automattic/mongoose) and [Typegoose](https://github.com/typegoose/typegoose) libraries available in Typescript, `mgod` aims to streamline these processes. It offers a more integrated approach, reducing the need to duplicate code and enhancing type safety, making MongoDB operations more intuitive and efficient in Go.
+Inspired by the easy interface of MongoDB handling using [Mongoose](https://github.com/Automattic/mongoose) and [Typegoose](https://github.com/typegoose/typegoose) libraries available in Node, `mgod` aims to streamline these processes. It offers a more integrated approach, reducing the need to duplicate code and enhancing type safety, making MongoDB operations more intuitive and efficient in Go.
 
 ## Future Scope
 The current version of mgod is a stable release. However, there are plans to add a lot more features like -
