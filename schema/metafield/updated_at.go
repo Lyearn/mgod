@@ -10,31 +10,31 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type UpdatedAtMetaField struct{}
+type updatedAtMetaField struct{}
 
 func newUpdatedAtMetaField() MetaField {
-	return &UpdatedAtMetaField{}
+	return &updatedAtMetaField{}
 }
 
 var updatedAtMetaFieldInstance = newUpdatedAtMetaField()
 
-func (m UpdatedAtMetaField) GetKey() MetaFieldKey {
+func (m updatedAtMetaField) GetKey() MetaFieldKey {
 	return MetaFieldKeyUpdatedAt
 }
 
-func (m UpdatedAtMetaField) GetReflectKind() reflect.Kind {
+func (m updatedAtMetaField) GetReflectKind() reflect.Kind {
 	return reflect.String
 }
 
-func (m UpdatedAtMetaField) GetApplicableTransformers() []transformer.Transformer {
+func (m updatedAtMetaField) GetApplicableTransformers() []transformer.Transformer {
 	return []transformer.Transformer{transformer.DateTransformerInstance}
 }
 
-func (m UpdatedAtMetaField) IsApplicable(schemaOptions schemaopt.SchemaOptions) bool {
+func (m updatedAtMetaField) IsApplicable(schemaOptions schemaopt.SchemaOptions) bool {
 	return schemaOptions.Timestamps
 }
 
-func (m UpdatedAtMetaField) CheckIfValidValue(val interface{}) bool {
+func (m updatedAtMetaField) CheckIfValidValue(val interface{}) bool {
 	if val, ok := val.(string); ok && val != "" {
 		return true
 	}
@@ -42,13 +42,13 @@ func (m UpdatedAtMetaField) CheckIfValidValue(val interface{}) bool {
 	return false
 }
 
-func (m UpdatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
+func (m updatedAtMetaField) FieldAlreadyPresent(doc *bson.D, index int) {
 	// field is already present. hence, updating the value.
 	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
 	(*doc)[index].Value = isoString
 }
 
-func (m UpdatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
+func (m updatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int) error {
 	isoString, err := dateformatter.New(time.Now().UTC()).GetISOString()
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (m UpdatedAtMetaField) FieldPresentWithIncorrectVal(doc *bson.D, index int)
 	return nil
 }
 
-func (m UpdatedAtMetaField) FieldNotPresent(doc *bson.D) {
+func (m updatedAtMetaField) FieldNotPresent(doc *bson.D) {
 	isoString, _ := dateformatter.New(time.Now().UTC()).GetISOString()
 	*doc = append(*doc, bson.E{
 		Key:   string(m.GetKey()),

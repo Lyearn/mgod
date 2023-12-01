@@ -1,5 +1,6 @@
 package metafield
 
+// MetaFieldKey is the unique field name of a meta field.
 type MetaFieldKey string
 
 const (

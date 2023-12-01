@@ -9,8 +9,10 @@ import (
 )
 
 type MetaField interface {
+	// GetKey returns the unique key of the meta field.
 	GetKey() MetaFieldKey
 
+	// GetReflectKind returns the reflect kind of the meta field.
 	GetReflectKind() reflect.Kind
 
 	// GetApplicableTransformers returns the list of transformers applicable for the meta field.
@@ -48,7 +50,7 @@ func AddMetaFields(bsonDoc *bson.D, schemaOptions schemaopt.SchemaOptions) error
 			continue
 		}
 
-		if err := ValidatedAndAddFieldValue(bsonDoc, metaField); err != nil {
+		if err := validatedAndAddFieldValue(bsonDoc, metaField); err != nil {
 			return err
 		}
 	}

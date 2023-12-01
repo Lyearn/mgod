@@ -2,7 +2,7 @@ package transformer
 
 import "reflect"
 
-// transformers can transform fields in both directions i.e. from entity model to mongo doc and vice versa.
+// Transformer can transform fields in both directions i.e. from entity model to mongo doc and vice versa.
 type Transformer interface {
 	isTransformationRequired(field reflect.StructField) bool
 	// TransformForMongoDoc transforms the incoming value according to mongo requirements

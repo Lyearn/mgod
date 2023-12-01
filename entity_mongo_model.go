@@ -15,19 +15,50 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// EntityMongoModel is a generic interface of available wrapper functions on MongoDB collection.
 type EntityMongoModel[T any] interface {
+	// GetDocToInsert returns the bson.D doc to be inserted in the collection for the provided struct object.
+	// This function is mainly used while creating a doc to be inserted for Union Type models because the underlying type of a union
+	// type model is interface{}, so it's not possible to identify the underlying concrete type to validate and insert the doc.
 	GetDocToInsert(ctx context.Context, model T) (bson.D, error)
+
+	// InsertOne inserts a single document in the collection.
+	// model is kept as interface{} to support Union Type models i.e. accept both bson.D (generated using GetDocToInsert()) and struct object.
 	InsertOne(ctx context.Context, model interface{}, opts ...*options.InsertOneOptions) (T, error)
+
+	// InsertMany inserts multiple documents in the collection.
+	// docs is kept as interface{} to support Union Type models i.e. accept both []bson.D (generated using GetDocToInsert()) and []struct objects.
 	InsertMany(ctx context.Context, docs interface{}, opts ...*options.InsertManyOptions) ([]T, error)
+
+	// UpdateMany updates multiple filtered documents in the collection based on the provided update query.
 	UpdateMany(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+
+	// BulkWrite performs multiple write operations on the collection at once.
+	// Currently, only InsertOne, UpdateOne, and UpdateMany operations are supported.
 	BulkWrite(ctx context.Context, bulkWrites []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
+
+	// Find returns all documents in the collection matching the provided filter.
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) ([]T, error)
+
+	// FindOne returns a single document from the collection matching the provided filter.
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) (*T, error)
+
+	// FindOneAndUpdate returns a single document from the collection based on the provided filter and updates it.
 	FindOneAndUpdate(ctx context.Context, filter, update interface{}, opts ...*options.FindOneAndUpdateOptions) (T, error)
+
+	// DeleteOne deletes a single document in the collection based on the provided filter.
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+
+	// DeleteMany deletes multiple documents in the collection based on the provided filter.
 	DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+
+	// CountDocuments returns the number of documents in the collection for the provided filter.
 	CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error)
+
+	// Distinct returns the distinct values for the provided field name in the collection for the provided filter.
 	Distinct(ctx context.Context, fieldName string, filter interface{}, opts ...*options.DistinctOptions) ([]interface{}, error)
+
+	// Aggregate performs an aggregation operation on the collection and returns the results.
 	Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) ([]bson.D, error)
 }
 
@@ -42,6 +73,7 @@ type entityMongoModel[T any] struct {
 	discriminatorKey string
 }
 
+// NewEntityMongoModel returns a new instance of EntityMongoModel for the provided model type and options.
 func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMongoModel[T], error) {
 	dbConnection := opts.dbConnection
 	if dbConnection == nil {
@@ -87,6 +119,7 @@ func (m entityMongoModel[T]) getEntityModel() T {
 	return m.modelType
 }
 
+// getMongoDocFromEntityModel converts the provided entity model to a bson.D doc.
 func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, model T) (bson.D, error) {
 	marshalledDoc, err := bson.Marshal(model)
 	if err != nil {
@@ -132,6 +165,7 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 	return bsonDoc, nil
 }
 
+// getEntityModelFromMongoDoc converts the provided bson.D doc to an entity model.
 func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bsonDoc bson.D) (T, error) {
 	model := m.getEntityModel()
 
@@ -170,6 +204,7 @@ func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bso
 	return model, nil
 }
 
+// handleTimestampsForUpdateQuery adds updatedAt field to the update query if the schema options has timestamps enabled.
 func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, funcName string) (interface{}, error) {
 	updateQuery, ok := update.(bson.D)
 	if !ok {
@@ -195,7 +230,7 @@ func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, 
 	return updateQuery, nil
 }
 
-// Converts bulkWrite entity models to mongo models.
+// transformToBulkWriteBSONDocs converts bulkWrite entity models to mongo models.
 func (m entityMongoModel[T]) transformToBulkWriteBSONDocs(ctx context.Context, bulkWrites []mongo.WriteModel) error {
 	for _, bulkWrite := range bulkWrites {
 		switch bulkWriteType := bulkWrite.(type) {

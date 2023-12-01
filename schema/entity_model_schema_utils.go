@@ -6,10 +6,12 @@ import (
 	"github.com/Lyearn/mgod/schema/fieldopt"
 )
 
+// GetSchemaNameForModel returns the default schema name for the model.
 func GetSchemaNameForModel[T any](model T) string {
 	return reflect.TypeOf(model).Name()
 }
 
+// GetDefaultSchemaTreeRootNode returns the default root node of a schema tree.
 func GetDefaultSchemaTreeRootNode() TreeNode {
 	rootNode := TreeNode{
 		Path:    "$root",
@@ -27,6 +29,7 @@ func GetDefaultSchemaTreeRootNode() TreeNode {
 	return rootNode
 }
 
+// GetPathForField returns the schema tree path for the field.
 func GetPathForField(field, parent string) string {
 	path := field
 	if parent != "" {

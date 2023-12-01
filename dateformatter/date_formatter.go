@@ -47,6 +47,7 @@ func (d *DateFormatter) GetISOString() (string, error) {
 	return "", errors.New("invalid time format")
 }
 
+// formatMilliSecondsString adds zeros to milliseconds if not present.
 func formatMilliSecondsString(dateTimeStr string) string {
 	parts := strings.Split(dateTimeStr, ".")
 	partsAfterMillisSplit := 2

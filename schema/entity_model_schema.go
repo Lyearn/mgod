@@ -10,32 +10,44 @@ import (
 	"github.com/samber/lo"
 )
 
+// EntityModelSchema holds the schema tree for the entity model.
 type EntityModelSchema struct {
-	// root node is a dummy node, it's not a real field in the model.
+	// Root node is a dummy node, it's not a real field in the model.
 	// actual doc parsing starts from the children of root node.
 	Root TreeNode
 
-	// nodes map is used to quickly access the schema tree node by path.
+	// Nodes is a map used to quickly access the [TreeNode] by path.
 	Nodes map[string]*TreeNode
 }
 
+// TreeNode is a node in the schema tree.
 type TreeNode struct {
-	Path    string // path will be used to identify the ancestor chain. used for debugging purposes.
-	BSONKey string // translated bson key.
-	Key     string // struct key. used for debugging purposes.
-	Props   SchemaFieldProps
-	// array is used instead of map to preserve the order of fields.
-	// fields in bson doc should always match with the schema tree order.
+	// Path is used to identify the ancestor chain. Used for debugging purposes.
+	Path string
+	// BSONKey is the translated bson key.
+	BSONKey string
+	// Key is the struct field name. Used for debugging purposes.
+	Key string
+	// Props contains the field properties.
+	Props SchemaFieldProps
+	// Children contains the child nodes.
+	// Array is used instead of map to preserve the order of fields. Fields in bson doc should always match with the schema tree order.
 	Children []TreeNode
 }
 
+// SchemaFieldProps are the possible field properties.
 type SchemaFieldProps struct {
-	Type         reflect.Kind              // contains struct field type or the underlying type in case of pointer.
-	IsPointer    bool                      // will be used to identify pointer type of fields.
-	Transformers []transformer.Transformer // reference to id, date, etc. transformers
-	Options      fieldopt.SchemaFieldOptions
+	// Type holds the struct field type or the underlying type in case of pointer.
+	Type reflect.Kind
+	// IsPointer is used to identify pointer type of fields.
+	IsPointer bool
+	// Transformers are the transformations that needs to be applied on the field while building the bson doc.
+	Transformers []transformer.Transformer
+	// Options are the schema options for the field.
+	Options fieldopt.SchemaFieldOptions
 }
 
+// BuildSchemaForModel builds the schema tree for the given model.
 func BuildSchemaForModel[T any](model T, schemaOpts schemaopt.SchemaOptions) (*EntityModelSchema, error) {
 	schemaTree := make([]TreeNode, 0)
 	rootNode := GetDefaultSchemaTreeRootNode()
@@ -61,6 +73,7 @@ func BuildSchemaForModel[T any](model T, schemaOpts schemaopt.SchemaOptions) (*E
 	return schema, nil
 }
 
+// BuildSchema is a recursive function that actually builds the schema tree for the given model.
 func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string, opts EntityModelSchemaOptions) error {
 	v := reflect.ValueOf(model)
 
@@ -255,7 +268,7 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes 
 	return nil
 }
 
-// addMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
+// AddMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
 // of fields not found in the tree (Meta fields are appended to the bson doc based on the schema options dynamically).
 func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string) {
 	v := reflect.ValueOf(model)
@@ -300,7 +313,7 @@ func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRe
 	}
 }
 
-// addTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
+// AddTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
 func addTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAddTreeNodes ...TreeNode) {
 	*treeRef = append(*treeRef, make([]TreeNode, len(toAddTreeNodes))...)
 

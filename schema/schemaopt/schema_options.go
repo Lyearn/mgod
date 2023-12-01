@@ -1,5 +1,7 @@
 package schemaopt
 
+// SchemaOptions is the Mongo Schema (modified actual MongoDB doc) level options that needs to be provided when creating a new [EntityMongoModel].
+// These options are used to identify the collection name, whether to add timestamps meta fields, version key, etc.
 type SchemaOptions struct {
 	// Collection is the name of the mongo collection in which the entity is stored.
 	Collection string

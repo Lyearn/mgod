@@ -12,13 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// TranslateToEnum is the enum for the type of translation to be done.
 type TranslateToEnum string
 
 const (
-	TranslateToEnumMongo       TranslateToEnum = "mongo"
-	TranslateToEnumEntityModel TranslateToEnum = "entity_model"
+	TranslateToEnumMongo       TranslateToEnum = "mongo"        // translate to mongo doc
+	TranslateToEnumEntityModel TranslateToEnum = "entity_model" // translate to entity model
 )
 
+// Build builds the bson doc based on the provided entity model schema.
 func Build(
 	ctx context.Context,
 	bsonDoc *bson.D,
@@ -215,7 +217,7 @@ func getConvertedValueForNode(
 	return modifiedVal, err
 }
 
-// addMissingNodes appends missing nodes in bson doc which have default value.
+// AddMissingNodes appends missing nodes in bson doc which have default value.
 func addMissingNodes(
 	ctx context.Context,
 	bsonElem *bson.D,

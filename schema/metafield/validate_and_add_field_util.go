@@ -4,7 +4,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func ValidatedAndAddFieldValue(doc *bson.D, metaField MetaField) error {
+// validateAndAddField validates if the provided meta field exists in the bson doc with proper type, else adds it.
+func validatedAndAddFieldValue(doc *bson.D, metaField MetaField) error {
 	field := string(metaField.GetKey())
 
 	for index, elem := range *doc {

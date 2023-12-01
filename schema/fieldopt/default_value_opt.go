@@ -8,21 +8,21 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type DefaultValueOption struct{}
+type defaultValueOption struct{}
 
 func newDefaultValueOption() FieldOption {
-	return &DefaultValueOption{}
+	return &defaultValueOption{}
 }
 
-func (o DefaultValueOption) GetOptName() string {
+func (o defaultValueOption) GetOptName() string {
 	return "Default"
 }
 
-func (o DefaultValueOption) GetBSONTagName() string {
+func (o defaultValueOption) GetBSONTagName() string {
 	return "mgoDefault"
 }
 
-func (o DefaultValueOption) IsApplicable(field reflect.StructField) bool {
+func (o defaultValueOption) IsApplicable(field reflect.StructField) bool {
 	// not available on struct fields
 	if field.Type.Kind() == reflect.Struct {
 		return false
@@ -34,11 +34,11 @@ func (o DefaultValueOption) IsApplicable(field reflect.StructField) bool {
 	return tagVal != ""
 }
 
-func (o DefaultValueOption) GetDefaultValue(field reflect.StructField) interface{} {
+func (o defaultValueOption) GetDefaultValue(field reflect.StructField) interface{} {
 	return nil
 }
 
-func (o DefaultValueOption) GetValue(field reflect.StructField) (interface{}, error) {
+func (o defaultValueOption) GetValue(field reflect.StructField) (interface{}, error) {
 	tagVal := field.Tag.Get(o.GetBSONTagName())
 
 	fieldType := field.Type.Kind()
