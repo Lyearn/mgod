@@ -5,9 +5,9 @@ import "reflect"
 // Transformer can transform fields in both directions i.e. from entity model to mongo doc and vice versa.
 type Transformer interface {
 	isTransformationRequired(field reflect.StructField) bool
-	// TransformForMongoDoc transforms the incoming value according to mongo requirements
+	// TransformForMongoDoc transforms the incoming value according to mongo requirements.
 	TransformForMongoDoc(value interface{}) (interface{}, error)
-	// TransformForEntityModelDoc transforms the incoming value according to entity model requirements
+	// TransformForEntityModelDoc transforms the incoming value according to entity model requirements.
 	TransformForEntityModelDoc(value interface{}) (interface{}, error)
 }
 

@@ -18,7 +18,7 @@ func NewEntityMongoOptions(db *mongo.Database) *EntityMongoOptions {
 	}
 }
 
-// SetSchemaOptions sets the updated [schemaOptions].
+// SetSchemaOptions sets the updated [schemaopt.SchemaOptions].
 func (o *EntityMongoOptions) SetSchemaOptions(schemaOptions schemaopt.SchemaOptions) *EntityMongoOptions {
 	o.schemaOptions = schemaOptions
 	return o
