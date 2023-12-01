@@ -7,13 +7,22 @@
 
 `mgod` is a MongoDB ODM specifically designed for Go. It provides a structured way to map Go models to MongoDB collections, simplifying database interactions in Go applications.
 
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Motivation](#motivation)
+- [Future Scope](#future-scope)
+- [Contribute](#contributors)
+- [License](#license)
+
 ## Features
-- Reuse existing Go structs to define models and perform Mongo operations.
-- Automatic field transformation between Go and MongoDB using struct tags.
-- Easily manage meta fields in models without cluttering Go structs.
-- Supports union types, expanding data capabilities.
-- Implement strict field requirements with struct tags for data integrity.
-- Wrapper around the official Mongo Go Driver.
+- **Reuse existing Go structs** to define models and perform Mongo operations.
+- Automatic **field transformation** between Go and MongoDB using struct tags.
+- Easily manage **meta fields** in models without cluttering Go structs.
+- Supports **union types**, expanding data capabilities.
+- Implement strict field requirements with struct tags for **data integrity**.
+- Wrapper around the **official** Mongo Go Driver.
 
 ## Requirements
 - Go 1.18 or higher.
@@ -25,16 +34,23 @@ go get github.com/Lyearn/mgod
 ```
 
 ## Basic Usage
+Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
 ```go
-// Step 1: Add tags (wherever required) in existing struct.
 type User struct {
 	Name     string
 	EmailID  string `bson:"emailId"`
 	Age      *int32 `bson:",omitempty"`
 	JoinedOn string `bson:"joinedOn" mgoType:"date"`
 }
+```
 
-// Step 2: Use mgod to get the entity odm.
+Use `mgod` to get the entity ODM.
+```go
+import (
+	"github.com/Lyearn/mgod"
+	"github.com/Lyearn/mgod/schema/schemaopt"
+)
+
 model := User{}
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "users",
@@ -44,8 +60,11 @@ schemaOpts := schemaopt.SchemaOptions{
 // dbConn is the database connection obtained using Go Mongo Driver's Connect method.
 userModelOpts := mgod.NewEntityMongoOptions(dbConn).SetSchemaOptions(schemaOpts)
 userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
+```
 
-// Step 3: Use the above odm to perform CRUD operations with ease.
+Use the entity ODM to perform CRUD operations with ease.
+```go
+// Insert new document.
 joinedOn, _ := dateformatter.New(time.Now()).GetISOString()
 userDoc := User{
 	Name: "Gopher",
@@ -64,7 +83,7 @@ userModel.InsertOne(context.TODO(), userDoc)
 }
 */
 
-// Find data using model properties.
+// Find documents using model properties.
 users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 /*
 []User{
@@ -78,9 +97,9 @@ users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 ```
 
 ## Motivation
-Creating `mgod` was driven by the need to simplify MongoDB interactions in Go. Traditionally, working with MongoDB in Go involved either using separate structs for database and service logic or manually converting service structs to MongoDB documents, a process that was both time-consuming and error-prone. This lack of integration often led to redundant coding, especially when dealing with union types or adding meta fields for each MongoDB operation.
+Creating `mgod` was driven by the need to **simplify MongoDB interactions** while keeping **one schema for all** in Go. Traditionally, working with MongoDB in Go involved either using separate structs for database and service logic or manually converting service structs to MongoDB documents, a process that was both time-consuming and error-prone. This lack of integration often led to redundant coding, especially when dealing with union types or adding meta fields for each MongoDB operation.
 
-Inspired by the easy interface of MongoDB handling using [Mongoose](https://github.com/Automattic/mongoose) and [Typegoose](https://github.com/typegoose/typegoose) libraries available in Typescript, `mgod` aims to streamline these processes. It offers a more integrated approach, reducing the need for repetitive code and enhancing type safety, making MongoDB operations more intuitive and efficient in Go.
+Inspired by the easy interface of MongoDB handling using [Mongoose](https://github.com/Automattic/mongoose) and [Typegoose](https://github.com/typegoose/typegoose) libraries available in Typescript, `mgod` aims to streamline these processes. It offers a more integrated approach, reducing the need to duplicate code and enhancing type safety, making MongoDB operations more intuitive and efficient in Go.
 
 ## Future Scope
 The current version of mgod is a stable release. However, there are plans to add a lot more features like -
@@ -91,7 +110,10 @@ The current version of mgod is a stable release. However, there are plans to add
 - [ ] Introduce automatic MongoDB collection selection based on Go struct names as a default behavior.
 - [ ] Add test cases to improve code coverage.
 
-If you have any interesting feature requests, feel free to open an issue on GitHub. We will be more than happy to discuss that!
+If you have any interesting feature requests, feel free to open an issue on [GitHub issue tracker](https://github.com/Lyearn/mgod/issues). We will be more than happy to discuss that!
+
+## Contribute
+For contribution guidelines, check out [CONTRIBUTING](https://github.com/Lyearn/mgod/blob/main/CONTRIBUTING.md).
 
 <!-- ## Documentation -->
 
