@@ -9,7 +9,7 @@ import (
 // FieldOption is the interface that needs to be implemented by all [SchemaFieldOptions].
 type FieldOption interface {
 	// GetOptName returns the name of the schema option. This name is used to identify the unique option.
-	// NOTE: Make sure to return the same name as the name of the struct field.
+	// NOTE: Make sure to return the same name as the name of the field in [SchemaFieldOptions] struct.
 	GetOptName() string
 	// GetBSONTagName returns the bson tag name for the option. This is used to identify the option and its flags in the bson tag.
 	GetBSONTagName() string
@@ -38,9 +38,9 @@ type SchemaFieldOptions struct {
 }
 
 var availableSchemaOptions = []FieldOption{
-	requiredOptionInstance,
-	xidOptionInstance,
-	defaultValueOptionInstance,
+	RequiredOption,
+	XIDOption,
+	DefaultValueOption,
 }
 
 var optNameToSchemaOptionMap = lo.KeyBy(availableSchemaOptions, func(opt FieldOption) string {

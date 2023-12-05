@@ -12,8 +12,8 @@ import (
 
 // EntityModelSchema holds the schema tree for the entity model.
 type EntityModelSchema struct {
-	// Root node is a dummy node, it's not a real field in the model.
-	// actual doc parsing starts from the children of root node.
+	// Root is the root node of the schema tree.
+	// Root node is a dummy node, it's not a real field in the model. Actual doc parsing starts from the children of root node.
 	Root TreeNode
 
 	// Nodes is a map used to quickly access the [TreeNode] by path.
@@ -73,7 +73,7 @@ func BuildSchemaForModel[T any](model T, schemaOpts schemaopt.SchemaOptions) (*E
 	return schema, nil
 }
 
-// BuildSchema is a recursive function that actually builds the schema tree for the given model.
+// buildSchema is a recursive function that actually builds the schema tree for the given model.
 func buildSchema[T any](model T, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string, opts EntityModelSchemaOptions) error {
 	v := reflect.ValueOf(model)
 
@@ -268,7 +268,7 @@ func handleSliceTypeField(sliceElemType reflect.Type, treeNode *TreeNode, nodes 
 	return nil
 }
 
-// AddMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
+// addMetaFields adds meta type fields to the schema tree so that the bson doc can be built without any errors
 // of fields not found in the tree (Meta fields are appended to the bson doc based on the schema options dynamically).
 func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRef *[]TreeNode, nodes map[string]*TreeNode, parent string) {
 	v := reflect.ValueOf(model)
@@ -280,7 +280,7 @@ func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRe
 
 	rootStructFields := getCurrentLevelBSONFields(v)
 
-	for _, metaField := range metafield.AvailableMetaFields {
+	for _, metaField := range metafield.GetAvailableMetaFields() {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue
 		}
@@ -313,7 +313,7 @@ func addMetaFields[T any](model T, schemaOptions schemaopt.SchemaOptions, treeRe
 	}
 }
 
-// AddTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
+// addTreeNodesToSchema adds the given tree nodes to the schema tree as well as to the nodes map.
 func addTreeNodesToSchema(treeRef *[]TreeNode, nodes map[string]*TreeNode, toAddTreeNodes ...TreeNode) {
 	*treeRef = append(*treeRef, make([]TreeNode, len(toAddTreeNodes))...)
 

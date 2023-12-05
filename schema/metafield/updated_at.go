@@ -16,7 +16,10 @@ func newUpdatedAtMetaField() MetaField {
 	return &updatedAtMetaField{}
 }
 
-var updatedAtMetaFieldInstance = newUpdatedAtMetaField()
+// UpdatedAtField is the meta field that stores the timestamp of the document updation.
+// This field is automatically added (if not present in the input) to the schema if the [schemaopt.SchemaOptions.Timestamps] is set to true.
+// The value of this field is set to the current timestamp in ISO format and is updated every time the document is updated.
+var UpdatedAtField = newUpdatedAtMetaField()
 
 func (m updatedAtMetaField) GetKey() MetaFieldKey {
 	return MetaFieldKeyUpdatedAt
@@ -27,7 +30,7 @@ func (m updatedAtMetaField) GetReflectKind() reflect.Kind {
 }
 
 func (m updatedAtMetaField) GetApplicableTransformers() []transformer.Transformer {
-	return []transformer.Transformer{transformer.DateTransformerInstance}
+	return []transformer.Transformer{transformer.DateTransformer}
 }
 
 func (m updatedAtMetaField) IsApplicable(schemaOptions schemaopt.SchemaOptions) bool {

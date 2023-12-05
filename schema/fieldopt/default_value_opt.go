@@ -14,12 +14,18 @@ func newDefaultValueOption() FieldOption {
 	return &defaultValueOption{}
 }
 
+// DefaultValueOption provides the default value for a field.
+// This value of this option is used when the field is not present in the input document.
+// This option is applicable only for fields that are not of type struct.
+// Defaults to nil for all fields.
+var DefaultValueOption = newDefaultValueOption()
+
 func (o defaultValueOption) GetOptName() string {
 	return "Default"
 }
 
 func (o defaultValueOption) GetBSONTagName() string {
-	return "mgoDefault"
+	return string(FieldOptionTagDefault)
 }
 
 func (o defaultValueOption) IsApplicable(field reflect.StructField) bool {
@@ -70,5 +76,3 @@ func (o defaultValueOption) GetValue(field reflect.StructField) (interface{}, er
 		return nil, fmt.Errorf("unsupported type %v", fieldType)
 	}
 }
-
-var defaultValueOptionInstance = newDefaultValueOption()

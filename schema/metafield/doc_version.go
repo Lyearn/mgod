@@ -14,7 +14,10 @@ func newDocVersionMetaField() MetaField {
 	return &docVersionMetaField{}
 }
 
-var docVersionMetaFieldInstance = newDocVersionMetaField()
+// DocVersionField is the meta field that stores the version of the document.
+// This field is automatically added (if not present in the input) to the schema if the [schemaopt.SchemaOptions.VersionKey] is set to true.
+// This field starts with a default value of 0.
+var DocVersionField = newDocVersionMetaField()
 
 func (m docVersionMetaField) GetKey() MetaFieldKey {
 	return MetaFieldKeyDocVersion

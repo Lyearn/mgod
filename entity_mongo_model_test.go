@@ -97,8 +97,7 @@ func (s *EntityMongoModelSuite) TestFind() {
 
 		mt.AddMockResponses(first, second, killCursors)
 
-		opts := mgod.NewEntityMongoOptions(mt.DB).
-			SetSchemaOptions(schemaopt.SchemaOptions{Collection: s.collName})
+		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
 
 		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
 		s.Nil(err)
@@ -134,8 +133,7 @@ func (s *EntityMongoModelSuite) TestFindOne() {
 			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB).
-			SetSchemaOptions(schemaopt.SchemaOptions{Collection: s.collName})
+		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
 
 		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
 		s.Nil(err)
@@ -170,8 +168,7 @@ func (s *EntityMongoModelSuite) TestInsertOne() {
 			{Key: "age", Value: 18},
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB).
-			SetSchemaOptions(schemaopt.SchemaOptions{Collection: s.collName})
+		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
 
 		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
 		s.Nil(err)
@@ -196,8 +193,7 @@ func (s *EntityMongoModelSuite) TestInsertOne() {
 			Message: "duplicate key error",
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB).
-			SetSchemaOptions(schemaopt.SchemaOptions{Collection: s.collName})
+		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
 
 		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
 		s.Nil(err)

@@ -20,7 +20,7 @@ const (
 	TranslateToEnumEntityModel TranslateToEnum = "entity_model" // translate to entity model
 )
 
-// Build builds the bson doc based on the provided entity model schema.
+// Build builds the bson doc based on the provided [schema.EntityModelSchema].
 func Build(
 	ctx context.Context,
 	bsonDoc *bson.D,
@@ -124,7 +124,7 @@ func build(
 			(*bsonElem)[arrIdx] = convertedValue
 		}
 
-	// default case handles all primitive types i.e. all leaf nodes of schema tree or all bson doc
+	// Default case handles all primitive types i.e. all leaf nodes of schema tree or all bson doc
 	// elements which are not of type bson.D or bson.A.
 	default:
 		// Transformations related logic starts here
@@ -140,8 +140,8 @@ func build(
 
 			var elemVal interface{}
 			if _, ok := bsonDocRef.(*interface{}); !ok {
-				// this case handles only elements of array which are passed as reference from the above *bson.A case.
-				// hence, reject any other type.
+				// This case handles only elements of array which are passed as reference from the above *bson.A case.
+				// Hence, reject any other type.
 				return nil
 			} else {
 				elemVal = *(bsonDocRef.(*interface{}))
@@ -180,14 +180,14 @@ func getConvertedValueForNode(
 	var modifiedVal interface{}
 	var err error
 
-	// if nodeVal is nil, then there is no need to do any conversion.
+	// If nodeVal is nil, then there is no need to do any conversion.
 	if nodeVal == nil {
 		//nolint:nilnil // this is a valid case
 		return nil, nil
 	}
 
-	// this switch case provides type support for bson.D and bson.A type of elements.
-	// without this, *interface{} type of bsonDoc would be passed in the recursive call,
+	// This switch case provides type support for bson.D and bson.A type of elements.
+	// Without this, *interface{} type of bsonDoc would be passed in the recursive call,
 	// which will then go to the default case and will not be able to handle any nested type.
 	switch typedValue := nodeVal.(type) {
 	case bson.D:
@@ -217,7 +217,7 @@ func getConvertedValueForNode(
 	return modifiedVal, err
 }
 
-// AddMissingNodes appends missing nodes in bson doc which have default value.
+// addMissingNodes appends missing nodes in bson doc which have default value.
 func addMissingNodes(
 	ctx context.Context,
 	bsonElem *bson.D,

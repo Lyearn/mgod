@@ -7,6 +7,7 @@ import (
 )
 
 // DateFormatter provides utilities to get date time in different formats.
+//
 // NOTE: DateFormatter processes the provided date time string in UTC format.
 type DateFormatter struct {
 	t time.Time
@@ -16,6 +17,7 @@ func New(t time.Time) *DateFormatter {
 	return &DateFormatter{t: t.UTC()}
 }
 
+// GetISOString returns the date time in ISO 8601 format.
 func (d *DateFormatter) GetISOString() (string, error) {
 	// ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
 

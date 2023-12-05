@@ -38,14 +38,20 @@ type MetaField interface {
 	FieldNotPresent(doc *bson.D)
 }
 
-var AvailableMetaFields = []MetaField{
-	createdAtMetaFieldInstance,
-	updatedAtMetaFieldInstance,
-	docVersionMetaFieldInstance,
+var availableMetaFields = []MetaField{
+	CreatedAtField,
+	UpdatedAtField,
+	DocVersionField,
 }
 
+// GetAvailableMetaFields returns the list of available meta fields.
+func GetAvailableMetaFields() []MetaField {
+	return availableMetaFields
+}
+
+// AddMetaFields adds all applicable meta fields to the bson doc based on the provided schema options.
 func AddMetaFields(bsonDoc *bson.D, schemaOptions schemaopt.SchemaOptions) error {
-	for _, metaField := range AvailableMetaFields {
+	for _, metaField := range availableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue
 		}

@@ -12,7 +12,9 @@ func newIDTransformer() Transformer {
 	return &idTransformer{}
 }
 
-func (t idTransformer) isTransformationRequired(field reflect.StructField) bool {
+var IDTransformer = newIDTransformer()
+
+func (t idTransformer) IsTransformationRequired(field reflect.StructField) bool {
 	return field.Tag.Get("mgoType") == "id"
 }
 
@@ -33,5 +35,3 @@ func (t idTransformer) TransformForEntityModelDoc(value interface{}) (interface{
 
 	return ids[0], nil
 }
-
-var IDTransformerInstance = newIDTransformer()

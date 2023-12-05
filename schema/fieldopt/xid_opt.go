@@ -8,12 +8,17 @@ func newXIDOption() FieldOption {
 	return &xidOption{}
 }
 
+// XIDOption defines if `_id` field needs to be added in a object.
+// This option is applicable for fields holding structs only.
+// Defaults to true for struct fields.
+var XIDOption = newXIDOption()
+
 func (o xidOption) GetOptName() string {
 	return "XID"
 }
 
 func (o xidOption) GetBSONTagName() string {
-	return "mgoID"
+	return string(FieldOptionTagXID)
 }
 
 func (o xidOption) IsApplicable(field reflect.StructField) bool {
@@ -41,5 +46,3 @@ func (o xidOption) GetValue(field reflect.StructField) (interface{}, error) {
 
 	return isXIDRequired, nil
 }
-
-var xidOptionInstance = newXIDOption()

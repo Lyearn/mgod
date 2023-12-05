@@ -24,24 +24,3 @@ func (o *EntityModelSchemaOptions) SetParentBSONFields(parentBSONFields []string
 	o.parentBSONFields = parentBSONFields
 	return o
 }
-
-type buildSchemaForModelOptions struct {
-	cache      bool
-	schemaName string
-}
-
-func NewBuildSchemaForModelOptions() *buildSchemaForModelOptions {
-	return &buildSchemaForModelOptions{
-		cache: true,
-	}
-}
-
-func (o *buildSchemaForModelOptions) SetCache(cache bool) *buildSchemaForModelOptions {
-	o.cache = cache
-	return o
-}
-
-func (o *buildSchemaForModelOptions) SetSchemaName(schemaName string) *buildSchemaForModelOptions {
-	o.schemaName = schemaName
-	return o
-}

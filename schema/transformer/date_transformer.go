@@ -12,7 +12,9 @@ func newDateTransformer() Transformer {
 	return &dateTransformer{}
 }
 
-func (t dateTransformer) isTransformationRequired(field reflect.StructField) bool {
+var DateTransformer = newDateTransformer()
+
+func (t dateTransformer) IsTransformationRequired(field reflect.StructField) bool {
 	return field.Tag.Get("mgoType") == "date"
 }
 
@@ -33,5 +35,3 @@ func (t dateTransformer) TransformForEntityModelDoc(value interface{}) (interfac
 
 	return dates[0], nil
 }
-
-var DateTransformerInstance = newDateTransformer()

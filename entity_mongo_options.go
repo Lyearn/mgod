@@ -7,19 +7,14 @@ import (
 
 // EntityMongoOptions is the options to be configured/provided when creating a new [EntityMongoModel].
 type EntityMongoOptions struct {
-	schemaOptions schemaopt.SchemaOptions
 	dbConnection  *mongo.Database
+	schemaOptions schemaopt.SchemaOptions
 }
 
-// NewEntityMongoOptions creates a new instance of [EntityMongoOptions] with the provided database connection.
-func NewEntityMongoOptions(db *mongo.Database) *EntityMongoOptions {
+// NewEntityMongoOptions creates a new instance of [EntityMongoOptions].
+func NewEntityMongoOptions(dbConn *mongo.Database, schemaOpts schemaopt.SchemaOptions) *EntityMongoOptions {
 	return &EntityMongoOptions{
-		dbConnection: db,
+		dbConnection:  dbConn,
+		schemaOptions: schemaOpts,
 	}
-}
-
-// SetSchemaOptions sets the updated [schemaopt.SchemaOptions].
-func (o *EntityMongoOptions) SetSchemaOptions(schemaOptions schemaopt.SchemaOptions) *EntityMongoOptions {
-	o.schemaOptions = schemaOptions
-	return o
 }

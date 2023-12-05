@@ -6,10 +6,10 @@ import (
 )
 
 // EntityModelSchemaCache is the cache implementation than can hold [EntityModelSchema].
+//
 // It has the following to main use cases -
-// 1. Avoid re-computing the schema for the same entity model.
-// 2. Fetch the relevant schema based on the discriminator key in case of union type models to validate the bson doc fetched from
-// MongoDB against a concrete type.
+//  1. Avoid re-computing the schema for the same entity model.
+//  2. Fetch the relevant schema based on the discriminator key in case of union type models to validate the bson doc fetched from MongoDB.
 type EntityModelSchemaCache interface {
 	GetSchema(schemaName string) (*EntityModelSchema, error)
 	SetSchema(schemaName string, schema *EntityModelSchema)
