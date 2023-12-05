@@ -1,3 +1,6 @@
+// Package metafield defines and provide functions on custom meta fields for the schema.
+//
+// Meta fields are those fields that tracks extra information about the document which can be helpful to determine the state of a document.
 package metafield
 
 import (

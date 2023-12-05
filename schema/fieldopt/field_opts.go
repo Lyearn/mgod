@@ -1,3 +1,4 @@
+// Package fieldopt provides custom options for schema fields.
 package fieldopt
 
 import (

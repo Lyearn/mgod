@@ -1,3 +1,4 @@
+// Package mgod implements ODM logic for MongoDB in Go.
 package mgod
 
 import (

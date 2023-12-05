@@ -1,3 +1,4 @@
+// Package bsondoc builds on an existing bson doc according to the provided entity model schema.
 package bsondoc
 
 import (
@@ -20,7 +21,7 @@ const (
 	TranslateToEnumEntityModel TranslateToEnum = "entity_model" // translate to entity model
 )
 
-// Build builds the bson doc based on the provided [schema.EntityModelSchema].
+// Build builds on the given bson doc based on the provided [schema.EntityModelSchema].
 func Build(
 	ctx context.Context,
 	bsonDoc *bson.D,

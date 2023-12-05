@@ -1,3 +1,4 @@
+// Package dateformatter provides utilities to get date time in different formats.
 package dateformatter
 
 import (

@@ -1,3 +1,4 @@
+// Package transformer provides custom transformers for schema fields.
 package transformer
 
 import "reflect"

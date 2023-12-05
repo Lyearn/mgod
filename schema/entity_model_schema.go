@@ -1,3 +1,4 @@
+// Package schema provides utilities to build the schema tree for the entity model.
 package schema
 
 import (
