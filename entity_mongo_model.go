@@ -1,13 +1,12 @@
+// Package mgod implements ODM logic for MongoDB in Go.
 package mgod
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/Lyearn/mgod/bsondoc"
 	"github.com/Lyearn/mgod/errors"
 	"github.com/Lyearn/mgod/schema"
-	"github.com/Lyearn/mgod/schema/metafield"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,19 +14,50 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// EntityMongoModel is a generic interface of available wrapper functions on MongoDB collection.
 type EntityMongoModel[T any] interface {
+	// GetDocToInsert returns the bson.D doc to be inserted in the collection for the provided struct object.
+	// This function is mainly used while creating a doc to be inserted for Union Type models because the underlying type of a union
+	// type model is interface{}, so it's not possible to identify the underlying concrete type to validate and insert the doc.
 	GetDocToInsert(ctx context.Context, model T) (bson.D, error)
+
+	// InsertOne inserts a single document in the collection.
+	// Model is kept as interface{} to support Union Type models i.e. accept both bson.D (generated using GetDocToInsert()) and struct object.
 	InsertOne(ctx context.Context, model interface{}, opts ...*options.InsertOneOptions) (T, error)
+
+	// InsertMany inserts multiple documents in the collection.
+	// Docs is kept as interface{} to support Union Type models i.e. accept both []bson.D (generated using GetDocToInsert()) and []struct objects.
 	InsertMany(ctx context.Context, docs interface{}, opts ...*options.InsertManyOptions) ([]T, error)
+
+	// UpdateMany updates multiple filtered documents in the collection based on the provided update query.
 	UpdateMany(ctx context.Context, filter, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+
+	// BulkWrite performs multiple write operations on the collection at once.
+	// Currently, only InsertOne, UpdateOne, and UpdateMany operations are supported.
 	BulkWrite(ctx context.Context, bulkWrites []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
+
+	// Find returns all documents in the collection matching the provided filter.
 	Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) ([]T, error)
+
+	// FindOne returns a single document from the collection matching the provided filter.
 	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) (*T, error)
+
+	// FindOneAndUpdate returns a single document from the collection based on the provided filter and updates it.
 	FindOneAndUpdate(ctx context.Context, filter, update interface{}, opts ...*options.FindOneAndUpdateOptions) (T, error)
+
+	// DeleteOne deletes a single document in the collection based on the provided filter.
 	DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+
+	// DeleteMany deletes multiple documents in the collection based on the provided filter.
 	DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error)
+
+	// CountDocuments returns the number of documents in the collection for the provided filter.
 	CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error)
+
+	// Distinct returns the distinct values for the provided field name in the collection for the provided filter.
 	Distinct(ctx context.Context, fieldName string, filter interface{}, opts ...*options.DistinctOptions) ([]interface{}, error)
+
+	// Aggregate performs an aggregation operation on the collection and returns the results.
 	Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) ([]bson.D, error)
 }
 
@@ -42,6 +72,7 @@ type entityMongoModel[T any] struct {
 	discriminatorKey string
 }
 
+// NewEntityMongoModel returns a new instance of EntityMongoModel for the provided model type and options.
 func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMongoModel[T], error) {
 	dbConnection := opts.dbConnection
 	if dbConnection == nil {
@@ -81,153 +112,6 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 		isUnionType:      isUnionTypeModel,
 		discriminatorKey: discriminatorKey,
 	}, nil
-}
-
-func (m entityMongoModel[T]) getEntityModel() T {
-	return m.modelType
-}
-
-func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, model T) (bson.D, error) {
-	marshalledDoc, err := bson.Marshal(model)
-	if err != nil {
-		return nil, err
-	}
-
-	var bsonDoc bson.D
-	err = bson.Unmarshal(marshalledDoc, &bsonDoc)
-	if err != nil {
-		return nil, err
-	}
-
-	if bsonDoc == nil {
-		// empty bson doc
-		return bsonDoc, nil
-	}
-
-	if err = metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions); err != nil {
-		return nil, err
-	}
-
-	err = bsondoc.Build(ctx, &bsonDoc, m.schema, bsondoc.TranslateToEnumMongo)
-	if err != nil {
-		return nil, err
-	}
-
-	if m.isUnionType {
-		discriminatorVal := bsondoc.GetFieldValueFromRootDoc(&bsonDoc, m.discriminatorKey)
-		if discriminatorVal == nil {
-			discriminatorVal = schema.GetSchemaNameForModel(m.modelType)
-			bsonDoc = append(bsonDoc, primitive.E{
-				Key:   m.discriminatorKey,
-				Value: discriminatorVal,
-			})
-		}
-
-		cacheKey := GetSchemaCacheKey(m.coll.Name(), discriminatorVal.(string))
-		if _, err := schema.EntityModelSchemaCacheInstance.GetSchema(cacheKey); err != nil {
-			schema.EntityModelSchemaCacheInstance.SetSchema(cacheKey, m.schema)
-		}
-	}
-
-	return bsonDoc, nil
-}
-
-func (m entityMongoModel[T]) getEntityModelFromMongoDoc(ctx context.Context, bsonDoc bson.D) (T, error) {
-	model := m.getEntityModel()
-
-	if bsonDoc == nil {
-		// empty bson doc
-		return model, nil
-	}
-
-	entityModelSchema := m.schema
-
-	if m.isUnionType {
-		discriminatorVal := bsondoc.GetFieldValueFromRootDoc(&bsonDoc, m.discriminatorKey)
-		if discriminatorVal != nil {
-			cacheKey := GetSchemaCacheKey(m.coll.Name(), discriminatorVal.(string))
-			if unionElemSchema, err := schema.EntityModelSchemaCacheInstance.GetSchema(cacheKey); err == nil {
-				entityModelSchema = unionElemSchema
-			}
-		}
-	}
-
-	err := bsondoc.Build(ctx, &bsonDoc, entityModelSchema, bsondoc.TranslateToEnumEntityModel)
-	if err != nil {
-		return model, err
-	}
-
-	marshalledDoc, err := bson.Marshal(bsonDoc)
-	if err != nil {
-		return model, err
-	}
-
-	err = bson.Unmarshal(marshalledDoc, &model)
-	if err != nil {
-		return model, err
-	}
-
-	return model, nil
-}
-
-func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, funcName string) (interface{}, error) {
-	updateQuery, ok := update.(bson.D)
-	if !ok {
-		return nil, errors.NewBadRequestError(errors.BadRequestError{
-			Underlying: "update query",
-			Got:        fmt.Sprintf("%T", update),
-			Expected:   "bson.D",
-		})
-	}
-
-	if m.opts.schemaOptions.Timestamps {
-		updatedAtCommand := bson.E{
-			Key: "$currentDate",
-			Value: bson.D{{
-				Key:   "updatedAt",
-				Value: true,
-			}},
-		}
-
-		updateQuery = append(updateQuery, updatedAtCommand)
-	}
-
-	return updateQuery, nil
-}
-
-// Converts bulkWrite entity models to mongo models.
-func (m entityMongoModel[T]) transformToBulkWriteBSONDocs(ctx context.Context, bulkWrites []mongo.WriteModel) error {
-	for _, bulkWrite := range bulkWrites {
-		switch bulkWriteType := bulkWrite.(type) {
-		case *mongo.InsertOneModel:
-			doc := bulkWriteType.Document
-			if doc == nil {
-				continue
-			}
-
-			bsonDoc, err := m.getMongoDocFromEntityModel(ctx, doc.(T))
-			if err != nil {
-				return err
-			}
-
-			bulkWriteType.Document = bsonDoc
-		case *mongo.UpdateOneModel:
-			updateQuery, err := m.handleTimestampsForUpdateQuery(bulkWriteType.Update, "BulkWrite")
-			if err != nil {
-				return err
-			}
-
-			bulkWriteType.Update = updateQuery
-		case *mongo.UpdateManyModel:
-			updateQuery, err := m.handleTimestampsForUpdateQuery(bulkWriteType.Update, "BulkWrite")
-			if err != nil {
-				return err
-			}
-
-			bulkWriteType.Update = updateQuery
-		}
-	}
-	return nil
 }
 
 func (m entityMongoModel[T]) GetDocToInsert(ctx context.Context, doc T) (bson.D, error) {

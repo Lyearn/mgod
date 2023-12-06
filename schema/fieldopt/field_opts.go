@@ -1,3 +1,4 @@
+// Package fieldopt provides custom options for schema fields.
 package fieldopt
 
 import (
@@ -6,34 +7,48 @@ import (
 	"github.com/samber/lo"
 )
 
+// FieldOption is the interface that needs to be implemented by all [SchemaFieldOptions].
 type FieldOption interface {
 	// GetOptName returns the name of the schema option. This name is used to identify the unique option.
-	// NOTE: Make sure to return the same name as the name of the struct field.
+	// NOTE: Make sure to return the same name as the name of the field in [SchemaFieldOptions] struct.
 	GetOptName() string
-	// bson tag name for the option. This is used to identify the option and its flags in the bson tag.
+	// GetBSONTagName returns the bson tag name for the option. This is used to identify the option and its flags in the bson tag.
 	GetBSONTagName() string
+	// IsApplicable returns true if the option is applicable for the field.
 	IsApplicable(field reflect.StructField) bool
+	// GetDefaultValue returns the default value for the field (if available).
 	GetDefaultValue(field reflect.StructField) interface{}
+	// GetValue returns the provided value for the field.
 	GetValue(field reflect.StructField) (interface{}, error)
 }
 
+// SchemaFieldOptions are custom schema options available for struct fields.
+// These options either modifies the schema based on the field or adds validations to the field.
 type SchemaFieldOptions struct {
-	Required bool        // defaults to true. can be identified using omitempty bson flag. [FIELD_LEVEL]
-	XID      bool        // defaults to true wherever applicable. [STRUCT_LEVEL]
-	Default  interface{} // will be populated using reflect. will be of same type as Type in SchemaFieldProps. [FIELD_LEVEL]
-	Select   bool
+	// Required suggests whether the field is required or not. [FIELD_LEVEL]
+	// Defaults to true. Can be identified using omitempty bson flag.
+	Required bool
+	// XID suggests whether "_id" field needs to be added in the bson doc for the following object type field. [STRUCT_LEVEL]
+	// Defaults to true. This option is applicable for fields holding structs only.
+	XID bool
+	// Default is the default value for the field. [FIELD_LEVEL]
+	// Defaults to nil. Will be populated using reflect and will be of the same type as Type in SchemaFieldProps.
+	Default interface{}
+	// not implemented yet
+	Select bool
 }
 
 var availableSchemaOptions = []FieldOption{
-	requiredOptionInstance,
-	xidOptionInstance,
-	defaultValueOptionInstance,
+	RequiredOption,
+	XIDOption,
+	DefaultValueOption,
 }
 
 var optNameToSchemaOptionMap = lo.KeyBy(availableSchemaOptions, func(opt FieldOption) string {
 	return opt.GetOptName()
 })
 
+// GetSchemaOptionsForField returns all the applicable schema field options for the provided field.
 func GetSchemaOptionsForField(field reflect.StructField) (SchemaFieldOptions, error) {
 	options := SchemaFieldOptions{}
 

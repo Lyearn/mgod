@@ -5,18 +5,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// EntityMongoOptions is the options to be configured/provided when creating a new [EntityMongoModel].
 type EntityMongoOptions struct {
-	schemaOptions schemaopt.SchemaOptions
 	dbConnection  *mongo.Database
+	schemaOptions schemaopt.SchemaOptions
 }
 
-func NewEntityMongoOptions(db *mongo.Database) *EntityMongoOptions {
+// NewEntityMongoOptions creates a new instance of [EntityMongoOptions].
+func NewEntityMongoOptions(dbConn *mongo.Database, schemaOpts schemaopt.SchemaOptions) *EntityMongoOptions {
 	return &EntityMongoOptions{
-		dbConnection: db,
+		dbConnection:  dbConn,
+		schemaOptions: schemaOpts,
 	}
-}
-
-func (o *EntityMongoOptions) SetSchemaOptions(schemaOptions schemaopt.SchemaOptions) *EntityMongoOptions {
-	o.schemaOptions = schemaOptions
-	return o
 }

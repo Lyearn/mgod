@@ -2,25 +2,30 @@ package fieldopt
 
 import "reflect"
 
-type XIDOption struct{}
+type xidOption struct{}
 
 func newXIDOption() FieldOption {
-	return &XIDOption{}
+	return &xidOption{}
 }
 
-func (o XIDOption) GetOptName() string {
+// XIDOption defines if `_id` field needs to be added in a object.
+// This option is applicable for fields holding structs only.
+// Defaults to true for struct fields.
+var XIDOption = newXIDOption()
+
+func (o xidOption) GetOptName() string {
 	return "XID"
 }
 
-func (o XIDOption) GetBSONTagName() string {
-	return "mgoID"
+func (o xidOption) GetBSONTagName() string {
+	return string(FieldOptionTagXID)
 }
 
-func (o XIDOption) IsApplicable(field reflect.StructField) bool {
+func (o xidOption) IsApplicable(field reflect.StructField) bool {
 	return field.Type.Kind() == reflect.Struct
 }
 
-func (o XIDOption) GetDefaultValue(field reflect.StructField) interface{} {
+func (o xidOption) GetDefaultValue(field reflect.StructField) interface{} {
 	// if the field is not applicable, then the default value should be false
 	defaultValue := true
 
@@ -31,7 +36,7 @@ func (o XIDOption) GetDefaultValue(field reflect.StructField) interface{} {
 	return defaultValue
 }
 
-func (o XIDOption) GetValue(field reflect.StructField) (interface{}, error) {
+func (o xidOption) GetValue(field reflect.StructField) (interface{}, error) {
 	tagVal := field.Tag.Get(o.GetBSONTagName())
 	isXIDRequired := true
 
@@ -41,5 +46,3 @@ func (o XIDOption) GetValue(field reflect.StructField) (interface{}, error) {
 
 	return isXIDRequired, nil
 }
-
-var xidOptionInstance = newXIDOption()

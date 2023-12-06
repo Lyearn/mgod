@@ -2,6 +2,7 @@ package errors
 
 import "fmt"
 
+// Error is the custom error type.
 type Error string
 
 func (e Error) Error() string {

@@ -82,7 +82,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 			Key:     "ID",
 			Props: schema.SchemaFieldProps{
 				Type:         reflect.String,
-				Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
+				Transformers: []transformer.Transformer{transformer.IDTransformer},
 				Options: fieldopt.SchemaFieldOptions{
 					Required: true,
 				},
@@ -134,7 +134,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					Key:     "JoinedOn",
 					Props: schema.SchemaFieldProps{
 						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
+						Transformers: []transformer.Transformer{transformer.DateTransformer},
 						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 						},
@@ -158,7 +158,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 							Key:     "$", // to identify slice element
 							Props: schema.SchemaFieldProps{
 								Type:         reflect.String,
-								Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
+								Transformers: []transformer.Transformer{transformer.IDTransformer},
 							},
 						},
 					},
@@ -191,7 +191,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 									Key:     "ProjectID",
 									Props: schema.SchemaFieldProps{
 										Type:         reflect.String,
-										Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
+										Transformers: []transformer.Transformer{transformer.IDTransformer},
 										Options: fieldopt.SchemaFieldOptions{
 											Required: true,
 										},
@@ -203,7 +203,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 									Key:     "CompletedAt",
 									Props: schema.SchemaFieldProps{
 										Type:         reflect.String,
-										Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
+										Transformers: []transformer.Transformer{transformer.DateTransformer},
 										Options: fieldopt.SchemaFieldOptions{
 											Required: true,
 										},
@@ -219,7 +219,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 					Key:     "XID",
 					Props: schema.SchemaFieldProps{
 						Type:         reflect.String,
-						Transformers: []transformer.Transformer{transformer.IDTransformerInstance},
+						Transformers: []transformer.Transformer{transformer.IDTransformer},
 						Options: fieldopt.SchemaFieldOptions{
 							Required: true,
 						},
@@ -298,7 +298,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 		Props: schema.SchemaFieldProps{
 			Type:         reflect.String,
 			Options:      fieldopt.SchemaFieldOptions{Required: false},
-			Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
+			Transformers: []transformer.Transformer{transformer.DateTransformer},
 		},
 	})
 
@@ -309,7 +309,7 @@ func (s *EntityModelSchemaSuite) TestBuildSchemaForModel() {
 		Props: schema.SchemaFieldProps{
 			Type:         reflect.String,
 			Options:      fieldopt.SchemaFieldOptions{Required: false},
-			Transformers: []transformer.Transformer{transformer.DateTransformerInstance},
+			Transformers: []transformer.Transformer{transformer.DateTransformer},
 		},
 	})
 

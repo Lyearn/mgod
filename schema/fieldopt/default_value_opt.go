@@ -8,21 +8,27 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type DefaultValueOption struct{}
+type defaultValueOption struct{}
 
 func newDefaultValueOption() FieldOption {
-	return &DefaultValueOption{}
+	return &defaultValueOption{}
 }
 
-func (o DefaultValueOption) GetOptName() string {
+// DefaultValueOption provides the default value for a field.
+// This value of this option is used when the field is not present in the input document.
+// This option is applicable only for fields that are not of type struct.
+// Defaults to nil for all fields.
+var DefaultValueOption = newDefaultValueOption()
+
+func (o defaultValueOption) GetOptName() string {
 	return "Default"
 }
 
-func (o DefaultValueOption) GetBSONTagName() string {
-	return "mgoDefault"
+func (o defaultValueOption) GetBSONTagName() string {
+	return string(FieldOptionTagDefault)
 }
 
-func (o DefaultValueOption) IsApplicable(field reflect.StructField) bool {
+func (o defaultValueOption) IsApplicable(field reflect.StructField) bool {
 	// not available on struct fields
 	if field.Type.Kind() == reflect.Struct {
 		return false
@@ -34,11 +40,11 @@ func (o DefaultValueOption) IsApplicable(field reflect.StructField) bool {
 	return tagVal != ""
 }
 
-func (o DefaultValueOption) GetDefaultValue(field reflect.StructField) interface{} {
+func (o defaultValueOption) GetDefaultValue(field reflect.StructField) interface{} {
 	return nil
 }
 
-func (o DefaultValueOption) GetValue(field reflect.StructField) (interface{}, error) {
+func (o defaultValueOption) GetValue(field reflect.StructField) (interface{}, error) {
 	tagVal := field.Tag.Get(o.GetBSONTagName())
 
 	fieldType := field.Type.Kind()
@@ -70,5 +76,3 @@ func (o DefaultValueOption) GetValue(field reflect.StructField) (interface{}, er
 		return nil, fmt.Errorf("unsupported type %v", fieldType)
 	}
 }
-
-var defaultValueOptionInstance = newDefaultValueOption()

@@ -5,6 +5,11 @@ import (
 	"sync"
 )
 
+// EntityModelSchemaCache is the cache implementation than can hold [EntityModelSchema].
+//
+// It has the following to main use cases -
+//  1. Avoid re-computing the schema for the same entity model.
+//  2. Fetch the relevant schema based on the discriminator key in case of union type models to validate the bson doc fetched from MongoDB.
 type EntityModelSchemaCache interface {
 	GetSchema(schemaName string) (*EntityModelSchema, error)
 	SetSchema(schemaName string, schema *EntityModelSchema)
@@ -36,4 +41,5 @@ func (c *entityModelSchemaCache) SetSchema(schemaName string, schema *EntityMode
 	c.cache[schemaName] = schema
 }
 
+// EntityModelSchemaCacheInstance is the singleton instance of [EntityModelSchemaCache].
 var EntityModelSchemaCacheInstance = newEntityModelSchemaCache()

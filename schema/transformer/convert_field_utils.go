@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// convertStringToDateTime converts the provided string dates to primitive.DateTime.
 func convertStringToDateTime(dates ...string) ([]primitive.DateTime, error) {
 	dateTimes := []primitive.DateTime{}
 
@@ -24,6 +25,7 @@ func convertStringToDateTime(dates ...string) ([]primitive.DateTime, error) {
 	return dateTimes, nil
 }
 
+// convertStringToObjectID converts the provided string ids to primitive.ObjectID.
 func convertStringToObjectID(ids ...string) ([]primitive.ObjectID, error) {
 	objectIDS := []primitive.ObjectID{}
 
@@ -39,6 +41,7 @@ func convertStringToObjectID(ids ...string) ([]primitive.ObjectID, error) {
 	return objectIDS, nil
 }
 
+// convertDateTimeToString converts the provided primitive.DateTime to string.
 func convertDateTimeToString(dateTimes ...primitive.DateTime) ([]string, error) {
 	dates := []string{}
 
@@ -54,6 +57,8 @@ func convertDateTimeToString(dateTimes ...primitive.DateTime) ([]string, error) 
 	return dates, nil
 }
 
+// convertObjectIDToString converts the provided primitive.ObjectID to string.
+//
 //nolint:unparam // error field added to keep the signature of convert field functions consistent
 func convertObjectIDToString(objectIDs ...primitive.ObjectID) ([]string, error) {
 	ids := []string{}

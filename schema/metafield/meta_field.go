@@ -1,3 +1,6 @@
+// Package metafield defines and provide functions on custom meta fields for the schema.
+//
+// Meta fields are those fields that tracks extra information about the document which can be helpful to determine the state of a document.
 package metafield
 
 import (
@@ -9,8 +12,10 @@ import (
 )
 
 type MetaField interface {
+	// GetKey returns the unique key of the meta field.
 	GetKey() MetaFieldKey
 
+	// GetReflectKind returns the reflect kind of the meta field.
 	GetReflectKind() reflect.Kind
 
 	// GetApplicableTransformers returns the list of transformers applicable for the meta field.
@@ -36,19 +41,25 @@ type MetaField interface {
 	FieldNotPresent(doc *bson.D)
 }
 
-var AvailableMetaFields = []MetaField{
-	createdAtMetaFieldInstance,
-	updatedAtMetaFieldInstance,
-	docVersionMetaFieldInstance,
+var availableMetaFields = []MetaField{
+	CreatedAtField,
+	UpdatedAtField,
+	DocVersionField,
 }
 
+// GetAvailableMetaFields returns the list of available meta fields.
+func GetAvailableMetaFields() []MetaField {
+	return availableMetaFields
+}
+
+// AddMetaFields adds all applicable meta fields to the bson doc based on the provided schema options.
 func AddMetaFields(bsonDoc *bson.D, schemaOptions schemaopt.SchemaOptions) error {
-	for _, metaField := range AvailableMetaFields {
+	for _, metaField := range availableMetaFields {
 		if !metaField.IsApplicable(schemaOptions) {
 			continue
 		}
 
-		if err := ValidatedAndAddFieldValue(bsonDoc, metaField); err != nil {
+		if err := validatedAndAddFieldValue(bsonDoc, metaField); err != nil {
 			return err
 		}
 	}
