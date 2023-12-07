@@ -58,7 +58,7 @@ schemaOpts := schemaopt.SchemaOptions{
 }
 
 // dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-userModelOpts := mgod.NewEntityMongoOptions(dbConn).SetSchemaOptions(schemaOpts)
+userModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
 userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
 ```
 
@@ -71,14 +71,15 @@ userDoc := User{
 	EmailID: "gopher@mgod.com",
 	JoinedOn: joinedOn,
 }
-userModel.InsertOne(context.TODO(), userDoc)
+user, _ := userModel.InsertOne(context.TODO(), userDoc)
 /*
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
-	"joinedOn": "2023-12-01 11:32:19.290Z",
-	"createdAt": "2023-12-01 11:32:19.290Z",
+	"joinedOn": ISODate("2023-12-01T11:32:19.290Z"),
+	"createdAt": ISODate("2023-12-01T11:32:19.290Z"),
+	"updatedAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"__v": 0
 }
 */
