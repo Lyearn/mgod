@@ -14,7 +14,7 @@ type User struct {
 }
 ```
 
-#### createdAt
+## createdAt
 * Format - `ISO String`
 
 It is the meta field that stores the timestamp of the document creation. This field is automatically added (if not present in the input) to the schema if the `SchemaOptions.Timestamps` is set to true.
@@ -43,7 +43,7 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 */
 ```
 
-#### updatedAt
+## updatedAt
 * Format - `ISO String`
 
 It is the meta field that stores the timestamp of the document updation. This field is automatically upserted (if not present in the input) to the schema if the `SchemaOptions.Timestamps` is set to true.
@@ -75,7 +75,7 @@ User Doc
 */
 ```
 
-#### __v
+## __v
 * Format - `Number`
 
 It is the field that stores the version of the document. This field is automatically added (if not present in the input) to the schema if the `SchemaOptions.VersionKey` is set to true. This field starts with a default value of 0.
