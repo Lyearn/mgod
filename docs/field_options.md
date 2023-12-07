@@ -1,5 +1,5 @@
 ---
-Field Options
+title: Field Options
 ---
 
 Field Options are custom schema options available at field level (for fields of struct type). These options either modifies the schema or adds validations to the field on which it is applied.

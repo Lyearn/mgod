@@ -1,5 +1,5 @@
 ---
-Union Types
+title: Union Types
 ---
 Sometimes its possible that the API needs to be flexible and support a range of types. An example for this might be a tagging functionality on resources such as user, movies, etc. The CRUD layer for tags entity needs to support operations on multiple types of tags like `NumberTag`, `DateTag`, etc. through same functions.
 

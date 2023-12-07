@@ -1,5 +1,5 @@
 ---
-Installation
+title: Installation
 ---
 
 ## Requirements

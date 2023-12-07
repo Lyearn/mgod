@@ -1,5 +1,5 @@
 ---
-Basic Usage
+title: Basic Usage
 ---
 
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.

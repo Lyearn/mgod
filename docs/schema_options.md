@@ -1,5 +1,5 @@
 ---
-Schema Options
+title: Schema Options
 ---
 
 Schema Options is Mongo Schema level options (which modifies actual MongoDB doc) that needs to be provided when creating a new EntityMongoModel.
