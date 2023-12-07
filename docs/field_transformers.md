@@ -9,7 +9,7 @@ A field transformer is defined by the tag `mgoType`.
 `mgod` supports the following field transformers -
 
 ## ID
-Tag Value: `id`
+* Tag Value: `id`
 
 It is a transformer that converts a field of type `string` in Go struct to `primitive.ObjectID` for MongoDB document and vice versa.
 
@@ -65,7 +65,7 @@ userDoc := User{
 ```
 
 ## Date
-Tag Value: `date`
+* Tag Value: `date`
 
 It is a transformer that converts a field of type `string` in ISO 8601 format to `primitive.DateTime` for MongoDB document and vice versa.
 

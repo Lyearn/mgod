@@ -7,9 +7,9 @@ Field Options are custom schema options available at field level (for fields of 
 `mgod` supports the following field options -
 
 ## __id
-BSON Tag: `mgoID`
-Accepts Type: `bool`
-Default Value: `true` for custom type fields
+* BSON Tag: `mgoID`
+* Accepts Type: `bool`
+* Default Value: `true` for custom type fields
 
 It defines if `_id` field needs to be added in a object. This option is applicable for fields holding structs only.
 
@@ -65,8 +65,9 @@ Also, note how `_id` field is skipped for `projects` object as it was set to fal
 ```
 
 ## required
-Accepts Type: `bool`
-Default Value: `true`
+* Accepts Type: `bool`
+* Default Value: `true`
+
 It defines if a field is required or not. The option can be invalidated using `omitempty` property of `bson` tag.
 
 Example -
@@ -92,9 +93,9 @@ userDoc := User{
 ```
 
 ## default
-BSON Tag: `mgoDefault`
-Accepts Type: `string`
-Default Value: `nil`
+* BSON Tag: `mgoDefault`
+* Accepts Type: `string`
+* Default Value: `nil`
 
 It provides the default value for a field. The value of this option is used when the field is not present in the input document. This option is applicable only for fields that are not of custom type (custom structs).
 
