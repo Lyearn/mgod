@@ -113,10 +113,13 @@ The current version of mgod is a stable release. However, there are plans to add
 
 If you have any interesting feature requests, feel free to open an issue on [GitHub issue tracker](https://github.com/Lyearn/mgod/issues). We will be more than happy to discuss that!
 
+## Documentation
+For user facing documentation, check out [docs](docs/README.md).
+
 ## Contribute
-For contribution guidelines, check out [CONTRIBUTING](https://github.com/Lyearn/mgod/blob/main/CONTRIBUTING.md).
+For contribution guidelines, check out [CONTRIBUTING](CONTRIBUTING.md).
 
 <!-- ## Documentation -->
 
 ## License
-`mgod` is licensed under the [MIT License](https://github.com/Lyearn/mgod/blob/main/LICENSE).
+`mgod` is licensed under the [MIT License](LICENSE).
