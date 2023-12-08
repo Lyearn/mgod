@@ -1,30 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * To find the list of variables you can override, build the project and run the following command:
+ * find ./build -type f -exec grep -o '\-\-\(docusaurus\|ifm\)\(\-[a-z0-9]*\)*' {} \; | sort -u | fzf | pbcopy
  */
 
-/* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /* custom variables */
+  --ly-color-brand: #00B9D1;
+
+  --ifm-button-border-radius: 9999px;
   --ifm-code-font-size: 95%;
+  --ifm-font-family-base: 'Inter', sans-serif;
+  --ifm-menu-link-padding-horizontal: 12px;
+  --ifm-menu-link-sublist-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.5)" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>');
+  --ifm-navbar-height: 56px;
+  --ifm-pagination-nav-border-radius: 8px;
+
+  /* light mode specific */
+  --ifm-color-primary: #222222;
+  --ifm-color-primary-dark: #1f1f1f;
+  --ifm-color-primary-darker: #1d1d1d;
+  --ifm-color-primary-darkest: #181818;
+  --ifm-color-primary-light: #252525;
+  --ifm-color-primary-lighter: #272727;
+  --ifm-color-primary-lightest: #2c2c2c;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: #dadada;
+  --ifm-color-primary-dark: #c4c4c4;
+  --ifm-color-primary-darker: #b9b9b9;
+  --ifm-color-primary-darkest: #999999;
+  --ifm-color-primary-light: #f0f0f0;
+  --ifm-color-primary-lighter: #fbfbfb;
+  --ifm-color-primary-lightest: #ffffff;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.navbar--fixed-top {
+  padding-inline: 20px;
+}
+
+.navbar__brand {
+  color: var(--ly-color-brand);
+}
+
+.navbar__brand:hover {
+  color: var(--ly-color-brand);
+}
+
+.navbar__logo {
+  width: 22.6px;
+  height: 22.6px;
+  margin-inline-end: 3.265px;
+}
+
+.navbar__items.navbar__items--right {
+  gap: 24px;
+}
+
+.navbar__link {
+  padding: 0;
+}
+
+.menu.thin-scrollbar {
+  padding: 16px;
+  padding-inline-start: 12px;
+}
+
+.menu__link {
+  padding-inline: 12px;
+  padding-block: 9px;
+  border-radius: 6px;
+}
+
+.pagination-nav__link {
+  padding-inline: 24px;
+  padding-block: 20px;
+}
+
+.pagination-nav__link--prev {
+  text-align: right;
+}
+
+.pagination-nav__link--next {
+  text-align: left;
+}
+
+.pagination-nav__sublabel {
+  text-transform: uppercase;
 }
