@@ -2,6 +2,35 @@
 title: Basic Usage
 ---
 
+Use existing MongoDB connection, or setup a new one to register a default database connection.
+
+For existing database connection,
+```go
+import "github.com/Lyearn/mgod"
+
+func init() {
+	// ...database connection logic
+	mgod.SetDefaultConnection(dbConn)
+}
+```
+
+To setup a new connection,
+```go
+import (
+	"github.com/Lyearn/mgod"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func init() {
+	uri := "mongodb://root:mgod123@localhost:27017"
+	dbName := "mgod-test"
+
+	err := mgod.ConfigureDefaultConnection(nil, dbName, options.Client().ApplyURI(uri))
+}
+```
+> [!NOTE]
+> The above `err` variable will be a connection error (if occurs) returned by the Go Mongo Driver. So, handle the error accordingly.
+
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
 ```go
 type User struct {
@@ -25,9 +54,7 @@ schemaOpts := schemaopt.SchemaOptions{
 	Timestamps: true,
 }
 
-// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-userModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
-userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
+userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
 ```
 
 Use the entity ODM to perform CRUD operations with ease.

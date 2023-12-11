@@ -47,7 +47,7 @@ func (m entityMongoModel[T]) getMongoDocFromEntityModel(ctx context.Context, mod
 		return bsonDoc, nil
 	}
 
-	if err = metafield.AddMetaFields(&bsonDoc, m.opts.schemaOptions); err != nil {
+	if err = metafield.AddMetaFields(&bsonDoc, m.schemaOpts); err != nil {
 		return nil, err
 	}
 
@@ -125,7 +125,7 @@ func (m entityMongoModel[T]) handleTimestampsForUpdateQuery(update interface{}, 
 		})
 	}
 
-	if m.opts.schemaOptions.Timestamps {
+	if m.schemaOpts.Timestamps {
 		updatedAtCommand := bson.E{
 			Key: "$currentDate",
 			Value: bson.D{{
