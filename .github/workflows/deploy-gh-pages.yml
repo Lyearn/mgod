@@ -19,16 +19,15 @@ jobs:
         with:
           node-version: 18
           cache: yarn
-          cache-dependency-path: ./website/yarn.lock
-      
-      - name: Set working directory
-        run: cd ./website
+          cache-dependency-path: ./website/yarn.loc
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+        working-directory: ./website
 
       - name: Build website
         run: yarn build
+        working-directory: ./website
 
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
       - name: Deploy to GitHub Pages
