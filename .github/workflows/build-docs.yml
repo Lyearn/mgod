@@ -1,17 +1,20 @@
-name: Deploy to GitHub Pages
+name: Build Docs
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/**'
+      - 'website/**'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  deploy:
-    name: Deploy to GitHub Pages
+  build-docs:
+    name: Build Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
