@@ -39,6 +39,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/aryan02420/mgod/tree/main/docs/',
           exclude: ['**/README.md'],
+          breadcrumbs: false,
         },
         blog: false,
         theme: {
