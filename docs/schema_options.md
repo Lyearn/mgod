@@ -73,6 +73,9 @@ If `IsUnionType` is set to true, then `__t` will be used as the `DiscriminatorKe
 It is the key used to identify the underlying type in case of a union type entity.
 
 **Usage**
+> [!NOTE]
+> `IsUnionType` needs to be set to `true` to use the `DiscriminatorKey` field.
+
 ```go
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "resources",
@@ -80,10 +83,8 @@ schemaOpts := schemaopt.SchemaOptions{
 	DiscriminatorKey: "type",
 }
 ```
+
 > [!IMPORTANT]
 > The provided `DiscriminatorKey` should be present in the Go struct as a compulsory field.
 
-Default `DiscriminatorKey` is overwritten by the provided `type` field.
-
-> [!NOTE]
-> `IsUnionType` needs to be set to `true` to use the `DiscriminatorKey` field.
+Default `DiscriminatorKey` will be overwritten by the provided `type` field.
