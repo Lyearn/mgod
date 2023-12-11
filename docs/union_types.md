@@ -41,8 +41,10 @@ type GlobalTag struct {
 	Date    *string `bson:",omitempty" mgoType:"date"`
 }
 ```
-> [!IMPORTANT]
-> Only common fields are kept as compulsory whereas other fields are marked optional.
+
+:::info
+Only common fields are kept as compulsory whereas other fields are marked optional.
+:::
 
 Configure schema options for the union type entities.
 ```go
