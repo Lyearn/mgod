@@ -80,10 +80,10 @@ schemaOpts := schemaopt.SchemaOptions{
 	DiscriminatorKey: "type",
 }
 ```
+> [!IMPORTANT]
+> The provided `DiscriminatorKey` should be present in the Go struct as a compulsory field.
+
 Default `DiscriminatorKey` is overwritten by the provided `type` field.
 
 > [!NOTE]
 > `IsUnionType` needs to be set to `true` to use the `DiscriminatorKey` field.
-
-> [!IMPORTANT]
-> The provided `DiscriminatorKey` should be present in the Go struct as a compulsory field.
