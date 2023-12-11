@@ -15,7 +15,7 @@ func newDefaultValueOption() FieldOption {
 }
 
 // DefaultValueOption provides the default value for a field.
-// This value of this option is used when the field is not present in the input document.
+// The value of this option is used when the field is not present in the input document.
 // This option is applicable only for fields that are not of type struct.
 // Defaults to nil for all fields.
 var DefaultValueOption = newDefaultValueOption()
