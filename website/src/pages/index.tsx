@@ -20,7 +20,7 @@ function GetStartedButton() {
 function HomepageHeader() {
   return (
     <header className={clsx('hero hero--secondary', styles.heroBanner)}>
-      <div className={clsx('container', styles.heroContainer)}>
+      <div className={clsx(styles.heroContainer)}>
         <Heading as="h1" className="hero__title" style={{ marginBlockEnd: 32 }}>
           Empower Your Go Applications with Mgod
         </Heading>
@@ -38,7 +38,7 @@ function HomepageHeader() {
 function HomepageFooter() {
   return (
     <footer className={clsx('hero hero--secondary', styles.ctaBanner)}>
-      <div className={clsx('container', styles.ctaContainer)}>
+      <div className={clsx(styles.ctaContainer)}>
         <Heading as="h2" className="hero__title" style={{ marginBlockEnd: 56 }}>
           Ready to Simplify Your MongoDB Interactions?
         </Heading>
