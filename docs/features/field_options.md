@@ -1,5 +1,6 @@
 ---
 title: Field Options
+sidebar_position: 2
 ---
 
 Field Options are custom schema options available at field level (for fields of struct type). These options either modifies the schema or adds validations to the field on which it is applied.
@@ -12,8 +13,10 @@ Field Options are custom schema options available at field level (for fields of 
 * Default Value: `true` for custom type fields
 
 It defines if `_id` field needs to be added in a object.
-> [!NOTE]
-> This option is only applicable for fields holding structs.
+
+:::note
+This option is only applicable for fields holding structs.
+:::
 
 **Example**
 ```go
@@ -103,8 +106,10 @@ This doc will work fine.
 * Default Value: `nil`
 
 It provides the default value for a field. The value of this option is used when the field is not present in the input document.
-> [!NOTE]
-> This option is applicable only for fields that are not of custom type (custom structs).
+
+:::note
+This option is applicable only for fields that are not of custom type (custom structs).
+:::
 
 **Example**
 ```go
