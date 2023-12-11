@@ -8,14 +8,14 @@ const config: Config = {
   favicon: '/img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://lyearn.github.io',
+  url: 'https://aryan02420.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/mgod/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Lyearn',
+  organizationName: 'aryan02420',
   projectName: 'mgod',
   trailingSlash: false, // https://github.com/slorber/trailing-slash-guide 
 
@@ -37,7 +37,7 @@ const config: Config = {
         docs: {
           path: '../docs/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/lyearn/mgod/tree/main/docs/',
+          editUrl: 'https://github.com/aryan02420/mgod/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -76,7 +76,7 @@ const config: Config = {
         //   position: 'right',
         // },
         {
-          href: 'https://github.com/Lyearn/mgod',
+          href: 'https://github.com/aryan02420/mgod',
           label: 'GitHub',
           position: 'right',
         },
