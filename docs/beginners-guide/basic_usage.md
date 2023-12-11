@@ -1,5 +1,6 @@
 ---
 title: Basic Usage
+sidebar_position: 2
 ---
 
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
