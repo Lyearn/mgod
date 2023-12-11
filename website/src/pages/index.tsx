@@ -7,22 +7,28 @@ import Heading from '@theme/Heading';
 
 import styles from './index.module.css';
 
+function GetStartedButton() {
+  return (
+    <Link
+      className="button button--primary button--lg"
+      to="/docs/introduction/about">
+      Get Started
+    </Link>
+  );
+}
+
 function HomepageHeader() {
   return (
     <header className={clsx('hero hero--secondary', styles.heroBanner)}>
       <div className={clsx('container', styles.heroContainer)}>
-        <Heading as="h1" className="hero__title">
+        <Heading as="h1" className="hero__title" style={{ marginBlockEnd: 32 }}>
           Empower Your Go Applications with Mgod
         </Heading>
-        <p className="hero__subtitle">
+        <p className="hero__subtitle" style={{ marginBlockEnd: 56 }}>
           Transform your MongoDB interactions in Go effortlessly with mgod. Simplify database operations, enhance type safety, and build robust applications!
         </p>
         <div className={styles.buttons}>
-          <Link
-            className="button button--primary button--lg"
-            to="/docs/intro">
-            Get Started
-          </Link>
+          <GetStartedButton />
         </div>
       </div>
     </header>
@@ -33,15 +39,11 @@ function HomepageFooter() {
   return (
     <footer className={clsx('hero hero--secondary', styles.ctaBanner)}>
       <div className={clsx('container', styles.ctaContainer)}>
-        <Heading as="h2" className="hero__title">
-        Ready to Simplify Your MongoDB Interactions?
+        <Heading as="h2" className="hero__title" style={{ marginBlockEnd: 56 }}>
+          Ready to Simplify Your MongoDB Interactions?
         </Heading>
         <div className={styles.buttons}>
-          <Link
-            className="button button--primary button--lg"
-            to="/docs/introduction/about">
-            Get Started
-          </Link>
+          <GetStartedButton />
         </div>
       </div>
     </footer>

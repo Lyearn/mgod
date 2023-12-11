@@ -1,11 +1,14 @@
 .features {
   display: flex;
   flex-wrap: wrap;
+  gap: 24px;
   justify-content: space-evenly;
-  padding-inline: 148px;
+  margin-inline: auto;
+  padding-inline-start: 20px;
   padding-block-start: 72px;
   padding-block-end: 200px;
   width: 100%;
+  max-width: 1080px;
 }
 
 .featureItem {
