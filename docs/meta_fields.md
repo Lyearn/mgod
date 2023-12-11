@@ -19,7 +19,7 @@ type User struct {
 
 It is the meta field that stores the timestamp of the document creation. This field is automatically added (if not present in the input) to the schema if the `SchemaOptions.Timestamps` is set to true.
 
-Example -
+**Example**
 ```go
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "users",
@@ -31,16 +31,18 @@ userDoc := User{
 	EmailID: "gopher@mgod.com",
 }
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
 	"createdAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"updatedAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"__v": 0
-  }
-*/
+}
 ```
 
 ## updatedAt
@@ -48,7 +50,7 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 
 It is the meta field that stores the timestamp of the document updation. This field is automatically upserted (if not present in the input) to the schema if the `SchemaOptions.Timestamps` is set to true.
 
-Example -
+**Example**
 ```go
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "users",
@@ -56,14 +58,18 @@ schemaOpts := schemaopt.SchemaOptions{
 }
 
 result, _ := userModel.UpdateMany(context.TODO(), bson.M{"emailId": "gopher@mgod.com"}, bson.M{"$inc": {"__v": 1}})
-/*
-> mongo.UpdateResult{
+```
+
+**Output:**
+```go
+mongo.UpdateResult{
 	MatchedCount: 1,
 	ModifiedCount: 1,
 	UpsertedCount: 0,
-  }
-
-User Doc
+}
+```
+```json
+// User Doc
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
@@ -72,7 +78,6 @@ User Doc
 	"updatedAt": ISODate("2023-12-02 10:40:00.670Z"),
 	"__v": 1
 }
-*/
 ```
 
 ## __v
@@ -80,7 +85,7 @@ User Doc
 
 It is the field that stores the version of the document. This field is automatically added (if not present in the input) to the schema if the `SchemaOptions.VersionKey` is set to true. This field starts with a default value of 0.
 
-Example -
+**Example**
 ```go
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "users",
@@ -92,16 +97,20 @@ userDoc := User{
 	EmailID: "gopher@mgod.com",
 }
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
 	"__v": 0
-  }
-*/
+}
+```
 
-// If set to false.
+If `VersionKey` is set to `false`.
+```go
 schemaOpts := schemaopt.SchemaOptions{
 	Collection: "users",
 	VersionKey: false
@@ -112,11 +121,13 @@ userDoc := User{
 	EmailID: "gopher@mgod.com",
 }
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com"
-  }
-*/
+}
 ```

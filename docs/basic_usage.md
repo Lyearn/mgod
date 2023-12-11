@@ -41,8 +41,11 @@ userDoc := User{
 	JoinedOn: joinedOn,
 }
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
@@ -50,37 +53,44 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 	"createdAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"updatedAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"__v": 0
-  }
-
-Notice how `_id`, `createdAt`, `updatedAt` and `__v` fields are added automatically.
-*/
+}
 ```
+Notice how `_id`, `createdAt`, `updatedAt` and `__v` fields are added automatically.
+
+---
 
 Find documents using model properties.
 ```go
 users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
-/*
-> []User{
+```
+
+**Output:**
+```go
+[]User{
 	User{
 		Name: "Gopher",
 		EmailID: "gopher@mgod.com",
 		JoinedOn: "2023-12-01T11:32:19.290Z",
 	}
   }
-*/
 ```
+---
 
 Update document properties.
 ```go
 result, _ := userModel.UpdateMany(context.TODO(), bson.M{"joinedOn": bson.M{"$gte": "2023-12-01T00:00:00.000Z"}}, bson.M{"$inc": {"__v": 1}})
-/*
-> mongo.UpdateResult{
+```
+
+**Output:**
+```go
+mongo.UpdateResult{
 	MatchedCount: 1,
 	ModifiedCount: 1,
 	UpsertedCount: 0,
-  }
-
-User Doc
+}
+```
+```json
+// User Doc
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
@@ -90,17 +100,19 @@ User Doc
 	"updatedAt": ISODate("2023-12-02T10:40:00.670Z"),
 	"__v": 1
 }
-
-Notice the addition of new `updatedAt` field.
-*/
 ```
+Notice the updation of the `updatedAt` field.
+
+---
 
 Remove documents matching certain or all model properties.
 ```go
 result, _ := userModel.DeleteMany(context.TODO(), bson.M{"name": userDoc.Name})
-/*
-> mongo.DeleteResult{
+```
+
+**Output:**
+```go
+mongo.DeleteResult{
 	DeletedCount: 1
   }
-*/
 ```

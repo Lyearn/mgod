@@ -40,8 +40,9 @@ type GlobalTag struct {
 	Number  *int    `bson:",omitempty"`
 	Date    *string `bson:",omitempty" mgoType:"date"`
 }
-// Note how only common fields are kept as compulsory whereas other fields are marked optional.
 ```
+> [!IMPORTANT]
+> Only common fields are kept as compulsory whereas other fields are marked optional.
 
 Configure schema options for the union type entities.
 ```go
@@ -78,8 +79,11 @@ numberTag := NumberTag{
 	}
 
 insertedNumberTag, _ := numberTagModel.InsertOne(context.TODO(), numberTag)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id" : ObjectId("65718f9c55e90b39cf538b42"),
 	"name" : "numberTag",
 	"type" : "number",
@@ -87,8 +91,7 @@ insertedNumberTag, _ := numberTagModel.InsertOne(context.TODO(), numberTag)
 	"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
 	"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
 	"__v" : 0
-  }
-*/
+}
 ```
 
 2. Use global ODM to insert the doc that is created using the entity ODM. This is helpful in case where we want a common function handle the inserting of entities.
@@ -106,8 +109,11 @@ dateTag := DateTag{
 dateTagDoc, _ := dateTagModel.GetDocToInsert(context.TODO(), numberTag)
 
 insertedDateTag, _ := globalTagModel.InsertOne(context.TODO(), dateTagDoc)
-/*
-> {
+```
+
+**Output:**
+```json
+{
 	"_id" : ObjectId("65718f9c55e90b39cf538b43"),
 	"name" : "dateTag",
 	"type" : "date",
@@ -115,14 +121,16 @@ insertedDateTag, _ := globalTagModel.InsertOne(context.TODO(), dateTagDoc)
 	"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
 	"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
 	"__v" : 0
-  }
-*/
+}
 ```
 
 Use the global ODM to find docs by querying on model properties.
 ```go
 numberTag, _ := globalTagModel.FindOne(context.TODO(), bson.M{"name": "numberTag"})
-/*
+```
+
+**Output:**
+```go
 GlobalTag{
 	BaseTag{
 		ID: "65718f9c55e90b39cf538b42",
@@ -132,6 +140,5 @@ GlobalTag{
 	Number: 0x1400030c380, // pointer to value of 1
 	Date: <nil>,
 }
-*/
 ```
 In the above step, before returning the results, all docs received from the MongoDB are validated and processed against their respective typed models based on the discriminator key (here the `type` field). So, in the above step, the number tag document is processed against the schema for NumberTag type before getting converted to the GlobalTag type.
