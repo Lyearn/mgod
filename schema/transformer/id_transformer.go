@@ -12,6 +12,7 @@ func newIDTransformer() Transformer {
 	return &idTransformer{}
 }
 
+// IDTransformer is a transformer that converts a string to primitive.ObjectID and vice versa.
 var IDTransformer = newIDTransformer()
 
 func (t idTransformer) IsTransformationRequired(field reflect.StructField) bool {

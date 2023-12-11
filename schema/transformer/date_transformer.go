@@ -12,6 +12,7 @@ func newDateTransformer() Transformer {
 	return &dateTransformer{}
 }
 
+// DateTransformer is a transformer that converts a string in ISO format to primitive.DateTime and vice versa.
 var DateTransformer = newDateTransformer()
 
 func (t dateTransformer) IsTransformationRequired(field reflect.StructField) bool {
