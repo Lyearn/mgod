@@ -801,7 +801,7 @@ html {
   text-transform: capitalize;
 }
 
-.markdown .alert > div:first-child svg {
+.markdown .alert > div:first-child span {
   display: none;
 }
 
