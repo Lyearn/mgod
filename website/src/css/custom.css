@@ -724,10 +724,13 @@ html {
 }
 
 .markdown pre {
-  padding-inline: 1.6rem 1.2rem;
-  padding-block: 1.2rem 2rem;
   @apply body-long-01;
   border: 1px solid #EAEAEA;
+}
+
+.markdown pre code {
+  padding-inline: 1.6rem 1.2rem;
+  padding-block: 1.2rem 2rem;
 }
 
 .markdown pre + div {
