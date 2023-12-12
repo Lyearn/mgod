@@ -37,7 +37,7 @@ const config: Config = {
         docs: {
           path: '../docs/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/aryan02420/mgod/tree/main/docs/',
+          // editUrl: 'https://github.com/aryan02420/mgod/tree/main/docs/',
           exclude: ['**/README.md'],
           breadcrumbs: false,
         },
@@ -49,16 +49,34 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    // https://www.swyx.io/tailwind-docusaurus-2022
+    async function tailwindPlugin(context, options) {
+      const tailwindCss = (await import("tailwindcss"));
+      const autoprefixer = (await import("autoprefixer"));
+    
+      return {
+        name: "docusaurus-tailwindcss",
+        configurePostCss(postcssOptions) {
+          postcssOptions.plugins.push(tailwindCss);
+          postcssOptions.plugins.push(autoprefixer);
+          return postcssOptions;
+        },
+      };
+    },
+  ],
+
   themeConfig: {
     image: 'img/social-card.jpg', // twitter:image
     colorMode: {
       disableSwitch: true,
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'mgod',
       logo: {
         alt: 'mgod',
-        src: 'img/logo.svg',
+        src: 'img/logo-with-text.svg',
       },
       items: [
         {
