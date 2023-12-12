@@ -50,7 +50,7 @@ type GlobalTag struct {
 Only common fields are kept as compulsory whereas other fields are marked optional.
 :::
 
-Configure schema options for the union type entities.
+### Configure schema options for the union type entities
 
 ```go
 // As the `type` field is the discriminator in this case, we can define the DiscriminatorKey rather than relying on auto creation of `__t` field.
@@ -66,7 +66,7 @@ schemaOpts := schemaopt.SchemaOptions{
 tagModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
 ```
 
-Create ODM for entities using `mgod`.
+### Create ODM for entities using `mgod`
 
 ```go
 globalTagModel, _ := mgod.NewEntityMongoModel(GlobalTag{}, *tagModelOpts)
@@ -74,70 +74,70 @@ numberTagModel, _ := mgod.NewEntityMongoModel(NumberTag{}, *tagModelOpts)
 dateTagModel, _ := mgod.NewEntityMongoModel(DateTag{}, *tagModelOpts)
 ```
 
-Now, to insert documents, we have two options -
+### Now, to insert documents, we have two options
 
 1. Use ODM specific to the entity we are inserting in case we have liberty to create separate functions to handle different entities.
 
-```go
-numberTag := NumberTag{
-		BaseTag: BaseTag{
-			ID:   primitive.NewObjectID().Hex(),
-			Name: "numberTag",
-			Type: TagTypeEnumNumber,
-		},
-		Number: 1,
+	```go
+	numberTag := NumberTag{
+			BaseTag: BaseTag{
+				ID:   primitive.NewObjectID().Hex(),
+				Name: "numberTag",
+				Type: TagTypeEnumNumber,
+			},
+			Number: 1,
+		}
+
+	insertedNumberTag, _ := numberTagModel.InsertOne(context.TODO(), numberTag)
+	```
+
+	**Output:**
+
+	```js
+	{
+		"_id" : ObjectId("65718f9c55e90b39cf538b42"),
+		"name" : "numberTag",
+		"type" : "number",
+		"number" : 1,
+		"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
+		"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
+		"__v" : 0
 	}
-
-insertedNumberTag, _ := numberTagModel.InsertOne(context.TODO(), numberTag)
-```
-
-**Output:**
-
-```js
-{
-	"_id" : ObjectId("65718f9c55e90b39cf538b42"),
-	"name" : "numberTag",
-	"type" : "number",
-	"number" : 1,
-	"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
-	"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
-	"__v" : 0
-}
-```
+	```
 
 2. Use global ODM to insert the doc that is created using the entity ODM. This is helpful in case where we want a common function handle the inserting of entities.
 
-```go
-date, _ := dateformatter.New(time.Now().UTC()).GetISOString()
-dateTag := DateTag{
-		BaseTag: BaseTag{
-			ID:   primitive.NewObjectID().Hex(),
-			Name: "dateTag",
-			Type: TagTypeEnumDate,
-		},
-		Date: date,
+	```go
+	date, _ := dateformatter.New(time.Now().UTC()).GetISOString()
+	dateTag := DateTag{
+			BaseTag: BaseTag{
+				ID:   primitive.NewObjectID().Hex(),
+				Name: "dateTag",
+				Type: TagTypeEnumDate,
+			},
+			Date: date,
+		}
+
+	dateTagDoc, _ := dateTagModel.GetDocToInsert(context.TODO(), numberTag)
+
+	insertedDateTag, _ := globalTagModel.InsertOne(context.TODO(), dateTagDoc)
+	```
+
+	**Output:**
+
+	```js
+	{
+		"_id" : ObjectId("65718f9c55e90b39cf538b43"),
+		"name" : "dateTag",
+		"type" : "date",
+		"date" : ISODate("2023-12-07T09:25:48.252Z"),
+		"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
+		"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
+		"__v" : 0
 	}
+	```
 
-dateTagDoc, _ := dateTagModel.GetDocToInsert(context.TODO(), numberTag)
-
-insertedDateTag, _ := globalTagModel.InsertOne(context.TODO(), dateTagDoc)
-```
-
-**Output:**
-
-```js
-{
-	"_id" : ObjectId("65718f9c55e90b39cf538b43"),
-	"name" : "dateTag",
-	"type" : "date",
-	"date" : ISODate("2023-12-07T09:25:48.252Z"),
-	"createdAt" : ISODate("2023-12-07T09:25:48.253Z"),
-	"updatedAt" : ISODate("2023-12-07T09:25:48.253Z"),
-	"__v" : 0
-}
-```
-
-Use the global ODM to find docs by querying on model properties.
+### Use the global ODM to find docs by querying on model properties.
 
 ```go
 numberTag, _ := globalTagModel.FindOne(context.TODO(), bson.M{"name": "numberTag"})

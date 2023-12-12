@@ -35,7 +35,7 @@ userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
 
 Use the entity ODM to perform CRUD operations with ease.
 
-Insert a new document.
+## Inserting a new document
 
 ```go
 joinedOn, _ := dateformatter.New(time.Now()).GetISOString()
@@ -63,9 +63,7 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 
 Notice how `_id`, `createdAt`, `updatedAt` and `__v` fields are added automatically.
 
----
-
-Find documents using model properties.
+## Finding documents using model properties
 
 ```go
 users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
@@ -80,12 +78,10 @@ users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 		EmailID: "gopher@mgod.com",
 		JoinedOn: "2023-12-01T11:32:19.290Z",
 	}
-  }
+}
 ```
 
----
-
-Update document properties.
+## Updating document properties
 
 ```go
 result, _ := userModel.UpdateMany(context.TODO(), bson.M{"joinedOn": bson.M{"$gte": "2023-12-01T00:00:00.000Z"}}, bson.M{"$inc": {"__v": 1}})
@@ -116,9 +112,7 @@ mongo.UpdateResult{
 
 Notice the updation of the `updatedAt` field.
 
----
-
-Remove documents matching certain or all model properties.
+## Removing documents matching certain or all model properties
 
 ```go
 result, _ := userModel.DeleteMany(context.TODO(), bson.M{"name": userDoc.Name})
@@ -129,5 +123,5 @@ result, _ := userModel.DeleteMany(context.TODO(), bson.M{"name": userDoc.Name})
 ```go
 mongo.DeleteResult{
 	DeletedCount: 1
-  }
+}
 ```
