@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'mgod',
-  tagline: 'MongoDB ODM designed to work with Go modelsl',
+  tagline: 'Transform your MongoDB interactions in Go effortlessly with mgod',
   favicon: '/img/favicon.ico',
 
   // Set the production url of your site here
