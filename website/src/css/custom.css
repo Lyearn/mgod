@@ -9,9 +9,6 @@
 */
 
 :root {
-  /* custom variables */
-  --ly-color-brand: #00B9D1;
-
   --ifm-button-border-radius: 9999px;
   --ifm-font-size-base: 6px;
   --ifm-code-font-size: 95%;
@@ -518,14 +515,6 @@ html {
 .navbar--fixed-top {
   padding-inline: 2.4rem;
   border-bottom: 1px solid #EAEAEA;
-}
-
-.navbar__brand {
-  color: var(--ly-color-brand);
-}
-
-.navbar__brand:hover {
-  color: var(--ly-color-brand);
 }
 
 .navbar__logo {
