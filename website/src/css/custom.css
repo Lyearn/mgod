@@ -1,52 +1,523 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* @layer base { */
 /**
- * To find the list of variables you can override, build the project and run the following command:
- * find ./build -type f -exec grep -o '\-\-\(docusaurus\|ifm\)\(\-[a-z0-9]*\)*' {} \; | sort -u | fzf | pbcopy
- */
+* To find the list of variables you can override, build the project and run the following command:
+* find ./build -type f -exec grep -o '\-\-\(docusaurus\|ifm\)\(\-[a-z0-9]*\)*' {} \; | sort -u | fzf | pbcopy
+*/
 
 :root {
   /* custom variables */
   --ly-color-brand: #00B9D1;
 
   --ifm-button-border-radius: 9999px;
+  --ifm-font-size-base: 6px;
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: 'Inter', sans-serif;
-  --ifm-menu-link-padding-horizontal: 0px;
+  --ifm-menu-link-padding-horizontal: 0rem;
   --ifm-menu-link-sublist-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.5)" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>');
-  --ifm-navbar-height: 56px;
-  --ifm-pagination-nav-border-radius: 8px;
+  --ifm-menu-color-background-active: unset;
+  --ifm-menu-color-background-hover: unset;
+  --ifm-navbar-height: 5.6rem;
+  --ifm-pagination-nav-border-radius: 0.8rem;
+  --ifm-link-hover-decoration: none;
+  --ifm-toc-border-color: #EAEAEA;
+  --ifm-toc-padding-horizontal: 1.6rem;
+  --ifm-toc-padding-vertical: 0rem;
+  --ifm-global-shadow-lw: none;
 
-  /* light mode specific */
-  --ifm-color-primary: #222222;
-  --ifm-color-primary-dark: #1f1f1f;
-  --ifm-color-primary-darker: #1d1d1d;
-  --ifm-color-primary-darkest: #181818;
-  --ifm-color-primary-light: #252525;
-  --ifm-color-primary-lighter: #272727;
-  --ifm-color-primary-lightest: #2c2c2c;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* uncomment to check unstyled elements */
+  /*
+  --ifm-font-color-base: #ff00ff;
+  --ifm-color-primary: #ff00ff;
+  --ifm-color-primary-dark: #ff00ff;
+  --ifm-color-primary-darker: #ff00ff;
+  --ifm-color-primary-darkest: #ff00ff;
+  --ifm-color-primary-light: #ff00ff;
+  --ifm-color-primary-lighter: #ff00ff;
+  --ifm-color-primary-lightest: #ff00ff;
+  --ifm-color-emphasis-1000: #ff00ff;
+  --ifm-color-emphasis-800: #ff00ff;
+  --ifm-color-emphasis-900: #ff00ff;
+  --ifm-color-emphasis-700: #ff00ff;
+  --ifm-color-emphasis-600: #ff00ff;
+  --ifm-color-emphasis-500: #ff00ff;
+  --ifm-color-emphasis-400: #ff00ff;
+  --ifm-color-emphasis-300: #ff00ff;
+  --ifm-color-emphasis-200: #ff00ff;
+  --ifm-color-emphasis-100: #ff00ff;
+  --ifm-color-emphasis-0: #ff00ff;
+  */
 }
 
-[data-theme='dark'] {
-  --ifm-color-primary: #dadada;
-  --ifm-color-primary-dark: #c4c4c4;
-  --ifm-color-primary-darker: #b9b9b9;
-  --ifm-color-primary-darkest: #999999;
-  --ifm-color-primary-light: #f0f0f0;
-  --ifm-color-primary-lighter: #fbfbfb;
-  --ifm-color-primary-lightest: #ffffff;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+:root {
+  --font-primary: 'Inter';
+  --font-secondary: 'Poppins';
+  --font-pen: 'Nanum Pen Script';
+  --font-code: 'Roboto Mono';
+
+  --ff-body-long-01: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-long-02: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-long-03: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-short-01: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-short-02: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-short-03: var(--font-primary), var(--ifm-font-family-base);
+  --ff-body-short-04: var(--font-primary), var(--ifm-font-family-base);
+  --ff-code-01: var(--font-code), var(--ifm-font-family-monospace);
+  --ff-code-02: var(--font-code), var(--ifm-font-family-monospace);
+  --ff-display-l: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-m: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-s: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-xl: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-xs: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-xxl: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-xxs: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-display-xxxl: var(--font-secondary), var(--ifm-font-family-base);
+  --ff-heading-l: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-m: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-s: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-xl: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-xs: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-xxl: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-xxs: var(--font-primary), var(--ifm-font-family-base);
+  --ff-heading-xxxl: var(--font-primary), var(--ifm-font-family-base);
+  --ff-helper-text-01: var(--font-pen), var(--ifm-font-family-base);
+  --ff-label-01: var(--font-primary), var(--ifm-font-family-base);
+  --ff-label-02: var(--font-primary), var(--ifm-font-family-base);
+  --ff-label-03: var(--font-primary), var(--ifm-font-family-base);
+  --ff-label-caps: var(--font-primary), var(--ifm-font-family-base);
+
+
+  --fs-body-long-01: 1.6rem;
+  --fs-body-long-02: 1.4rem;
+  --fs-body-long-03: 1.3rem;
+  --fs-body-short-01: 1.6rem;
+  --fs-body-short-02: 1.4rem;
+  --fs-body-short-03: 1.2rem;
+  --fs-body-short-04: 1.0rem;
+  --fs-code-01: 85%;
+  --fs-code-02: 80%;
+  --fs-display-l: 2.4rem;
+  --fs-display-m: 2.2rem;
+  --fs-display-s: 1.8rem;
+  --fs-display-xl: 2.8rem;
+  --fs-display-xs: 1.6rem;
+  --fs-display-xxl: 3.6rem;
+  --fs-display-xxs: 1.4rem;
+  --fs-display-xxxl: 5.4rem;
+  --fs-heading-l: 2.4rem;
+  --fs-heading-m: 2.2rem;
+  --fs-heading-s: 1.8rem;
+  --fs-heading-xl: 2.8rem;
+  --fs-heading-xs: 1.6rem;
+  --fs-heading-xxl: 3.6rem;
+  --fs-heading-xxs: 1.4rem;
+  --fs-heading-xxxl: 5.4rem;
+  --fs-helper-text-01: 2.4rem;
+  --fs-label-01: 1.6rem;
+  --fs-label-02: 1.4rem;
+  --fs-label-03: 1.2rem;
+  --fs-label-caps: 1.2rem;
+
+  --fw-body-long-01: 400;
+  --fw-body-long-02: 400;
+  --fw-body-long-03: 400;
+  --fw-body-short-01: 400;
+  --fw-body-short-02: 400;
+  --fw-body-short-03: 400;
+  --fw-body-short-04: 400;
+  --fw-code-01: 400;
+  --fw-code-02: 400;
+  --fw-display-l: 600;
+  --fw-display-m: 600;
+  --fw-display-s: 600;
+  --fw-display-xl: 600;
+  --fw-display-xs: 600;
+  --fw-display-xxl: 600;
+  --fw-display-xxs: 600;
+  --fw-display-xxxl: 600;
+  --fw-heading-l: 600;
+  --fw-heading-m: 600;
+  --fw-heading-s: 600;
+  --fw-heading-xl: 600;
+  --fw-heading-xs: 600;
+  --fw-heading-xxl: 600;
+  --fw-heading-xxs: 600;
+  --fw-heading-xxxl: 600;
+  --fw-helper-text-01: 400;
+  --fw-label-01: 500;
+  --fw-label-02: 500;
+  --fw-label-03: 500;
+  --fw-label-caps: 600;
+
+  --ls-body-long-01: 0em;
+  --ls-body-long-02: 0em;
+  --ls-body-long-03: 0em;
+  --ls-body-short-01: 0em;
+  --ls-body-short-02: 0em;
+  --ls-body-short-03: 0.02em;
+  --ls-body-short-04: 0.02em;
+  --ls-code-01: 0rem;
+  --ls-code-02: 0rem;
+  --ls-display-l: 0em;
+  --ls-display-m: 0em;
+  --ls-display-s: 0em;
+  --ls-display-xl: 0em;
+  --ls-display-xs: 0em;
+  --ls-display-xxl: -0.02em;
+  --ls-display-xxs: 0em;
+  --ls-display-xxxl: 0em;
+  --ls-heading-l: 0em;
+  --ls-heading-m: 0em;
+  --ls-heading-s: 0em;
+  --ls-heading-xl: 0em;
+  --ls-heading-xs: 0em;
+  --ls-heading-xxl: -0.02em;
+  --ls-heading-xxs: 0em;
+  --ls-heading-xxxl: 0em;
+  --ls-helper-text-01: 0em;
+  --ls-label-01: 0em;
+  --ls-label-02: 0em;
+  --ls-label-03: 0em;
+  --ls-label-caps: 0.1em;
+
+  --lh-body-long-01: 2.6rem;
+  --lh-body-long-02: 2.4rem;
+  --lh-body-long-03: 1.8rem;
+  --lh-body-short-01: 2.4rem;
+  --lh-body-short-02: 2.2rem;
+  --lh-body-short-03: 1.6rem;
+  --lh-body-short-04: 1.6rem;
+  --lh-code-01: 2.4rem;
+  --lh-code-02: 2.2rem;
+  --lh-display-l: 3.6rem;
+  --lh-display-m: 3rem;
+  --lh-display-s: 2.6rem;
+  --lh-display-xl: 3.8rem;
+  --lh-display-xs: 2.4rem;
+  --lh-display-xxl: 4.8rem;
+  --lh-display-xxs: 1.8rem;
+  --lh-display-xxxl: 6.4rem;
+  --lh-heading-l: 3.6rem;
+  --lh-heading-m: 3rem;
+  --lh-heading-s: 2.6rem;
+  --lh-heading-xl: 3.8rem;
+  --lh-heading-xs: 2.4rem;
+  --lh-heading-xxl: 4.8rem;
+  --lh-heading-xxs: 1.8rem;
+  --lh-heading-xxxl: 6.4rem;
+  --lh-helper-text-01: 2.4rem;
+  --lh-label-01: 2.4rem;
+  --lh-label-02: 2.2rem;
+  --lh-label-03: 1.6rem;
+  --lh-label-caps: 2rem;
+
+  --text-paragraph: #222222;
+  --text-primary: #000000;
+  --text-secondary: #666666;
+  --text-placeholder: #999999;
+  --text-white: #ffffff;
+
+  --icon-active: #000000;
+  --icon-primary: #666666;
+  --icon-secondary: #999999;
+  --icon-placeholder: #bfbfbf;
+  --icon-white: #ffffff;
 }
 
-.markdown {
-  --ifm-link-color: #00B9D1;
-  --ifm-link-decoration: underline;
-  --ifm-link-hover-color: #00B9D1; 
+html {
+  font-size: 10px;
 }
+
+/* } */
+
+@layer utilities {
+  .body-short-01 {
+    font-weight: var(--fw-body-short-01);
+    font-family: var(--ff-body-short-01);
+    font-size: var(--fs-body-short-01);
+    line-height: var(--lh-body-short-01);
+    letter-spacing: var(--ls-body-short-01);
+  }
+
+  .body-short-02 {
+    font-weight: var(--fw-body-short-02);
+    font-family: var(--ff-body-short-02);
+    font-size: var(--fs-body-short-02);
+    line-height: var(--lh-body-short-02);
+    letter-spacing: var(--ls-body-short-02);
+  }
+
+  .body-short-03 {
+    font-weight: var(--fw-body-short-03);
+    font-family: var(--ff-body-short-03);
+    font-size: var(--fs-body-short-03);
+    line-height: var(--lh-body-short-03);
+    letter-spacing: var(--ls-body-short-03);
+  }
+
+  .body-short-04 {
+    font-weight: var(--fw-body-short-04);
+    font-family: var(--ff-body-short-04);
+    font-size: var(--fs-body-short-04);
+    line-height: var(--lh-body-short-04);
+    letter-spacing: var(--ls-body-short-04);
+  }
+
+  .body-long-01 {
+    font-weight: var(--fw-body-long-01);
+    font-family: var(--ff-body-long-01);
+    font-size: var(--fs-body-long-01);
+    line-height: var(--lh-body-long-01);
+    letter-spacing: var(--ls-body-long-01);
+  }
+
+  .body-long-02 {
+    font-weight: var(--fw-body-long-02);
+    font-family: var(--ff-body-long-02);
+    font-size: var(--fs-body-long-02);
+    line-height: var(--lh-body-long-02);
+    letter-spacing: var(--ls-body-long-02);
+  }
+
+  .body-long-03 {
+    font-weight: var(--fw-body-long-03);
+    font-family: var(--ff-body-long-03);
+    font-size: var(--fs-body-long-03);
+    line-height: var(--lh-body-long-03);
+    letter-spacing: var(--ls-body-long-03);
+  }
+
+  .helper-text-01 {
+    font-weight: var(--fw-helper-text-01);
+    font-family: var(--ff-helper-text-01);
+    font-size: var(--fs-helper-text-01);
+    line-height: var(--lh-helper-text-01);
+    letter-spacing: var(--ls-helper-text-01);
+  }
+
+  .label-01 {
+    font-weight: var(--fw-label-01);
+    font-family: var(--ff-label-01);
+    font-size: var(--fs-label-01);
+    line-height: var(--lh-label-01);
+    letter-spacing: var(--ls-label-01);
+  }
+
+  .label-02 {
+    font-weight: var(--fw-label-02);
+    font-family: var(--ff-label-02);
+    font-size: var(--fs-label-02);
+    line-height: var(--lh-label-02);
+    letter-spacing: var(--ls-label-02);
+  }
+
+  .label-03 {
+    font-weight: var(--fw-label-03);
+    font-family: var(--ff-label-03);
+    font-size: var(--fs-label-03);
+    line-height: var(--lh-label-03);
+    letter-spacing: var(--ls-label-03);
+  }
+
+  .label-caps {
+    font-weight: var(--fw-label-caps);
+    font-family: var(--ff-label-caps);
+    font-size: var(--fs-label-caps);
+    line-height: var(--lh-label-caps);
+    letter-spacing: var(--ls-label-caps);
+    text-transform: uppercase;
+  }
+
+  .display-xxxl {
+    font-weight: var(--fw-display-xxxl);
+    font-family: var(--ff-display-xxxl);
+    font-size: var(--fs-display-xxxl);
+    line-height: var(--lh-display-xxxl);
+    letter-spacing: var(--ls-display-xxxl);
+  }
+
+  .display-xxl {
+    font-weight: var(--fw-display-xxl);
+    font-family: var(--ff-display-xxl);
+    font-size: var(--fs-display-xxl);
+    line-height: var(--lh-display-xxl);
+    letter-spacing: var(--ls-display-xxl);
+  }
+
+  .display-xl {
+    font-weight: var(--fw-display-xl);
+    font-family: var(--ff-display-xl);
+    font-size: var(--fs-display-xl);
+    line-height: var(--lh-display-xl);
+    letter-spacing: var(--ls-display-xl);
+  }
+
+  .display-l {
+    font-weight: var(--fw-display-l);
+    font-family: var(--ff-display-l);
+    font-size: var(--fs-display-l);
+    line-height: var(--lh-display-l);
+    letter-spacing: var(--ls-display-l);
+  }
+
+  .display-m {
+    font-weight: var(--fw-display-m);
+    font-family: var(--ff-display-m);
+    font-size: var(--fs-display-m);
+    line-height: var(--lh-display-m);
+    letter-spacing: var(--ls-display-m);
+  }
+
+  .display-s {
+    font-weight: var(--fw-display-s);
+    font-family: var(--ff-display-s);
+    font-size: var(--fs-display-s);
+    line-height: var(--lh-display-s);
+    letter-spacing: var(--ls-display-s);
+  }
+
+  .display-xs {
+    font-weight: var(--fw-display-xs);
+    font-family: var(--ff-display-xs);
+    font-size: var(--fs-display-xs);
+    line-height: var(--lh-display-xs);
+    letter-spacing: var(--ls-display-xs);
+  }
+
+  .display-xxs {
+    font-weight: var(--fw-display-xxs);
+    font-family: var(--ff-display-xxs);
+    font-size: var(--fs-display-xxs);
+    line-height: var(--lh-display-xxs);
+    letter-spacing: var(--ls-display-xxs);
+  }
+
+  .heading-xxxl {
+    font-weight: var(--fw-heading-xxxl);
+    font-family: var(--ff-heading-xxxl);
+    font-size: var(--fs-heading-xxxl);
+    line-height: var(--lh-heading-xxxl);
+    letter-spacing: var(--ls-heading-xxxl);
+  }
+
+  .heading-xxl {
+    font-weight: var(--fw-heading-xxl);
+    font-family: var(--ff-heading-xxl);
+    font-size: var(--fs-heading-xxl);
+    line-height: var(--lh-heading-xxl);
+    letter-spacing: var(--ls-heading-xxl);
+  }
+
+  .heading-xl {
+    font-weight: var(--fw-heading-xl);
+    font-family: var(--ff-heading-xl);
+    font-size: var(--fs-heading-xl);
+    line-height: var(--lh-heading-xl);
+    letter-spacing: var(--ls-heading-xl);
+  }
+
+  .heading-l {
+    font-weight: var(--fw-heading-l);
+    font-family: var(--ff-heading-l);
+    font-size: var(--fs-heading-l);
+    line-height: var(--lh-heading-l);
+    letter-spacing: var(--ls-heading-l);
+  }
+
+  .heading-m {
+    font-weight: var(--fw-heading-m);
+    font-family: var(--ff-heading-m);
+    font-size: var(--fs-heading-m);
+    line-height: var(--lh-heading-m);
+    letter-spacing: var(--ls-heading-m);
+  }
+
+  .heading-s {
+    font-weight: var(--fw-heading-s);
+    font-family: var(--ff-heading-s);
+    font-size: var(--fs-heading-s);
+    line-height: var(--lh-heading-s);
+    letter-spacing: var(--ls-heading-s);
+  }
+
+  .heading-xs {
+    font-weight: var(--fw-heading-xs);
+    font-family: var(--ff-heading-xs);
+    font-size: var(--fs-heading-xs);
+    line-height: var(--lh-heading-xs);
+    letter-spacing: var(--ls-heading-xs);
+  }
+
+  .heading-xxs {
+    font-weight: var(--fw-heading-xxs);
+    font-family: var(--ff-heading-xxs);
+    font-size: var(--fs-heading-xxs);
+    line-height: var(--lh-heading-xxs);
+    letter-spacing: var(--ls-heading-xxs);
+  }
+
+  .code-01 {
+    font-weight: var(--fw-code-01);
+    font-family: var(--ff-code-01);
+    font-size: var(--fs-code-01);
+    line-height: var(--lh-code-01);
+    letter-spacing: var(--ls-code-01);
+  }
+
+  .code-02 {
+    font-weight: var(--fw-code-02);
+    font-family: var(--ff-code-02);
+    font-size: var(--fs-code-02);
+    line-height: var(--lh-code-02);
+    letter-spacing: var(--ls-code-02);
+  }
+
+  .text-text-paragraph {
+    color: var(--text-paragraph);
+  }
+
+  .text-text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-text-placeholder {
+    color: var(--text-placeholder);
+  }
+
+  .text-text-white {
+    color: var(--text-white);
+  }
+
+  .icon-icon-active {
+    color: var(--icon-active);
+  }
+  .icon-icon-primary {
+    color: var(--icon-primary);
+  }
+  .icon-icon-secondary {
+    color: var(--icon-secondary);
+  }
+  .icon-icon-placeholder {
+    color: var(--icon-placeholder);
+  }
+  .icon-icon-white {
+    color: var(--icon-white);
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 
 .navbar--fixed-top {
-  padding-inline: 20px;
+  padding-inline: 2.4rem;
+  border-bottom: 1px solid #EAEAEA;
 }
 
 .navbar__brand {
@@ -58,36 +529,96 @@
 }
 
 .navbar__logo {
-  width: 22.6px;
-  height: 22.6px;
-  margin-inline-end: 3.265px;
+  height: 2.26rem;
+  width: auto;
+}
+
+.navbar__title {
+  visibility: hidden;
 }
 
 .navbar__items.navbar__items--right {
-  gap: 24px;
+  gap: 2rem;
 }
 
 .navbar__link {
+  @apply body-short-02 text-text-secondary;
   padding: 0;
 }
 
+.navbar__link:hover,
+.navbar__link:focus-visible {
+  @apply text-text-primary;
+}
+
+.navbar__link--active {
+  @apply label-02 text-text-primary;
+}
+
+.navbar__link > svg {
+  display: none;
+}
+
+/* Custom class for Github logo. see docusaurus.config.ts */
+.navbar-github-link {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-github-link:after {
+  content: '';
+  width: 2.4rem;
+  height: 2.4rem;
+  background-image: url("data:image/svg+xml;charset=utf-8,<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path fill='currentColor' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/></svg>");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.navbar-github-link:before {
+  content: '';
+  margin-left: -0.4rem;
+  margin-right: 1.2rem;
+  width: 0.1rem;
+  height: 2.4rem;
+  background-color: #EAEAEA;
+}
+
 .menu.thin-scrollbar {
-  padding: 16px;
-  padding-inline-start: 12px;
+  padding-block: 2rem;
+  padding-inline: 2.4rem;
 }
 
 .menu__list > .menu__list-item:not(:first-child) {
-  margin-top: 10px;
+  margin-top: 1rem;
 }
 
 .menu__list .menu__list > .menu__list-item:not(:first-child) {
-  margin-top: 4px;
+  margin-top: 0.4rem;
 }
 
 .menu__link {
-  padding-inline: 8px;
-  padding-block: 5px;
-  border-radius: 6px;
+  @apply body-short-02 text-text-secondary;
+  padding-inline: 0.8rem;
+  padding-block: 0.5rem;
+  border-radius: 0.6rem;
+}
+
+.menu__link:hover,
+.menu__link:focus-visible {
+  @apply text-text-primary;
+}
+
+.menu__link--active {
+  @apply label-02 text-text-primary;
+}
+
+.menu__link--sublist.menu__link--active {
+  @apply body-short-02 text-text-secondary;
+}
+
+.menu__link--sublist:hover,
+.menu__link--sublist:focus-visible {
+  @apply text-text-primary;
 }
 
 .menu__link--sublist-caret:after {
@@ -96,13 +627,13 @@
 
 .menu__link--sublist-caret:before {
   content: '';
-  margin-inline-end: 10px;
-  min-width: 10px;
-  background: var(--ifm-menu-link-sublist-icon) 50% / 20px 20px;
+  margin-inline-end: 1rem;
+  min-width: 1rem;
+  background: var(--ifm-menu-link-sublist-icon) 50% / 2rem 2rem;
   filter: var(--ifm-menu-link-sublist-icon-filter);
-  height: 10px;
+  height: 1rem;
   transform: rotate(180deg);
-  width: 10px;
+  width: 1rem;
   transition: transform var(--ifm-transition-fast) linear;
 }
 
@@ -116,19 +647,165 @@
   border-inline-start: #EAEAEA 1px solid;
 }
 
+.table-of-contents {
+  margin-block-start: 4.8rem;
+}
+
+.table-of-contents > li {
+  margin-inline: 0rem;
+  margin-block: 0.8rem;
+}
+
+.table-of-contents__link {
+  @apply body-short-02 text-text-secondary;
+}
+
+.table-of-contents__link:hover,
+.table-of-contents__link:focus-visible {
+  @apply text-text-primary;
+}
+
+.table-of-contents__link--active {
+  @apply label-02 text-text-primary;
+}
+
+.pagination-nav {
+  margin-top: 4.8rem !important;
+  margin-bottom: 4.8rem;
+}
+
 .pagination-nav__link {
-  padding-inline: 24px;
-  padding-block: 20px;
+  padding-inline: 2.4rem;
+  padding-block: 2rem;
 }
 
 .pagination-nav__link--prev {
   text-align: right;
+  position: relative;
 }
 
 .pagination-nav__link--next {
   text-align: left;
+  position: relative;
 }
 
 .pagination-nav__sublabel {
+  @apply label-03 text-text-placeholder;
   text-transform: uppercase;
+  margin-bottom: 0.4rem;
 }
+
+.pagination-nav__label {
+  @apply heading-xs text-text-primary;
+}
+
+.pagination-nav__link--next .pagination-nav__label::after {
+  position: absolute;
+  right: 2.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  @apply icon-icon-placeholder;
+}
+
+.pagination-nav__link--prev .pagination-nav__label::before {
+  position: absolute;
+  left: 2.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  @apply icon-icon-placeholder;
+}
+
+.theme-back-to-top-button {
+  display: none;
+}
+
+.markdown {
+  --ifm-link-color: #0065FF;
+  --ifm-link-decoration: none;
+  --ifm-link-hover-color: #0065FF; 
+  --ifm-link-hover-decoration: underline;
+  --ifm-code-background: #FAFAFA;
+  --ifm-code-border-radius: 0.4rem;
+  --ifm-code-padding-horizontal: 0.4rem;
+  --ifm-alert-border-radius: 1.2rem;
+  --ifm-pre-border-radius: 0.8rem;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+.markdown h1,
+.markdown h1:first-child {
+  @apply text-text-primary heading-xxl mb-[3.2rem] mt-[5.2rem];
+}
+
+.markdown h2 {
+  @apply text-text-primary heading-m mb-[1.2rem] mt-[5.6rem];
+}
+
+.markdown h3 {
+  @apply text-text-primary heading-xs mb-[1.2rem] mt-[3.2rem];
+}
+
+.markdown p {
+  @apply text-text-paragraph body-long-01;
+}
+
+.markdown code {
+  @apply code-01;
+}
+
+.markdown li {
+  @apply text-text-paragraph body-long-01;
+}
+
+.markdown .theme-code-block {
+  margin-block: 1.2rem;
+}
+
+.markdown pre {
+  @apply body-long-01;
+  border: 1px solid #EAEAEA;
+}
+
+.markdown pre code {
+  padding-inline: 1.6rem 1.2rem;
+  padding-block: 1.2rem 2rem;
+}
+
+.markdown pre + div {
+  top: 1.2rem;
+  right: 1.2rem;
+  gap: 1rem;
+}
+
+/* copy to clipboard button */
+.markdown pre + div > button {
+  opacity: 1;
+  border: none;
+}
+
+.markdown pre + div > button > span,
+.markdown pre + div > button > svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.markdown .alert {
+  padding: 2rem;
+  padding-block-start: 1.6rem;
+  margin-block: 1.2rem;
+  border: 1px solid #EAEAEA;
+}
+
+.markdown .alert > div:first-child {
+  @apply label-02;
+  text-transform: capitalize;
+}
+
+.markdown .alert > div:first-child svg {
+  display: none;
+}
+
+.markdown .alert > p {
+  @apply body-short-02;
+}
+
