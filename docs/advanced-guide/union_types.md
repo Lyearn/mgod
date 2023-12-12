@@ -93,7 +93,7 @@ insertedNumberTag, _ := numberTagModel.InsertOne(context.TODO(), numberTag)
 
 **Output:**
 
-```json
+```js
 {
 	"_id" : ObjectId("65718f9c55e90b39cf538b42"),
 	"name" : "numberTag",
@@ -125,7 +125,7 @@ insertedDateTag, _ := globalTagModel.InsertOne(context.TODO(), dateTagDoc)
 
 **Output:**
 
-```json
+```js
 {
 	"_id" : ObjectId("65718f9c55e90b39cf538b43"),
 	"name" : "dateTag",

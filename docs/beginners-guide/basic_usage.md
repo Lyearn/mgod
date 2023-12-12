@@ -49,7 +49,7 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 
 **Output:**
 
-```json
+```js
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
@@ -101,7 +101,7 @@ mongo.UpdateResult{
 }
 ```
 
-```json
+```js
 // User Doc
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
