@@ -96,8 +96,9 @@ const config: Config = {
         //   position: 'right',
         // },
         {
+          'aria-label': 'GitHub',
+          className: 'navbar-github-link',
           href: 'https://github.com/aryan02420/mgod',
-          label: 'GitHub',
           position: 'right',
         },
       ],

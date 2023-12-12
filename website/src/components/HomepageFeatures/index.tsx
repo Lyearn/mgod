@@ -15,7 +15,7 @@ const FeatureList: FeatureItem[] = [
       </svg>
     ),
     title: 'Simplified Integration',
-    description: 'Mgod streamlines MongoDB interactions, reducing redundancy and enhancing type safety, making it a preferred choice for developers.'
+    description: 'Streamline MongoDB interactions with mgod. Reduce redundancy and enhance type safety.'
   },
   {
     icon: (
@@ -26,7 +26,7 @@ const FeatureList: FeatureItem[] = [
       </svg>
     ),
     title: 'Flexible and Open Source',
-    description: 'With an MIT license, mgod offers flexibility and control over your MongoDB stack, ensuring transparency and avoiding unexpected API changes.',
+    description: 'With an MIT license, mgod gives you flexibility and control over your MongoDB stack. Ensure transparency, avoid unexpected API changes.',
   },
   {
     icon: (
@@ -35,7 +35,7 @@ const FeatureList: FeatureItem[] = [
       </svg>
     ),
     title: 'Continuous Improvement',
-    description: 'We are committed to weekly updates, delivering new features and improvements regularly.',
+    description: 'Committed to weekly updates, mgod delivers new features and improvements regularly.',
   },
 ];
 

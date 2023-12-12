@@ -7,7 +7,7 @@ import Heading from '@theme/Heading';
 function GetStartedButton() {
   return (
     <Link
-      className="px-[3.2rem] py-[1.2rem] rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white"
+      className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white"
       to="/docs/introduction/about">
       Get Started
     </Link>
@@ -17,16 +17,16 @@ function GetStartedButton() {
 function HomepageHeader() {
   return (
     <header className="py-[12rem] text-center">
-      <Heading as="h1" className="pb-[3.2rem] max-w-[82.5rem] mx-auto text-text-primary heading-xxxl" style={{
+      <Heading as="h1" className="mb-[3.2rem] max-w-[82.5rem] mx-auto text-text-primary heading-xxxl" style={{
         fontSize: '6.8rem',
         fontStyle: 'normal',
         fontWeight: 600,
         lineHeight: 'normal',
         letterSpacing: '-0.136rem',
       }}>
-        Empower Your Go Applications with Mgod
+        Empower your Go applications with mgod
       </Heading>
-      <p className="pb-[5.6rem] max-w-[65.4rem] mx-auto text-text-secondary body-long-01" style={{
+      <p className="mb-[5.6rem] max-w-[65.4rem] mx-auto text-text-secondary body-long-01" style={{
         fontSize: '1.8rem',
         fontStyle: 'normal',
         fontWeight: 400,
@@ -42,14 +42,14 @@ function HomepageHeader() {
 function HomepageFooter() {
   return (
     <footer className="py-[20rem] text-center">
-      <Heading as="h2" className="pb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary heading-xxl" style={{
+      <Heading as="h2" className="mb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary heading-xxl" style={{
         fontSize: '4.8rem',
         fontStyle: 'normal',
         fontWeight: 600,
         lineHeight: '140%',
         letterSpacing: '-0.096rem',
       }}>
-        Ready to Simplify Your MongoDB Interactions?
+        Ready to simplify your MongoDB interactions?
       </Heading>
       <GetStartedButton />
     </footer>
