@@ -23,7 +23,10 @@
   --ifm-navbar-height: 5.6rem;
   --ifm-pagination-nav-border-radius: 0.8rem;
   --ifm-link-hover-decoration: none;
+  --ifm-toc-border-color: #EAEAEA;
   --ifm-toc-padding-horizontal: 1.6rem;
+  --ifm-toc-padding-vertical: 0rem;
+  --ifm-global-shadow-lw: none;
 
   /* uncomment to check unstyled elements */
   /*
@@ -514,6 +517,7 @@ html {
 
 .navbar--fixed-top {
   padding-inline: 2.4rem;
+  border-bottom: 1px solid #EAEAEA;
 }
 
 .navbar__brand {
@@ -643,6 +647,10 @@ html {
   border-inline-start: #EAEAEA 1px solid;
 }
 
+.table-of-contents {
+  margin-block-start: 4.8rem;
+}
+
 .table-of-contents > li {
   margin-inline: 0rem;
   margin-block: 0.8rem;
@@ -659,6 +667,11 @@ html {
 
 .table-of-contents__link--active {
   @apply label-02 text-text-primary;
+}
+
+.pagination-nav {
+  margin-top: 4.8rem !important;
+  margin-bottom: 4.8rem;
 }
 
 .pagination-nav__link {
@@ -679,6 +692,7 @@ html {
 .pagination-nav__sublabel {
   @apply label-03 text-text-placeholder;
   text-transform: uppercase;
+  margin-bottom: 0.4rem;
 }
 
 .pagination-nav__label {
@@ -718,7 +732,8 @@ html {
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-.markdown h1 {
+.markdown h1,
+.markdown h1:first-child {
   @apply text-text-primary heading-xxl mb-[3.2rem] mt-[5.2rem];
 }
 
@@ -743,7 +758,6 @@ html {
 }
 
 .markdown .theme-code-block {
-  box-shadow: none;
   margin-block: 1.2rem;
 }
 
@@ -779,7 +793,6 @@ html {
   padding: 2rem;
   padding-block-start: 1.6rem;
   margin-block: 1.2rem;
-  box-shadow: none;
   border: 1px solid #EAEAEA;
 }
 

@@ -4,6 +4,7 @@ sidebar_position: 2
 ---
 
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
+
 ```go
 type User struct {
 	Name     string
@@ -14,6 +15,7 @@ type User struct {
 ```
 
 Use `mgod` to get the entity ODM.
+
 ```go
 import (
 	"github.com/Lyearn/mgod"
@@ -34,6 +36,7 @@ userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
 Use the entity ODM to perform CRUD operations with ease.
 
 Insert a new document.
+
 ```go
 joinedOn, _ := dateformatter.New(time.Now()).GetISOString()
 userDoc := User{
@@ -45,6 +48,7 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 
 **Output:**
+
 ```json
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
@@ -56,16 +60,19 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 	"__v": 0
 }
 ```
+
 Notice how `_id`, `createdAt`, `updatedAt` and `__v` fields are added automatically.
 
 ---
 
 Find documents using model properties.
+
 ```go
 users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 ```
 
 **Output:**
+
 ```go
 []User{
 	User{
@@ -75,14 +82,17 @@ users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 	}
   }
 ```
+
 ---
 
 Update document properties.
+
 ```go
 result, _ := userModel.UpdateMany(context.TODO(), bson.M{"joinedOn": bson.M{"$gte": "2023-12-01T00:00:00.000Z"}}, bson.M{"$inc": {"__v": 1}})
 ```
 
 **Output:**
+
 ```go
 mongo.UpdateResult{
 	MatchedCount: 1,
@@ -90,6 +100,7 @@ mongo.UpdateResult{
 	UpsertedCount: 0,
 }
 ```
+
 ```json
 // User Doc
 {
@@ -102,16 +113,19 @@ mongo.UpdateResult{
 	"__v": 1
 }
 ```
+
 Notice the updation of the `updatedAt` field.
 
 ---
 
 Remove documents matching certain or all model properties.
+
 ```go
 result, _ := userModel.DeleteMany(context.TODO(), bson.M{"name": userDoc.Name})
 ```
 
 **Output:**
+
 ```go
 mongo.DeleteResult{
 	DeletedCount: 1
