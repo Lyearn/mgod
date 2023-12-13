@@ -51,7 +51,8 @@ function Feature({ icon, title, description }: FeatureItem) {
 
 export default function HomepageFeatures(): JSX.Element {
   return (
-    <section className="py-[10rem] px-[2rem] mx-auto flex flex-row flex-wrap gap-[4rem] place-content-evenly">
+    <section className="py-[10rem] px-[4.8rem] mx-auto flex flex-row flex-wrap gap-[4rem] place-content-evenly">
+      <Heading as="h2" className="screen-reader-only">Features</Heading>
       {FeatureList.map((props, idx) => (
         <Feature key={idx} {...props} />
       ))}

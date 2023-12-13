@@ -16,22 +16,14 @@ function GetStartedButton() {
 
 function HomepageHeader() {
   return (
-    <header className="py-[12rem] text-center">
-      <Heading as="h1" className="mb-[3.2rem] max-w-[82.5rem] mx-auto text-text-primary heading-xxxl" style={{
-        fontSize: '6.8rem',
-        fontStyle: 'normal',
-        fontWeight: 600,
-        lineHeight: 'normal',
-        letterSpacing: '-0.136rem',
-      }}>
+    <header className="py-[12rem] px-[2rem] text-center">
+      <Heading
+        as="h1"
+        className="mb-[3.2rem] max-w-[82.5rem] mx-auto text-text-primary text-[4.8rem] font-[600] leading-[120%] tracking-[-0.096] sm:text-[6.8rem] sm:leading-[normal] sm:tracking-[-0.136rem]"
+      >
         Empower your Go applications with mgod
       </Heading>
-      <p className="mb-[5.6rem] max-w-[65.4rem] mx-auto text-text-secondary body-long-01" style={{
-        fontSize: '1.8rem',
-        fontStyle: 'normal',
-        fontWeight: 400,
-        lineHeight: '3.2rem',
-      }}>
+      <p className="mb-[5.6rem] max-w-[65.4rem] mx-auto text-text-secondary text-[1.8rem] font-[400] leading-[3.2rem]">
         Transform your MongoDB interactions in Go effortlessly with mgod. Simplify database operations, enhance type safety, and build robust applications!
       </p>
       <GetStartedButton />
@@ -41,14 +33,18 @@ function HomepageHeader() {
 
 function HomepageFooter() {
   return (
-    <footer className="py-[20rem] text-center">
-      <Heading as="h2" className="mb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary heading-xxl" style={{
-        fontSize: '4.8rem',
-        fontStyle: 'normal',
-        fontWeight: 600,
-        lineHeight: '140%',
-        letterSpacing: '-0.096rem',
-      }}>
+    <footer className="py-[20rem] px-[2rem] text-center">
+      <Heading
+        as="h2"
+        className="mb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary text-[4.8rem] font-[600] leading-[140%] tracking-[-0.096] sm:text-[3.2rem] sm:leading-[120%] sm:tracking-[-0.064rem]"
+        style={{
+          fontSize: '4.8rem',
+          fontStyle: 'normal',
+          fontWeight: 600,
+          lineHeight: '140%',
+          letterSpacing: '-0.096rem',
+        }}
+        >
         Ready to simplify your MongoDB interactions?
       </Heading>
       <GetStartedButton />

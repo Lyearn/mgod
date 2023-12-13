@@ -14,16 +14,18 @@
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: 'Inter', sans-serif;
   --ifm-menu-link-padding-horizontal: 0rem;
-  --ifm-menu-link-sublist-icon: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24"><path fill="rgba(0,0,0,0.5)" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path></svg>');
+  --ifm-menu-link-sublist-icon: url('/icon/chevron-up-fill.svg');
   --ifm-menu-color-background-active: unset;
   --ifm-menu-color-background-hover: unset;
   --ifm-navbar-height: 5.6rem;
   --ifm-pagination-nav-border-radius: 0.8rem;
+  --ifm-pagination-nav-color-hover: #EAEAEA;
   --ifm-link-hover-decoration: none;
   --ifm-toc-border-color: #EAEAEA;
   --ifm-toc-padding-horizontal: 1.6rem;
   --ifm-toc-padding-vertical: 0rem;
   --ifm-global-shadow-lw: none;
+  --ifm-spacing-horizontal: 2rem;
 
   /* uncomment to check unstyled elements */
   /*
@@ -507,6 +509,17 @@ html {
   .icon-icon-white {
     color: var(--icon-white);
   }
+
+  .screen-reader-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+    margin: -1px;
+    padding: 0;
+  }
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
@@ -515,6 +528,21 @@ html {
 .navbar--fixed-top {
   padding-inline: 2.4rem;
   border-bottom: 1px solid #EAEAEA;
+
+  @media (max-width: 996px) {
+    padding-inline: 0.8rem;
+  }
+}
+
+.navbar__toggle {
+  margin-inline-end: 0.8rem;
+  padding: 1.2rem;
+
+  & svg {
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0.4rem;
+  }
 }
 
 .navbar__logo {
@@ -523,7 +551,7 @@ html {
 }
 
 .navbar__title {
-  visibility: hidden;
+  display: none;
 }
 
 .navbar__items.navbar__items--right {
@@ -544,32 +572,61 @@ html {
   @apply label-02 text-text-primary;
 }
 
-.navbar__link > svg {
+.navbar__link > svg,
+.menu__link > svg {
   display: none;
 }
 
 /* Custom class for Github logo. see docusaurus.config.ts */
-.navbar-github-link {
-  display: flex;
-  align-items: center;
-}
+.navbar.navbar--fixed-top .navbar__items--right {
+  & .navbar__link.navbar-github-link {
+    display: flex;
+    align-items: center;
+    
+    &:after {
+      content: '';
+      width: 2.4rem;
+      height: 2.4rem;
+      background-image: url("/icon/github-fill.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    
+    &:before {
+      content: '';
+      margin-left: -0.4rem;
+      margin-right: 1.2rem;
+      width: 0.1rem;
+      height: 2.4rem;
+      background-color: #EAEAEA;
+    }
 
-.navbar-github-link:after {
-  content: '';
-  width: 2.4rem;
-  height: 2.4rem;
-  background-image: url("data:image/svg+xml;charset=utf-8,<svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path fill='currentColor' d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/></svg>");
-  background-repeat: no-repeat;
-  background-position: center;
+    @media (max-width: 996px) {
+      display: none;
+    }
+  }
 }
+.navbar-sidebar .navbar-sidebar__item .menu__list-item {
+  .menu__link.navbar-github-link {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #EAEAEA;
+    padding-top: 1.6rem;
 
-.navbar-github-link:before {
-  content: '';
-  margin-left: -0.4rem;
-  margin-right: 1.2rem;
-  width: 0.1rem;
-  height: 2.4rem;
-  background-color: #EAEAEA;
+    &:before {
+      content: '';
+      width: 2.4rem;
+      height: 2.4rem;
+      background-image: url("/icon/github-fill.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-right: 0.8rem;
+    }
+    
+    &:after {
+      content: 'GitHub';
+    }
+  }
 }
 
 .menu.thin-scrollbar {
@@ -636,26 +693,67 @@ html {
   border-inline-start: #EAEAEA 1px solid;
 }
 
-.table-of-contents {
-  margin-block-start: 4.8rem;
+.theme-doc-toc-desktop {
+  & .table-of-contents {
+    margin-block-start: 4.8rem;
+
+    & > li {
+      margin-inline: 0rem;
+      margin-block: 0.8rem;
+    }
+  }
+
+  .table-of-contents__link {
+    @apply body-short-02 text-text-secondary;
+
+    &:hover,
+    &:focus-visible {
+      @apply text-text-primary;
+    }
+  }
+
+  .table-of-contents__link--active {
+    @apply label-02 text-text-primary;
+  }
 }
 
-.table-of-contents > li {
-  margin-inline: 0rem;
-  margin-block: 0.8rem;
-}
+.theme-doc-toc-mobile {
+  background-color: #F2F2F2 !important;
+  padding-block: 1.2rem;
+  padding-inline: 1.6rem;
+  margin-top: 1rem !important;
+  margin-bottom: 0rem !important;
+  @apply body-short-01 text-text-primary;
+  
+  & > button {
+    padding: 0rem;
+  }
 
-.table-of-contents__link {
-  @apply body-short-02 text-text-secondary;
-}
+  & .table-of-contents {
+    margin-block-start: 1.6rem;
 
-.table-of-contents__link:hover,
-.table-of-contents__link:focus-visible {
-  @apply text-text-primary;
-}
+    & > li {
+      margin-inline: 0rem;
+      margin-block: 1.6rem;
 
-.table-of-contents__link--active {
-  @apply label-02 text-text-primary;
+      &:last-child {
+        margin-block-end: 0rem;
+      }
+    }
+  }
+
+  & .table-of-contents__link {
+    @apply body-short-01 text-text-secondary;
+  
+    &:hover,
+    &:focus-visible {
+      @apply text-text-primary;
+    }
+  }
+
+  & .table-of-contents__link--active {
+    @apply label-01 text-text-primary;
+  }
 }
 
 .pagination-nav {
@@ -688,20 +786,26 @@ html {
   @apply heading-xs text-text-primary;
 }
 
-.pagination-nav__link--next .pagination-nav__label::after {
+.pagination-nav__link--next .pagination-nav__label::after,
+.pagination-nav__link--prev .pagination-nav__label::before {
+  content: '';
   position: absolute;
-  right: 2.4rem;
   top: 50%;
   transform: translateY(-50%);
-  @apply icon-icon-placeholder;
+  width: 2.4rem;
+  height: 2.4rem;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.pagination-nav__link--next .pagination-nav__label::after {
+  right: 2.4rem;
+  background-image: url("/icon/arrow-right-fill.svg");
 }
 
 .pagination-nav__link--prev .pagination-nav__label::before {
-  position: absolute;
   left: 2.4rem;
-  top: 50%;
-  transform: translateY(-50%);
-  @apply icon-icon-placeholder;
+  background-image: url("/icon/arrow-left-fill.svg");
 }
 
 .theme-back-to-top-button {
