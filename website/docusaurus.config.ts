@@ -52,12 +52,14 @@ const config: Config = {
   plugins: [
     // https://www.swyx.io/tailwind-docusaurus-2022
     async function tailwindPlugin(context, options) {
+      const tailwindCssNesting = (await import("tailwindcss/nesting"));
       const tailwindCss = (await import("tailwindcss"));
       const autoprefixer = (await import("autoprefixer"));
     
       return {
         name: "docusaurus-tailwindcss",
         configurePostCss(postcssOptions) {
+          postcssOptions.plugins.push(tailwindCssNesting);
           postcssOptions.plugins.push(tailwindCss);
           postcssOptions.plugins.push(autoprefixer);
           return postcssOptions;
