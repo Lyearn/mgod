@@ -723,10 +723,19 @@ html {
   padding-inline: 1.6rem;
   margin-top: 1rem !important;
   margin-bottom: 0rem !important;
+  border-radius: 1.2rem !important;
   @apply body-short-01 text-text-primary;
   
   & > button {
     padding: 0rem;
+
+    &::after {
+      background-image: url("/icon/arrow-ios-up-outline.svg");
+      background-repeat: no-repeat;
+      background-position: center;
+      height: 2rem;
+      width: 2rem;
+    }
   }
 
   & .table-of-contents {
@@ -827,7 +836,7 @@ html {
 
 .markdown h1,
 .markdown h1:first-child {
-  @apply text-text-primary heading-xxl mb-[3.2rem] mt-[5.2rem];
+  @apply text-text-primary heading-xxl mb-[3.2rem] mt-[4rem] sm:mt-[5.2rem];
 }
 
 .markdown h2 {
@@ -901,4 +910,3 @@ html {
 .markdown .alert > p {
   @apply body-short-02;
 }
-

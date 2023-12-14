@@ -41,7 +41,7 @@ const FeatureList: FeatureItem[] = [
 
 function Feature({ icon, title, description }: FeatureItem) {
   return (
-    <div className="max-w-[30rem]">
+    <div className="xs:max-w-[30rem]">
       <div className="w-[4rem] h-[4rem] icon-icon-active">{icon}</div>
       <Heading as="h3" className="mt-[1.6rem] mb-[0.4rem] heading-xs text-text-paragraph">{title}</Heading>
       <p className="body-short-01 text-text-paragraph">{description}</p>
@@ -51,7 +51,7 @@ function Feature({ icon, title, description }: FeatureItem) {
 
 export default function HomepageFeatures(): JSX.Element {
   return (
-    <section className="py-[10rem] px-[4.8rem] mx-auto flex flex-row flex-wrap gap-[4rem] place-content-evenly">
+    <section className="sm:py-[10rem] px-[4.8rem] mx-auto flex flex-row flex-wrap gap-[7.2rem] place-content-evenly">
       <Heading as="h2" className="screen-reader-only">Features</Heading>
       {FeatureList.map((props, idx) => (
         <Feature key={idx} {...props} />
