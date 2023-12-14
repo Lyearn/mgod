@@ -833,18 +833,15 @@ html {
   --ifm-link-color: #888;
 
   padding: 0rem;
-  padding-left: var(--doc-sidebar-width);
   background-color: unset;
   border-top: 1px solid #EAEAEA;
 
-
-  @media (max-width: 996px) {
-    padding-left: 0.4rem;
-  }
-
   & > .container {
-    margin-block-start: 2rem;
-    margin-block-end: 3.7rem;
+    margin-block: 2rem 3.2rem;
+    margin-left: auto;
+    @apply  mr-[2.4rem] sm:mr-[4.2rem];
+    padding: 0rem;
+    max-width: fit-content;
   }
 
   .footer__links {
@@ -853,7 +850,6 @@ html {
     .footer-github-discussions-link {
       display: flex;
       align-items: center;
-      margin-block-end: 1.6rem;
 
       &:after {
         content: '';
