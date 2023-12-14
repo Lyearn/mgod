@@ -92,11 +92,6 @@ const config: Config = {
           label: 'API',
           position: 'right',
         },
-        // {
-        //   href: 'https://blog.lyearn.com',
-        //   label: 'Blog',
-        //   position: 'right',
-        // },
         {
           'aria-label': 'GitHub',
           className: 'navbar-github-link',
@@ -116,45 +111,6 @@ const config: Config = {
           href: 'https://github.com/Lyearn/mgod/discussions',
           className: 'footer-github-discussions-link',
         },
-        // {
-        //   title: 'Docs',
-        //   items: [
-        //     {
-        //       label: 'Tutorial',
-        //       to: '/docs/intro',
-        //     },
-        //   ],
-        // },
-        // {
-        //   title: 'Community',
-        //   items: [
-        //     {
-        //       label: 'Stack Overflow',
-        //       href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-        //     },
-        //     {
-        //       label: 'Discord',
-        //       href: 'https://discordapp.com/invite/docusaurus',
-        //     },
-        //     {
-        //       label: 'Twitter',
-        //       href: 'https://twitter.com/docusaurus',
-        //     },
-        //   ],
-        // },
-        // {
-        //   title: 'More',
-        //   items: [
-        //     {
-        //       label: 'Blog',
-        //       href: 'https://blog.lyearn.com',
-        //     },
-        //     {
-        //       label: 'GitHub',
-        //       href: 'https://github.com/Lyearn/mgod',
-        //     },
-        //   ],
-        // },
       ],
       // copyright: `Copyright © ${new Date().getFullYear()} Lyearn, Inc.`,
     },
