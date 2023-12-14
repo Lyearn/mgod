@@ -13,6 +13,7 @@
   --ifm-font-size-base: 6px;
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: 'Inter', sans-serif;
+  --ifm-paragraph-margin-bottom: 0rem;
   --ifm-menu-link-padding-horizontal: 0rem;
   --ifm-menu-link-sublist-icon: url('/icon/chevron-up-fill.svg');
   --ifm-menu-color-background-active: unset;
