@@ -65,7 +65,7 @@ schemaOpts := schemaopt.SchemaOptions{
 tagModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
 ```
 
-### Create ODM for entities using `mgod`
+### Create ODM for entities
 
 ```go
 globalTagModel, _ := mgod.NewEntityMongoModel(GlobalTag{}, *tagModelOpts)
@@ -73,7 +73,9 @@ numberTagModel, _ := mgod.NewEntityMongoModel(NumberTag{}, *tagModelOpts)
 dateTagModel, _ := mgod.NewEntityMongoModel(DateTag{}, *tagModelOpts)
 ```
 
-### Now, to insert documents, we have two options
+### Inserting Documents
+
+To insert documents, we have two options:
 
 1. Use ODM specific to the entity we are inserting in case we have liberty to create separate functions to handle different entities.
 
@@ -136,7 +138,7 @@ dateTagModel, _ := mgod.NewEntityMongoModel(DateTag{}, *tagModelOpts)
 	}
 	```
 
-### Use the global ODM to find docs by querying on model properties.
+### Find docs by querying on model properties using the global ODM
 
 ```go
 numberTag, _ := globalTagModel.FindOne(context.TODO(), bson.M{"name": "numberTag"})
