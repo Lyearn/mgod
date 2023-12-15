@@ -787,6 +787,22 @@ html {
 .pagination-nav {
   margin-top: 4.8rem !important;
   margin-bottom: 4.8rem;
+  gap: 1.6rem;
+
+  @media (max-width: 640px) {
+    gap: 1.2rem;
+    grid-template-columns: auto;
+
+    & > .pagination-nav__link--next {
+      grid-row: 1 / 2;
+      grid-column: 1 / 2;
+    }
+
+    & > .pagination-nav__link--prev {
+      grid-row: 2 / 3;
+      grid-column: 1 / 2;
+    }
+  }
 }
 
 .pagination-nav__link {
