@@ -21,7 +21,7 @@ const FeatureList: FeatureItem[] = [
   {
     icon: 'icon/trending-up-large.svg',
     title: 'Continuous Improvement',
-    description: 'Committed to weekly updates, mgod delivers new features and improvements regularly.',
+    description: 'Dedicated to delivering regular updates, mgod consistently introduces new features and improvements.',
   },
 ];
 
