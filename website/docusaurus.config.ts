@@ -7,14 +7,10 @@ const config: Config = {
   tagline: 'Transform your MongoDB interactions in Go effortlessly with mgod',
   favicon: '/img/favicon.ico',
 
-  // Set the production url of your site here
   url: 'https://lyearn.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/mgod/',
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Lyearn',
   projectName: 'mgod',
   trailingSlash: false, // https://github.com/slorber/trailing-slash-guide 
@@ -22,9 +18,7 @@ const config: Config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
+  // you can use this field to set useful metadata like html lang
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
