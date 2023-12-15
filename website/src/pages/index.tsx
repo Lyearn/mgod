@@ -8,7 +8,7 @@ function GetStartedButton() {
   return (
     <Link
       className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white"
-      to="/docs/introduction/about">
+      to="/docs/about">
       Get Started
     </Link>
   );

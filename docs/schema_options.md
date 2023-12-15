@@ -1,6 +1,5 @@
 ---
 title: Schema Options
-sidebar_position: 1
 ---
 
 Schema Options is Mongo Schema level options (which modifies actual MongoDB doc) that needs to be provided when creating a new EntityMongoModel.
@@ -62,7 +61,7 @@ schemaOpts := schemaopt.SchemaOptions{
 - Default Value: `false`
 - Is Optional: `Yes`
 
-It defines whether the entity is a union type. See [Union Types](../advanced-guide/union_types.md) for more details on unions.
+It defines whether the entity is a union type. See [Union Types](union_types.md) for more details on unions.
 
 ### Usage
 

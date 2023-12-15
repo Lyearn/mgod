@@ -1,6 +1,5 @@
 ---
 title: Field Transformers
-sidebar_position: 3
 ---
 
 Field transformers are an adapter between MongoDB field and Go struct field. They help in transforming field types in both directions i.e. from entity model to mongo doc and vice versa while building intermediate BSON document.

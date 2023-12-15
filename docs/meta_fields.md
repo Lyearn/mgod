@@ -1,6 +1,5 @@
 ---
 title: Meta Fields
-sidebar_position: 4
 ---
 
 Meta fields are those fields that tracks extra information about the document which can be helpful to determine the state of a document.
