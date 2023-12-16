@@ -11,9 +11,9 @@ import (
 var dbConn *mongo.Database
 var defaultTimeout = 10 * time.Second
 
-// ConnectionConfig is the configuration for a MongoDB connection.
+// ConnectionConfig is the configuration options available for a MongoDB connection.
 type ConnectionConfig struct {
-	// Timeout is the timeout for the connection.
+	// Timeout is the timeout for various operations performed on the MongoDB server like Connect, Ping, Session etc.
 	Timeout time.Duration
 }
 
@@ -23,17 +23,17 @@ func SetDefaultConnection(conn *mongo.Database) {
 }
 
 // ConfigureDefaultConnection opens a new connection using the provided config options and sets it as a default connection to be used by the package.
-func ConfigureDefaultConnection(config *ConnectionConfig, dbName string, opts ...*options.ClientOptions) error {
-	if config == nil {
-		config = defaultConnectionConfig()
+func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*options.ClientOptions) error {
+	if cfg == nil {
+		cfg = defaultConnectionConfig()
 	}
 
-	client, err := newClient(config, opts...)
+	client, err := newClient(cfg, opts...)
 	if err != nil {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
+	ctx, cancel := newCtx(cfg.Timeout)
 	defer cancel()
 
 	// Ping the MongoDB server to check if connection is established.
@@ -47,16 +47,9 @@ func ConfigureDefaultConnection(config *ConnectionConfig, dbName string, opts ..
 	return nil
 }
 
-// defaultConnectionConfig returns the default connection config.
-func defaultConnectionConfig() *ConnectionConfig {
-	return &ConnectionConfig{
-		Timeout: defaultTimeout,
-	}
-}
-
 // newClient creates a new MongoDB client.
-func newClient(config *ConnectionConfig, opts ...*options.ClientOptions) (*mongo.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), config.Timeout)
+func newClient(cfg *ConnectionConfig, opts ...*options.ClientOptions) (*mongo.Client, error) {
+	ctx, cancel := newCtx(cfg.Timeout)
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, opts...)
@@ -65,4 +58,16 @@ func newClient(config *ConnectionConfig, opts ...*options.ClientOptions) (*mongo
 	}
 
 	return client, nil
+}
+
+// newCtx returns a context with timeout (from the configured connection config).
+func newCtx(timeout time.Duration) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), timeout)
+}
+
+// defaultConnectionConfig returns the default connection config.
+func defaultConnectionConfig() *ConnectionConfig {
+	return &ConnectionConfig{
+		Timeout: defaultTimeout,
+	}
 }

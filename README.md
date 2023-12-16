@@ -42,7 +42,7 @@ For existing database connection,
 import "github.com/Lyearn/mgod"
 
 func init() {
-	// ...database connection logic
+	// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
 	mgod.SetDefaultConnection(dbConn)
 }
 ```
@@ -55,10 +55,10 @@ import (
 )
 
 func init() {
-	uri := "mongodb://root:mgod123@localhost:27017"
 	dbName := "mgod-test"
+	opts := options.Client().ApplyURI("mongodb://root:mgod123@localhost:27017")
 
-	err := mgod.ConfigureDefaultConnection(nil, dbName, options.Client().ApplyURI(uri))
+	err := mgod.ConfigureDefaultConnection(nil, dbName, opts)
 }
 ```
 
