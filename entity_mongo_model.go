@@ -7,6 +7,7 @@ import (
 
 	"github.com/Lyearn/mgod/errors"
 	"github.com/Lyearn/mgod/schema"
+	"github.com/Lyearn/mgod/schema/schemaopt"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -62,9 +63,9 @@ type EntityMongoModel[T any] interface {
 }
 
 type entityMongoModel[T any] struct {
-	modelType T
-	opts      EntityMongoOptions
-	coll      *mongo.Collection
+	modelType  T
+	schemaOpts schemaopt.SchemaOptions
+	coll       *mongo.Collection
 
 	schema *schema.EntityModelSchema
 
@@ -73,13 +74,12 @@ type entityMongoModel[T any] struct {
 }
 
 // NewEntityMongoModel returns a new instance of EntityMongoModel for the provided model type and options.
-func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMongoModel[T], error) {
-	dbConnection := opts.dbConnection
-	if dbConnection == nil {
+func NewEntityMongoModel[T any](modelType T, schemaOpts schemaopt.SchemaOptions) (EntityMongoModel[T], error) {
+	if dbConn == nil {
 		return nil, errors.ErrNoDatabaseConnection
 	}
 
-	coll := dbConnection.Collection(opts.schemaOptions.Collection)
+	coll := dbConn.Collection(schemaOpts.Collection)
 
 	modelName := schema.GetSchemaNameForModel(modelType)
 	schemaCacheKey := GetSchemaCacheKey(coll.Name(), modelName)
@@ -89,7 +89,7 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 
 	// build schema if not cached.
 	if entityModelSchema, err = schema.EntityModelSchemaCacheInstance.GetSchema(schemaCacheKey); err != nil {
-		entityModelSchema, err = schema.BuildSchemaForModel(modelType, opts.schemaOptions)
+		entityModelSchema, err = schema.BuildSchemaForModel(modelType, schemaOpts)
 		if err != nil {
 			return nil, err
 		}
@@ -97,16 +97,16 @@ func NewEntityMongoModel[T any](modelType T, opts EntityMongoOptions) (EntityMon
 		schema.EntityModelSchemaCacheInstance.SetSchema(schemaCacheKey, entityModelSchema)
 	}
 
-	isUnionTypeModel := opts.schemaOptions.IsUnionType
+	isUnionTypeModel := schemaOpts.IsUnionType
 
 	discriminatorKey := "__t"
-	if isUnionTypeModel && opts.schemaOptions.DiscriminatorKey != nil {
-		discriminatorKey = *opts.schemaOptions.DiscriminatorKey
+	if isUnionTypeModel && schemaOpts.DiscriminatorKey != nil {
+		discriminatorKey = *schemaOpts.DiscriminatorKey
 	}
 
 	return &entityMongoModel[T]{
 		modelType:        modelType,
-		opts:             opts,
+		schemaOpts:       schemaOpts,
 		coll:             coll,
 		schema:           entityModelSchema,
 		isUnionType:      isUnionTypeModel,

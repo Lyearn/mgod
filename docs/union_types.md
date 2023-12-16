@@ -46,7 +46,6 @@ type GlobalTag struct {
 
 Configure schema options for the union type entities.
 ```go
-// As the `type` field is the discriminator in this case, we can define the DiscriminatorKey rather than relying on auto creation of `__t` field.
 discriminator := "type"
 schemaOpts := schemaopt.SchemaOptions{
 	Collection:       "unionTest",
@@ -54,16 +53,17 @@ schemaOpts := schemaopt.SchemaOptions{
 	IsUnionType:      true,
 	DiscriminatorKey: &discriminator,
 }
-
-// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-tagModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
 ```
+We have used the `type` field as the discriminator in this case, as it a unique key to identify underlying union types.
+
+> [!NOTE]
+> In case if we do not provide `type` as the discriminator key, `__t` will be added to the MongoDB doc with its value as the name of its underlying struct type.
 
 Create ODM for entities using `mgod`.
 ```go
-globalTagModel, _ := mgod.NewEntityMongoModel(GlobalTag{}, *tagModelOpts)
-numberTagModel, _ := mgod.NewEntityMongoModel(NumberTag{}, *tagModelOpts)
-dateTagModel, _ := mgod.NewEntityMongoModel(DateTag{}, *tagModelOpts)
+globalTagModel, _ := mgod.NewEntityMongoModel(GlobalTag{}, schemaOpts)
+numberTagModel, _ := mgod.NewEntityMongoModel(NumberTag{}, schemaOpts)
+dateTagModel, _ := mgod.NewEntityMongoModel(DateTag{}, schemaOpts)
 ```
 
 Now, to insert documents, we have two options -
