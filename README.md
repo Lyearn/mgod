@@ -35,6 +35,37 @@ go get github.com/Lyearn/mgod
 ```
 
 ## Basic Usage
+Use existing MongoDB connection, or setup a new one to register a default database connection.
+
+For existing database connection,
+```go
+import "github.com/Lyearn/mgod"
+
+func init() {
+	// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
+	mgod.SetDefaultConnection(dbConn)
+}
+```
+
+To setup a new connection,
+```go
+import (
+	"time"
+
+	"github.com/Lyearn/mgod"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func init() {
+	// `cfg` is optional. Can rely on default configurations by providing `nil` value in argument.
+	cfg := &mgod.ConnectionConfig{Timeout: 5 * time.Second}
+	dbName := "mgod-test"
+	opts := options.Client().ApplyURI("mongodb://root:mgod123@localhost:27017")
+
+	err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
+}
+```
+
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
 ```go
 type User struct {
@@ -58,9 +89,7 @@ schemaOpts := schemaopt.SchemaOptions{
 	Timestamps: true,
 }
 
-// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-userModelOpts := mgod.NewEntityMongoOptions(dbConn, schemaOpts)
-userModel, _ := mgod.NewEntityMongoModel(model, *userModelOpts)
+userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
 ```
 
 Use the entity ODM to perform CRUD operations with ease.
@@ -115,7 +144,7 @@ Inspired by the easy interface of MongoDB handling using [Mongoose](https://gith
 ## Future Scope
 The current version of mgod is a stable release. However, there are plans to add a lot more features like -
 - [ ] Enable functionality to opt out of the default conversion of date fields to ISOString format.
-- [ ] Implement a setup step for storing a default Mongo connection, eliminating the need to pass it during EntityMongoModel creation.
+- [x] Implement a setup step for storing a default Mongo connection, eliminating the need to pass it during EntityMongoModel creation.
 - [ ] Provide support for transactions following the integration of default Mongo connection logic.
 - [ ] Develop easy to use wrapper functions around MongoDB Aggregation operation.
 - [ ] Introduce automatic MongoDB collection selection based on Go struct names as a default behavior.

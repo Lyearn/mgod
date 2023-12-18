@@ -97,9 +97,8 @@ func (s *EntityMongoModelSuite) TestFind() {
 
 		mt.AddMockResponses(first, second, killCursors)
 
-		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
-
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
+		opts := schemaopt.SchemaOptions{Collection: s.collName}
+		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
 		s.Nil(err)
 
 		testEntities, err := entityMongoModel.Find(context.Background(), bson.D{
@@ -133,9 +132,8 @@ func (s *EntityMongoModelSuite) TestFindOne() {
 			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
-
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
+		opts := schemaopt.SchemaOptions{Collection: s.collName}
+		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
 		s.Nil(err)
 
 		testEntity, err := entityMongoModel.FindOne(context.Background(), bson.D{
@@ -168,9 +166,8 @@ func (s *EntityMongoModelSuite) TestInsertOne() {
 			{Key: "age", Value: 18},
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
-
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
+		opts := schemaopt.SchemaOptions{Collection: s.collName}
+		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
 		s.Nil(err)
 
 		doc, err := entityMongoModel.InsertOne(context.Background(), entity)
@@ -193,9 +190,8 @@ func (s *EntityMongoModelSuite) TestInsertOne() {
 			Message: "duplicate key error",
 		}))
 
-		opts := mgod.NewEntityMongoOptions(mt.DB, schemaopt.SchemaOptions{Collection: s.collName})
-
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, *opts)
+		opts := schemaopt.SchemaOptions{Collection: s.collName}
+		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
 		s.Nil(err)
 
 		docID, err := entityMongoModel.InsertOne(context.Background(), entity)
