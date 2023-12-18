@@ -32,8 +32,10 @@ func init() {
 	err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
 }
 ```
-> [!NOTE]
-> The above `err` variable will be a connection error (if occurs) returned by the Go Mongo Driver. So, handle the error accordingly.
+
+:::note
+The above `err` variable will be a connection error (if occurs) returned by the Go Mongo Driver. So, handle the error accordingly.
+:::
 
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
 

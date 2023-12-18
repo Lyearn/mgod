@@ -62,8 +62,9 @@ schemaOpts := schemaopt.SchemaOptions{
 ```
 We have used the `type` field as the discriminator in this case, as it a unique key to identify underlying union types.
 
-> [!NOTE]
-> In case if we do not provide `type` as the discriminator key, `__t` will be added to the MongoDB doc with its value as the name of its underlying struct type.
+:::note
+In case if we do not provide `type` as the discriminator key, `__t` will be added to the MongoDB doc with its value as the name of its underlying struct type.
+:::
 
 ### Create ODM for entities
 
