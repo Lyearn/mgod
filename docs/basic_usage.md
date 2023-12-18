@@ -32,10 +32,13 @@ func init() {
 	err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
 }
 ```
-> [!NOTE]
-> The above `err` variable will be a connection error (if occurs) returned by the Go Mongo Driver. So, handle the error accordingly.
+
+:::note
+The above `err` variable will be a connection error (if occurs) returned by the Go Mongo Driver. So, handle the error accordingly.
+:::
 
 Add tags _(wherever applicable)_ in existing struct _(or define a new model)_.
+
 ```go
 type User struct {
 	Name     string
@@ -46,6 +49,7 @@ type User struct {
 ```
 
 Use `mgod` to get the entity ODM.
+
 ```go
 import (
 	"github.com/Lyearn/mgod"
@@ -63,7 +67,8 @@ userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
 
 Use the entity ODM to perform CRUD operations with ease.
 
-Insert a new document.
+## Inserting a new document
+
 ```go
 joinedOn, _ := dateformatter.New(time.Now()).GetISOString()
 userDoc := User{
@@ -75,7 +80,8 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 
 **Output:**
-```json
+
+```js
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
@@ -86,16 +92,17 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 	"__v": 0
 }
 ```
+
 Notice how `_id`, `createdAt`, `updatedAt` and `__v` fields are added automatically.
 
----
+## Finding documents using model properties
 
-Find documents using model properties.
 ```go
 users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 ```
 
 **Output:**
+
 ```go
 []User{
 	User{
@@ -103,16 +110,17 @@ users, _ := userModel.Find(context.TODO(), bson.M{"name": userDoc.Name})
 		EmailID: "gopher@mgod.com",
 		JoinedOn: "2023-12-01T11:32:19.290Z",
 	}
-  }
+}
 ```
----
 
-Update document properties.
+## Updating document properties
+
 ```go
 result, _ := userModel.UpdateMany(context.TODO(), bson.M{"joinedOn": bson.M{"$gte": "2023-12-01T00:00:00.000Z"}}, bson.M{"$inc": {"__v": 1}})
 ```
 
 **Output:**
+
 ```go
 mongo.UpdateResult{
 	MatchedCount: 1,
@@ -120,7 +128,8 @@ mongo.UpdateResult{
 	UpsertedCount: 0,
 }
 ```
-```json
+
+```js
 // User Doc
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
@@ -132,18 +141,19 @@ mongo.UpdateResult{
 	"__v": 1
 }
 ```
+
 Notice the updation of the `updatedAt` field.
 
----
+## Removing documents matching certain or all model properties
 
-Remove documents matching certain or all model properties.
 ```go
 result, _ := userModel.DeleteMany(context.TODO(), bson.M{"name": userDoc.Name})
 ```
 
 **Output:**
+
 ```go
 mongo.DeleteResult{
 	DeletedCount: 1
-  }
+}
 ```
