@@ -145,9 +145,9 @@ Inspired by the easy interface of MongoDB handling using [Mongoose](https://gith
 
 ## Future Scope
 The current version of mgod is a stable release. However, there are plans to add a lot more features like -
-- [ ] Enable functionality to opt out of the default conversion of date fields to ISOString format.
 - [x] Implement a setup step for storing a default Mongo connection, eliminating the need to pass it during EntityMongoModel creation.
-- [ ] Provide support for transactions following the integration of default Mongo connection logic.
+- [x] Provide support for transactions following the integration of default Mongo connection logic.
+- [ ] Enable functionality to opt out of the default conversion of date fields to ISOString format.
 - [ ] Develop easy to use wrapper functions around MongoDB Aggregation operation.
 - [ ] Introduce automatic MongoDB collection selection based on Go struct names as a default behavior.
 - [ ] Add test cases to improve code coverage.
