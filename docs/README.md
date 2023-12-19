@@ -19,3 +19,4 @@ This directory contains user-facing documentation. For those who wish to underst
 
 ### Advanced Guide
 * [Unions](./union_types.md)
+* [Transactions](./transactions.md)

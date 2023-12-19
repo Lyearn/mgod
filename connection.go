@@ -8,27 +8,29 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var mClient *mongo.Client
 var dbConn *mongo.Database
 var defaultTimeout = 10 * time.Second
 
 // ConnectionConfig is the configuration options available for a MongoDB connection.
 type ConnectionConfig struct {
-	// Timeout is the timeout for various operations performed on the MongoDB server like Connect, Ping, Session etc.
+	// Timeout is the timeout for various operations performed on the MongoDB server like Connect, Ping etc.
 	Timeout time.Duration
 }
 
 // SetDefaultConnection sets the default connection to be used by the package.
-func SetDefaultConnection(conn *mongo.Database) {
-	dbConn = conn
+func SetDefaultConnection(client *mongo.Client, dbName string) {
+	mClient = client
+	dbConn = mClient.Database(dbName)
 }
 
 // ConfigureDefaultConnection opens a new connection using the provided config options and sets it as a default connection to be used by the package.
-func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*options.ClientOptions) error {
+func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*options.ClientOptions) (err error) {
 	if cfg == nil {
 		cfg = defaultConnectionConfig()
 	}
 
-	client, err := newClient(cfg, opts...)
+	mClient, err = newClient(cfg, opts...)
 	if err != nil {
 		return err
 	}
@@ -37,12 +39,12 @@ func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*o
 	defer cancel()
 
 	// Ping the MongoDB server to check if connection is established.
-	err = client.Ping(ctx, nil)
+	err = mClient.Ping(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	dbConn = client.Database(dbName)
+	dbConn = mClient.Database(dbName)
 
 	return nil
 }

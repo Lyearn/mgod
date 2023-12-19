@@ -42,8 +42,10 @@ For existing database connection,
 import "github.com/Lyearn/mgod"
 
 func init() {
-	// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-	mgod.SetDefaultConnection(dbConn)
+	dbName := "mgod-test"
+
+	// client is the MongoDB client obtained using Go Mongo Driver's Connect method.
+	mgod.SetDefaultConnection(client, dbName)
 }
 ```
 
