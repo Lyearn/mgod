@@ -5,7 +5,7 @@ title: Installation
 ## Requirements
 
 - Go 1.18 or higher
-- MongoDB 3.6 and higher
+- MongoDB 4.4 and higher
 
 ## Installation
 
