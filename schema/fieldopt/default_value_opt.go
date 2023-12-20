@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/Lyearn/mgod/errors"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -73,6 +74,10 @@ func (o defaultValueOption) GetValue(field reflect.StructField) (interface{}, er
 		return bson.A{}, nil
 
 	default:
-		return nil, fmt.Errorf("unsupported type %v", fieldType)
+		return nil, errors.NewBadRequestError(errors.BadRequestError{
+			Underlying: "default value option",
+			Got:        fmt.Sprintf("%v", fieldType),
+			Expected:   "string, int, float32, float64, bool, slice or array",
+		})
 	}
 }

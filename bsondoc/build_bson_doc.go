@@ -4,7 +4,6 @@ package bsondoc
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/Lyearn/mgod/errors"
 	"github.com/Lyearn/mgod/schema"
@@ -33,7 +32,6 @@ func Build(
 	}
 
 	if bsonDoc == nil && len(entityModelSchema.Root.Children) != 0 {
-		slog.ErrorContext(ctx, "BSON doc is nil but entity model schema is not empty")
 		return errors.NewBadRequestError(errors.BadRequestError{
 			Underlying: "bson doc",
 			Got:        "nil",
@@ -64,7 +62,7 @@ func build(
 		return nil
 	}
 
-	schemaNode, err := getSchemaNodeForPath(ctx, parent, schemaNodes, translateTo)
+	schemaNode, err := getSchemaNodeForPath(parent, schemaNodes, translateTo)
 	if err != nil {
 		return err
 	} else if schemaNode == nil {
@@ -100,7 +98,7 @@ func build(
 		uniqVisitedSchemaNodes := lo.Uniq(visitedSchemaNodes)
 
 		if len(uniqVisitedSchemaNodes) != len(immediateChildren) {
-			err := addMissingNodes(ctx, bsonElem, immediateChildren, uniqVisitedSchemaNodes, schemaNodes, translateTo)
+			err := addMissingNodes(bsonElem, immediateChildren, uniqVisitedSchemaNodes, schemaNodes, translateTo)
 			if err != nil {
 				return err
 			}
@@ -157,7 +155,10 @@ func build(
 			case TranslateToEnumEntityModel:
 				modifiedBSONNodeVal, err = transformer.TransformForEntityModelDoc(elemVal)
 			default:
-				err = fmt.Errorf("unknown translateTo enum value %s", translateTo)
+				err = errors.NewBadRequestError(errors.BadRequestError{
+					Underlying: "translateTo enum",
+					Got:        string(translateTo),
+				})
 			}
 
 			if err != nil {
@@ -220,7 +221,6 @@ func getConvertedValueForNode(
 
 // addMissingNodes appends missing nodes in bson doc which have default value.
 func addMissingNodes(
-	ctx context.Context,
 	bsonElem *bson.D,
 	immediateChildren []string,
 	uniqVisitedSchemaNodes []string,
@@ -229,7 +229,7 @@ func addMissingNodes(
 ) error {
 	missingSchemaPaths, _ := lo.Difference(immediateChildren, uniqVisitedSchemaNodes)
 	for _, missingSchemaPath := range missingSchemaPaths {
-		missingSchemaNode, err := getSchemaNodeForPath(ctx, missingSchemaPath, schemaNodes, translateTo)
+		missingSchemaNode, err := getSchemaNodeForPath(missingSchemaPath, schemaNodes, translateTo)
 		if err != nil {
 			return err
 		} else if missingSchemaNode == nil {
@@ -245,7 +245,11 @@ func addMissingNodes(
 
 		// throw error if schema node is not _id field (special field) and is required but has no default value.
 		if !isIDField && missingSchemaNode.Props.Options.Default == nil {
-			return fmt.Errorf("required field at path %s is missing in bson doc", missingSchemaPath)
+			return errors.NewBadRequestError(errors.BadRequestError{
+				Underlying: "bson doc",
+				Got:        "nil",
+				Expected:   fmt.Sprintf("field at path - %s", missingSchemaPath),
+			})
 		}
 
 		var bsonNodeToAppend bson.E
@@ -278,7 +282,6 @@ func addMissingNodes(
 }
 
 func getSchemaNodeForPath(
-	ctx context.Context,
 	path string,
 	schemaNodes map[string]*schema.TreeNode,
 	translateTo TranslateToEnum,
@@ -291,10 +294,10 @@ func getSchemaNodeForPath(
 			return nil, nil
 		}
 
-		slog.ErrorContext(ctx, fmt.Sprintf(
-			"schema doesn't contains any node at path %s found in bsonDoc", path))
-
-		return nil, fmt.Errorf("unknown path %s found in bson doc", path)
+		return nil, errors.NewNotFoundError(errors.NotFoundError{
+			Underlying: "bson doc",
+			Value:      fmt.Sprintf("path - %s", path),
+		})
 	}
 
 	return schemaNode, nil
