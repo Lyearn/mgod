@@ -6,198 +6,146 @@ import (
 	"time"
 
 	"github.com/Lyearn/mgod"
-	"github.com/Lyearn/mgod/dateformatter"
 	"github.com/Lyearn/mgod/schema/schemaopt"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type EntityMongoModelSuite struct {
 	suite.Suite
 	*require.Assertions
+}
 
-	dbName   string
-	collName string
-
-	mt     *mtest.T
-	mtOpts *mtest.Options
+type testEntity struct {
+	ID   string `bson:"_id" mgoType:"id"`
+	Name string
+	Age  *int `bson:",omitempty" mgoDefault:"18"`
 }
 
 func TestEntityMongoModelSuite(t *testing.T) {
 	s := new(EntityMongoModelSuite)
-	s.dbName = "foo"
-	s.collName = "bar"
-
 	suite.Run(t, s)
+}
+
+func (s *EntityMongoModelSuite) SetupSuite() {
+	s.setupConnection()
+	s.setupData()
 }
 
 func (s *EntityMongoModelSuite) SetupTest() {
 	s.Assertions = require.New(s.T())
-
-	mtOpts := mtest.NewOptions()
-	mtOpts = mtOpts.ClientType(mtest.Mock)
-	mtOpts = mtOpts.DatabaseName(s.dbName)
-	mtOpts = mtOpts.CollectionName(s.collName)
-
-	mt := mtest.New(s.T(), mtOpts)
-
-	s.mt = mt
-	s.mtOpts = mtOpts
 }
 
-func (s *EntityMongoModelSuite) ns() string {
-	return s.dbName + "." + s.collName
+func (s *EntityMongoModelSuite) TearDownSuite() {
+	entityMongoModel := s.getModel()
+	_, err := entityMongoModel.DeleteMany(context.Background(), bson.D{})
+	if err != nil {
+		s.T().Fatal(err)
+	}
 }
 
-type TestEntity struct {
-	ID       string `bson:"_id" mgoType:"id"`
-	Name     string
-	JoinedOn string `mgoType:"date"`
-	Age      *int   `bson:",omitempty" mgoDefault:"18"`
+func (s *EntityMongoModelSuite) setupConnection() {
+	cfg := &mgod.ConnectionConfig{Timeout: 5 * time.Second}
+	uri := "mongodb://localhost:27017/?replicaSet=replset&authSource=admin"
+
+	err := mgod.ConfigureDefaultClient(cfg, options.Client().ApplyURI(uri))
+	if err != nil {
+		s.T().Fatal(err)
+	}
+}
+
+func (s *EntityMongoModelSuite) setupData() {
+	firstID := primitive.NewObjectID()
+	secondID := primitive.NewObjectID()
+
+	age1 := 30
+	age2 := 40
+
+	entities := []testEntity{
+		{
+			ID:   firstID.Hex(),
+			Name: "Default User 1",
+			Age:  &age1,
+		},
+		{
+			ID:   secondID.Hex(),
+			Name: "Default User 2",
+			Age:  &age2,
+		},
+	}
+
+	entityMongoModel := s.getModel()
+	_, err := entityMongoModel.InsertMany(context.Background(), entities)
+	if err != nil {
+		s.T().Fatal(err)
+	}
+}
+
+func (s *EntityMongoModelSuite) getModel() mgod.EntityMongoModel[testEntity] {
+	schemaOpts := schemaopt.SchemaOptions{Timestamps: true}
+	opts := mgod.NewEntityMongoModelOptions("mgoddb", "entityMongoModel", &schemaOpts)
+	model, err := mgod.NewEntityMongoModel(testEntity{}, *opts)
+	if err != nil {
+		s.T().Fatal(err)
+	}
+
+	return model
 }
 
 func (s *EntityMongoModelSuite) TestFind() {
-	defer s.mt.Close()
-
-	s.mt.RunOpts("find", s.mtOpts, func(mt *mtest.T) {
-		currentTime := time.Now()
-		currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
-
-		firstID := primitive.NewObjectID()
-		secondID := primitive.NewObjectID()
-
-		//nolint:govet // this is a mock entity.
-		firstEntity := TestEntity{
-			ID:       firstID.Hex(),
-			Name:     "test1",
-			JoinedOn: currentTimeStr,
-		}
-		//nolint:govet // this is a mock entity.
-		secondEntity := TestEntity{
-			ID:       secondID.Hex(),
-			Name:     "test2",
-			JoinedOn: currentTimeStr,
-		}
-
-		first := mtest.CreateCursorResponse(1, s.ns(), mtest.FirstBatch, bson.D{
-			{Key: "_id", Value: firstID},
-			{Key: "name", Value: firstEntity.Name},
-			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
-		})
-		second := mtest.CreateCursorResponse(1, s.ns(), mtest.NextBatch, bson.D{
-			{Key: "_id", Value: secondID},
-			{Key: "name", Value: secondEntity.Name},
-			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
-		})
-		killCursors := mtest.CreateCursorResponse(0, s.ns(), mtest.NextBatch)
-
-		mt.AddMockResponses(first, second, killCursors)
-
-		opts := schemaopt.SchemaOptions{Collection: s.collName}
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
-		s.Nil(err)
-
-		testEntities, err := entityMongoModel.Find(context.Background(), bson.D{
-			{Key: "name", Value: firstEntity.Name},
-		})
-
-		s.Nil(err)
-		s.Equal(2, len(testEntities))
+	entityMongoModel := s.getModel()
+	entities, err := entityMongoModel.Find(context.Background(), bson.M{
+		"age": bson.M{
+			"$gt": 20,
+		},
+		"name": bson.M{
+			"$regex": "Default",
+		},
 	})
+
+	s.NoError(err)
+	s.Equal(2, len(entities))
 }
 
 func (s *EntityMongoModelSuite) TestFindOne() {
-	defer s.mt.Close()
-
-	s.mt.RunOpts("find one", s.mtOpts, func(mt *mtest.T) {
-		currentTime := time.Now()
-		currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
-
-		id := primitive.NewObjectID()
-
-		//nolint:govet // this is a mock entity.
-		entity := TestEntity{
-			ID:       id.Hex(),
-			Name:     "test",
-			JoinedOn: currentTimeStr,
-		}
-
-		mt.AddMockResponses(mtest.CreateCursorResponse(1, s.ns(), mtest.FirstBatch, bson.D{
-			{Key: "_id", Value: id},
-			{Key: "name", Value: entity.Name},
-			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
-		}))
-
-		opts := schemaopt.SchemaOptions{Collection: s.collName}
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
-		s.Nil(err)
-
-		testEntity, err := entityMongoModel.FindOne(context.Background(), bson.D{
-			{Key: "id", Value: entity.ID},
-		})
-
-		s.Nil(err)
-		s.Equal(entity.ID, testEntity.ID)
+	entityMongoModel := s.getModel()
+	entity, err := entityMongoModel.FindOne(context.Background(), bson.M{
+		"age": bson.M{
+			"$gt": 30,
+		},
+		"name": bson.M{
+			"$regex": "Default",
+		},
 	})
+
+	s.NoError(err)
+	s.Equal("Default User 2", entity.Name)
 }
 
 func (s *EntityMongoModelSuite) TestInsertOne() {
-	defer s.mt.Close()
-
 	id := primitive.NewObjectID()
-	currentTime := time.Now()
-	currentTimeStr, _ := dateformatter.New(currentTime).GetISOString()
+	age := 18
 
-	s.mt.RunOpts("insert one", s.mtOpts, func(mt *mtest.T) {
-		entity := TestEntity{
-			ID:       id.Hex(),
-			Name:     "test",
-			JoinedOn: currentTimeStr,
-		}
+	entity := testEntity{
+		ID:   id.Hex(),
+		Name: "test",
+		Age:  &age,
+	}
 
-		mt.AddMockResponses(mtest.CreateCursorResponse(1, s.ns(), mtest.FirstBatch, bson.D{
-			{Key: "_id", Value: id},
-			{Key: "name", Value: entity.Name},
-			{Key: "joinedon", Value: primitive.NewDateTimeFromTime(currentTime)},
-			{Key: "age", Value: 18},
-		}))
+	entityMongoModel := s.getModel()
+	doc, err := entityMongoModel.InsertOne(context.Background(), entity)
 
-		opts := schemaopt.SchemaOptions{Collection: s.collName}
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
-		s.Nil(err)
+	s.Nil(err)
+	s.Equal(entity.ID, doc.ID)
+	s.Equal(18, *doc.Age)
 
-		doc, err := entityMongoModel.InsertOne(context.Background(), entity)
-
-		s.Nil(err)
-		s.Equal(entity.ID, doc.ID)
-		s.Equal(18, *doc.Age)
-	})
-
-	s.mt.RunOpts("insert one with error", s.mtOpts, func(mt *mtest.T) {
-		entity := TestEntity{
-			ID:       id.Hex(),
-			Name:     "test",
-			JoinedOn: currentTimeStr,
-		}
-
-		mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{
-			Index:   1,
-			Code:    11000,
-			Message: "duplicate key error",
-		}))
-
-		opts := schemaopt.SchemaOptions{Collection: s.collName}
-		entityMongoModel, err := mgod.NewEntityMongoModel(TestEntity{}, opts)
-		s.Nil(err)
-
-		docID, err := entityMongoModel.InsertOne(context.Background(), entity)
-
-		s.Empty(docID)
-		s.NotNil(err)
-		s.True(mongo.IsDuplicateKeyError(err))
-	})
+	// Test duplicate key error
+	docID, err := entityMongoModel.InsertOne(context.Background(), entity)
+	s.Empty(docID)
+	s.NotNil(err)
+	s.True(mongo.IsDuplicateKeyError(err))
 }

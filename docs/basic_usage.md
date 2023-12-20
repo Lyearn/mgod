@@ -9,10 +9,8 @@ For existing database connection,
 import "github.com/Lyearn/mgod"
 
 func init() {
-	dbName := "mgod-test"
-
 	// client is the MongoDB client obtained using Go Mongo Driver's Connect method.
-	mgod.SetDefaultConnection(client, dbName)
+	mgod.SetDefaultClient(client, dbName)
 }
 ```
 
@@ -28,10 +26,9 @@ import (
 func init() {
 	// `cfg` is optional. Can rely on default configurations by providing `nil` value in argument.
 	cfg := &mgod.ConnectionConfig{Timeout: 5 * time.Second}
-	dbName := "mgod-test"
 	opts := options.Client().ApplyURI("mongodb://root:mgod123@localhost:27017")
 
-	err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
+	err := mgod.ConfigureDefaultClient(cfg, opts)
 }
 ```
 
@@ -59,11 +56,14 @@ import (
 )
 
 model := User{}
+dbName := "mgoddb"
+collection := "users"
+
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	Timestamps: true,
 }
 
+opts := mgod.NewEntityMongoModelOptions(dbName, collection, &schemaOpts)
 userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
 ```
 

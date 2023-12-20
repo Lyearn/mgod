@@ -10,10 +10,9 @@ Configure default connection with `mgod`.
 
 ```go
 cfg := &mgod.ConnectionConfig{Timeout: 5 * time.Second}
-dbName := "mgod_test"
 opts := options.Client().ApplyURI("mongodb://localhost:27017/?replicaSet=mgod_rs&authSource=admin")
 
-err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
+err := mgod.ConfigureDefaultClient(cfg, opts)
 ```
 
 :::info
@@ -29,12 +28,13 @@ type User struct {
 	EmailID string `bson:"emailId"`
 }
 
+dbName := "mgoddb"
+collection := "users"
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	Timestamps: true,
 }
 
-userModel, _ := mgod.NewEntityMongoModel(User{}, schemaOpts)
+userModel, _ := mgod.NewEntityMongoModelOptions(dbName, collection, &schemaOpts)
 ```
 
 Use `WithTransaction` function to perform multiple CRUD operations as an atomic unit.

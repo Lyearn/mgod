@@ -9,7 +9,6 @@ import (
 )
 
 var mClient *mongo.Client
-var dbConn *mongo.Database
 var defaultTimeout = 10 * time.Second
 
 // ConnectionConfig is the configuration options available for a MongoDB connection.
@@ -18,14 +17,13 @@ type ConnectionConfig struct {
 	Timeout time.Duration
 }
 
-// SetDefaultConnection sets the default connection to be used by the package.
-func SetDefaultConnection(client *mongo.Client, dbName string) {
+// SetDefaultClient sets the default MongoDB client to be used by the package.
+func SetDefaultClient(client *mongo.Client, dbName string) {
 	mClient = client
-	dbConn = mClient.Database(dbName)
 }
 
-// ConfigureDefaultConnection opens a new connection using the provided config options and sets it as a default connection to be used by the package.
-func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*options.ClientOptions) (err error) {
+// ConfigureDefaultClient opens a new connection using the provided config options and sets the default MongoDB client to be used by the package.
+func ConfigureDefaultClient(cfg *ConnectionConfig, opts ...*options.ClientOptions) (err error) {
 	if cfg == nil {
 		cfg = defaultConnectionConfig()
 	}
@@ -43,8 +41,6 @@ func ConfigureDefaultConnection(cfg *ConnectionConfig, dbName string, opts ...*o
 	if err != nil {
 		return err
 	}
-
-	dbConn = mClient.Database(dbName)
 
 	return nil
 }
