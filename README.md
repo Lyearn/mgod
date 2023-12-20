@@ -87,12 +87,8 @@ model := User{}
 dbName := "mgoddb"
 collection := "users"
 
-schemaOpts := schemaopt.SchemaOptions{
-	Timestamps: true,
-}
-
-opts := mgod.NewEntityMongoModelOptions(dbName, collection, &schemaOpts)
-userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
+opts := mgod.NewEntityMongoModelOptions(dbName, collection, nil)
+userModel, _ := mgod.NewEntityMongoModel(model, *opts)
 ```
 
 Use the entity ODM to perform CRUD operations with ease.
@@ -115,8 +111,6 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
 	"joinedOn": ISODate("2023-12-01T11:32:19.290Z"),
-	"createdAt": ISODate("2023-12-01T11:32:19.290Z"),
-	"updatedAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"__v": 0
 }
 ```

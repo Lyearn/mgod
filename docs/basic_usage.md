@@ -64,7 +64,7 @@ schemaOpts := schemaopt.SchemaOptions{
 }
 
 opts := mgod.NewEntityMongoModelOptions(dbName, collection, &schemaOpts)
-userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
+userModel, _ := mgod.NewEntityMongoModel(model, *opts)
 ```
 
 Use the entity ODM to perform CRUD operations with ease.
