@@ -18,5 +18,6 @@ This directory contains user-facing documentation. For those who wish to underst
 * [Meta fields](./meta_fields.md)
 
 ### Advanced Guide
+* [Multi Tenancy](./multi_tenancy.md)
 * [Unions](./union_types.md)
 * [Transactions](./transactions.md)
