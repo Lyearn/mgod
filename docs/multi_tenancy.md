@@ -37,8 +37,6 @@ The `EntityMongoModel` is always bound to the specified database at the time of 
 :::
 
 ```go
-amount := 10000
-
 result, _ := tenant1Model.FindOne(context.TODO(), bson.M{"name": "Gopher Tenant 2"})
 // result will be <nil> value in this case
 ```

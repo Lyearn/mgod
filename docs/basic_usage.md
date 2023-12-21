@@ -10,7 +10,7 @@ import "github.com/Lyearn/mgod"
 
 func init() {
 	// client is the MongoDB client obtained using Go Mongo Driver's Connect method.
-	mgod.SetDefaultClient(client, dbName)
+	mgod.SetDefaultClient(client)
 }
 ```
 
