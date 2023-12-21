@@ -23,6 +23,7 @@
 - Easily manage **meta fields** in models without cluttering Go structs.
 - Supports **union types**, expanding data capabilities.
 - Implement strict field requirements with struct tags for **data integrity**.
+- Built-in support for **multi-tenant** systems.
 - Wrapper around the **official** Mongo Go Driver.
 
 ## Requirements
@@ -42,8 +43,8 @@ For existing database connection,
 import "github.com/Lyearn/mgod"
 
 func init() {
-	// dbConn is the database connection obtained using Go Mongo Driver's Connect method.
-	mgod.SetDefaultConnection(dbConn)
+	// client is the MongoDB client obtained using Go Mongo Driver's Connect method.
+	mgod.SetDefaultClient(client)
 }
 ```
 
@@ -59,10 +60,9 @@ import (
 func init() {
 	// `cfg` is optional. Can rely on default configurations by providing `nil` value in argument.
 	cfg := &mgod.ConnectionConfig{Timeout: 5 * time.Second}
-	dbName := "mgod-test"
 	opts := options.Client().ApplyURI("mongodb://root:mgod123@localhost:27017")
 
-	err := mgod.ConfigureDefaultConnection(cfg, dbName, opts)
+	err := mgod.ConfigureDefaultClient(cfg, opts)
 }
 ```
 
@@ -84,12 +84,11 @@ import (
 )
 
 model := User{}
-schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
-	Timestamps: true,
-}
+dbName := "mgoddb"
+collection := "users"
 
-userModel, _ := mgod.NewEntityMongoModel(model, schemaOpts)
+opts := mgod.NewEntityMongoModelOptions(dbName, collection, nil)
+userModel, _ := mgod.NewEntityMongoModel(model, *opts)
 ```
 
 Use the entity ODM to perform CRUD operations with ease.
@@ -106,14 +105,12 @@ user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 
 **Output:**
-```json
+```js
 {
 	"_id": ObjectId("65697705d4cbed00e8aba717"),
 	"name": "Gopher",
 	"emailId": "gopher@mgod.com",
 	"joinedOn": ISODate("2023-12-01T11:32:19.290Z"),
-	"createdAt": ISODate("2023-12-01T11:32:19.290Z"),
-	"updatedAt": ISODate("2023-12-01T11:32:19.290Z"),
 	"__v": 0
 }
 ```
@@ -143,9 +140,9 @@ Inspired by the easy interface of MongoDB handling using [Mongoose](https://gith
 
 ## Future Scope
 The current version of mgod is a stable release. However, there are plans to add a lot more features like -
-- [ ] Enable functionality to opt out of the default conversion of date fields to ISOString format.
 - [x] Implement a setup step for storing a default Mongo connection, eliminating the need to pass it during EntityMongoModel creation.
-- [ ] Provide support for transactions following the integration of default Mongo connection logic.
+- [x] Provide support for transactions following the integration of default Mongo connection logic.
+- [ ] Enable functionality to opt out of the default conversion of date fields to ISOString format.
 - [ ] Develop easy to use wrapper functions around MongoDB Aggregation operation.
 - [ ] Introduce automatic MongoDB collection selection based on Go struct names as a default behavior.
 - [ ] Add test cases to improve code coverage.

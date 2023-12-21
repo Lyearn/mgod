@@ -243,7 +243,6 @@ linters:
     - nilnil # checks that there is no simultaneous return of nil error and an invalid value
     - noctx # finds sending http request without context.Context
     - nolintlint # reports ill-formed or insufficient nolint directives
-    - nonamedreturns # reports all named returns
     - nosprintfhostport # checks for misuse of Sprintf to construct a host with port in a URL
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
@@ -269,8 +268,9 @@ linters:
     #- decorder # checks declaration order and count of types, constants, variables and functions
     #- ginkgolinter # [if you use ginkgo/gomega] enforces standards of using ginkgo and gomega
     #- goheader # checks is file header matches to pattern
-    # - godox # detects FIXME, TODO and other comment keywords
+    #- godox # detects FIXME, TODO and other comment keywords
     #- ireturn # accept interfaces, return concrete types
+    #- nonamedreturns # reports all named returns
     #- prealloc # [premature optimization, but can be used in some cases] finds slice declarations that could potentially be preallocated
     #- tagalign # checks that struct tags are well aligned
     #- varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope

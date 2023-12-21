@@ -6,21 +6,6 @@ Schema Options is Mongo Schema level options (which modifies actual MongoDB doc)
 
 `mgod` supports the following schema options -
 
-## Collection
-
-- Accepts Type: `string`
-- Is Optional: `No`
-
-It is the name of the mongo collection in which the entity is stored. For example, `users` collection of MongoDB for `User` model in Golang.
-
-### Usage
-
-```go
-schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users", // MongoDB collection name
-}
-```
-
 ## Timestamps
 
 - Accepts Type: `bool`
@@ -33,7 +18,6 @@ It is used to track `createdAt` and `updatedAt` meta fields for the entity. See 
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	Timestamps: true,
 }
 ```
@@ -50,7 +34,6 @@ This reports whether to add a version key (`__v`) for the entity. See [Meta Fiel
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	VersionKey: true,
 }
 ```
@@ -67,7 +50,6 @@ It defines whether the entity is a union type. See [Union Types](union_types.md)
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "resources",
 	IsUnionType: true,
 }
 ```
@@ -90,7 +72,6 @@ It is the key used to identify the underlying type in case of a union type entit
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "resources",
 	IsUnionType: true,
 	DiscriminatorKey: "type",
 }

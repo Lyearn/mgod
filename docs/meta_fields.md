@@ -25,7 +25,6 @@ It is the meta field that stores the timestamp of the document creation. This fi
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	Timestamps: true,
 }
 
@@ -33,6 +32,7 @@ userDoc := User{
 	Name: "Gopher",
 	EmailID: "gopher@mgod.com",
 }
+
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 
@@ -59,7 +59,6 @@ It is the meta field that stores the timestamp of the document updation. This fi
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	Timestamps: true,
 }
 
@@ -98,7 +97,6 @@ It is the field that stores the version of the document. This field is automatic
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	VersionKey: true
 }
 
@@ -106,6 +104,7 @@ userDoc := User{
 	Name: "Gopher",
 	EmailID: "gopher@mgod.com",
 }
+
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 
@@ -124,7 +123,6 @@ If `VersionKey` is set to `false`.
 
 ```go
 schemaOpts := schemaopt.SchemaOptions{
-	Collection: "users",
 	VersionKey: false
 }
 
@@ -132,6 +130,7 @@ userDoc := User{
 	Name: "Gopher",
 	EmailID: "gopher@mgod.com",
 }
+
 user, _ := userModel.InsertOne(context.TODO(), userDoc)
 ```
 

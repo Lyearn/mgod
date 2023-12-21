@@ -74,18 +74,24 @@ type entityMongoModel[T any] struct {
 }
 
 // NewEntityMongoModel returns a new instance of EntityMongoModel for the provided model type and options.
-func NewEntityMongoModel[T any](modelType T, schemaOpts schemaopt.SchemaOptions) (EntityMongoModel[T], error) {
+func NewEntityMongoModel[T any](modelType T, opts entityMongoModelOptions) (EntityMongoModel[T], error) {
+	dbConn := getDBConn(opts.connOpts.db)
 	if dbConn == nil {
 		return nil, errors.ErrNoDatabaseConnection
 	}
 
-	coll := dbConn.Collection(schemaOpts.Collection)
+	coll := dbConn.Collection(opts.connOpts.coll)
 
 	modelName := schema.GetSchemaNameForModel(modelType)
 	schemaCacheKey := GetSchemaCacheKey(coll.Name(), modelName)
 
 	var entityModelSchema *schema.EntityModelSchema
 	var err error
+
+	schemaOpts := schemaopt.SchemaOptions{}
+	if opts.schemaOpts != nil {
+		schemaOpts = *opts.schemaOpts
+	}
 
 	// build schema if not cached.
 	if entityModelSchema, err = schema.EntityModelSchemaCacheInstance.GetSchema(schemaCacheKey); err != nil {
