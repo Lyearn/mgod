@@ -28,7 +28,11 @@
 
 ## Requirements
 - Go 1.18 or higher.
-- MongoDB 4.4 and higher.
+- MongoDB 3.6 and higher.
+
+> [!WARNING]
+> For MongoDB version **<4.4**, please create the collection in MongoDB before creating an `EntityMongoModel` using `mgod` for the same.
+> Refer to [this MongoDB docs](https://www.mongodb.com/docs/manual/reference/limits/#operations) for more information.
 
 ## Installation
 ```
