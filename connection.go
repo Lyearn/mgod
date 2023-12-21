@@ -18,7 +18,7 @@ type ConnectionConfig struct {
 }
 
 // SetDefaultClient sets the default MongoDB client to be used by the package.
-func SetDefaultClient(client *mongo.Client, dbName string) {
+func SetDefaultClient(client *mongo.Client) {
 	mClient = client
 }
 

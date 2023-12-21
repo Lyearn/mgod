@@ -86,8 +86,11 @@ func (s *EntityMongoModelSuite) setupData() {
 }
 
 func (s *EntityMongoModelSuite) getModel() mgod.EntityMongoModel[testEntity] {
+	dbName := "mgoddb"
+	collection := "entityMongoModel"
 	schemaOpts := schemaopt.SchemaOptions{Timestamps: true}
-	opts := mgod.NewEntityMongoModelOptions("mgoddb", "entityMongoModel", &schemaOpts)
+
+	opts := mgod.NewEntityMongoModelOptions(dbName, collection, &schemaOpts)
 	model, err := mgod.NewEntityMongoModel(testEntity{}, *opts)
 	if err != nil {
 		s.T().Fatal(err)

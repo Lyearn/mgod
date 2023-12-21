@@ -2,6 +2,7 @@ package mgod
 
 import (
 	"context"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,6 +18,7 @@ type TransactionFunc func(sc mongo.SessionContext) (interface{}, error)
 func WithTransaction(ctx context.Context, transactionFunc TransactionFunc) (interface{}, error) {
 	session, err := mClient.StartSession()
 	if err != nil {
+		slog.ErrorContext(ctx, "Error occurred during WithTransaction", err)
 		return nil, err
 	}
 	defer session.EndSession(ctx)
