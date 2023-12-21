@@ -1,8 +1,9 @@
 package schema
 
 import (
-	"fmt"
 	"sync"
+
+	"github.com/Lyearn/mgod/errors"
 )
 
 // EntityModelSchemaCache is the cache implementation than can hold [EntityModelSchema].
@@ -31,7 +32,7 @@ func (c *entityModelSchemaCache) GetSchema(schemaName string) (*EntityModelSchem
 		return schema, nil
 	}
 
-	return nil, fmt.Errorf("%s schema not found in cache", schemaName)
+	return nil, errors.ErrSchemaNotCached
 }
 
 func (c *entityModelSchemaCache) SetSchema(schemaName string, schema *EntityModelSchema) {
