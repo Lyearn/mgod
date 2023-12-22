@@ -34,7 +34,9 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Advanced Guide',
       items: [
+        'multi_tenancy',
         'union_types',
+        'transactions',
       ],
       collapsed: false,
     },
