@@ -34,7 +34,7 @@ function Feature({ icon, title, description }: FeatureItem) {
       <div
         aria-hidden
         className="w-[4rem] h-[4rem] mb-[1.6rem] bg-[#000] dark:bg-[#fff]"
-        style={{ maskImage: `url(${icon})` }}
+        style={{ WebkitMaskImage: `url(${icon})`, maskImage: `url(${icon})` }}
       />
       <Heading as="h3" className="mb-[0.4rem] heading-xs text-text-paragraph dark:text-[#eaeaea]">
         {title}
