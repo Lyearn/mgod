@@ -1,5 +1,5 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
@@ -13,7 +13,7 @@ const config: Config = {
   // GitHub pages deployment config.
   organizationName: 'Lyearn',
   projectName: 'mgod',
-  trailingSlash: false, // https://github.com/slorber/trailing-slash-guide 
+  trailingSlash: false, // https://github.com/slorber/trailing-slash-guide
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -46,12 +46,12 @@ const config: Config = {
   plugins: [
     // https://www.swyx.io/tailwind-docusaurus-2022
     async function tailwindPlugin(context, options) {
-      const tailwindCssNesting = (await import("tailwindcss/nesting"));
-      const tailwindCss = (await import("tailwindcss"));
-      const autoprefixer = (await import("autoprefixer"));
-    
+      const tailwindCssNesting = await import('tailwindcss/nesting');
+      const tailwindCss = await import('tailwindcss');
+      const autoprefixer = await import('autoprefixer');
+
       return {
-        name: "docusaurus-tailwindcss",
+        name: 'docusaurus-tailwindcss',
         configurePostCss(postcssOptions) {
           postcssOptions.plugins.push(tailwindCssNesting);
           postcssOptions.plugins.push(tailwindCss);
@@ -64,10 +64,6 @@ const config: Config = {
 
   themeConfig: {
     image: 'img/social-card.jpg', // twitter:image
-    colorMode: {
-      disableSwitch: true,
-      respectPrefersColorScheme: false,
-    },
     navbar: {
       title: 'mgod',
       logo: {
@@ -81,7 +77,7 @@ const config: Config = {
           label: 'Docs',
           position: 'right',
         },
-        { 
+        {
           href: 'https://pkg.go.dev/github.com/Lyearn/mgod',
           label: 'API',
           position: 'right',

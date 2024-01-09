@@ -20,9 +20,9 @@
   --ifm-menu-color-background-hover: unset;
   --ifm-navbar-height: 5.6rem;
   --ifm-pagination-nav-border-radius: 0.8rem;
-  --ifm-pagination-nav-color-hover: #EAEAEA;
+  --ifm-pagination-nav-color-hover: #eaeaea;
   --ifm-link-hover-decoration: none;
-  --ifm-toc-border-color: #EAEAEA;
+  --ifm-toc-border-color: #eaeaea;
   --ifm-toc-padding-horizontal: 1.6rem;
   --ifm-toc-padding-vertical: 0rem;
   --ifm-global-shadow-lw: none;
@@ -89,14 +89,13 @@
   --ff-label-03: var(--font-primary), var(--ifm-font-family-base);
   --ff-label-caps: var(--font-primary), var(--ifm-font-family-base);
 
-
   --fs-body-long-01: 1.6rem;
   --fs-body-long-02: 1.4rem;
   --fs-body-long-03: 1.3rem;
   --fs-body-short-01: 1.6rem;
   --fs-body-short-02: 1.4rem;
   --fs-body-short-03: 1.2rem;
-  --fs-body-short-04: 1.0rem;
+  --fs-body-short-04: 1rem;
   --fs-code-01: 85%;
   --fs-code-02: 80%;
   --fs-display-l: 2.4rem;
@@ -229,6 +228,11 @@
 
 html {
   font-size: 10px;
+}
+
+[data-theme='dark']:root {
+  --ifm-background-color: #000;
+  --ifm-navbar-background-color: #000;
 }
 
 /* } */
@@ -523,16 +527,20 @@ html {
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 
 .navbar--fixed-top {
   padding-inline: 2.4rem;
-  border-bottom: 1px solid #EAEAEA;
+  border-bottom: 1px solid #eaeaea;
 
   @media (max-width: 996px) {
     padding-inline: 0.8rem;
   }
+}
+
+[data-theme='dark'] .navbar--fixed-top {
+  border-bottom: 1px solid #222;
 }
 
 .navbar__toggle {
@@ -573,6 +581,21 @@ html {
   @apply label-02 text-text-primary;
 }
 
+[data-theme='dark'] {
+  .navbar__link {
+    color: var(--text-secondary);
+  }
+
+  .navbar__link:hover,
+  .navbar__link:focus-visible {
+    color: var(--text-white);
+  }
+
+  .navbar__link--active {
+    color: var(--text-white);
+  }
+}
+
 .navbar__link > svg,
 .menu__link > svg {
   display: none;
@@ -583,23 +606,22 @@ html {
   & .navbar__link.navbar-github-link {
     display: flex;
     align-items: center;
-    
+
     &:after {
       content: '';
       width: 2.4rem;
       height: 2.4rem;
-      background-image: url("/icon/github-fill.svg");
-      background-repeat: no-repeat;
-      background-position: center;
+      mask-image: url('/icon/github-fill.svg');
+      background-color: var(--icon-active);
     }
-    
+
     &:before {
       content: '';
       margin-left: -0.4rem;
       margin-right: 1.2rem;
       width: 0.1rem;
       height: 2.4rem;
-      background-color: #EAEAEA;
+      background-color: #eaeaea;
     }
 
     @media (max-width: 996px) {
@@ -607,23 +629,38 @@ html {
     }
   }
 }
+
+[data-theme='dark'] {
+  .navbar.navbar--fixed-top .navbar__items--right {
+    & .navbar__link.navbar-github-link {
+      &:after {
+        background-color: var(--icon-secondary);
+      }
+
+      &:before {
+        background-color: #222;
+      }
+    }
+  }
+}
+
 .navbar-sidebar .navbar-sidebar__item .menu__list-item {
   .menu__link.navbar-github-link {
     display: flex;
     align-items: center;
-    border-top: 1px solid #EAEAEA;
+    border-top: 1px solid #eaeaea;
     padding-top: 1.6rem;
 
     &:before {
       content: '';
       width: 2.4rem;
       height: 2.4rem;
-      background-image: url("/icon/github-fill.svg");
+      background-image: url('/icon/github-fill.svg');
       background-repeat: no-repeat;
       background-position: center;
       margin-right: 0.8rem;
     }
-    
+
     &:after {
       content: 'GitHub';
     }
@@ -691,7 +728,7 @@ html {
 .menu__list-item-collapsible + .menu__list {
   margin-inline-start: 12.5px;
   padding-inline-start: 6px;
-  border-inline-start: #EAEAEA 1px solid;
+  border-inline-start: #eaeaea 1px solid;
 }
 
 .theme-doc-toc-desktop {
@@ -704,7 +741,7 @@ html {
 
       & > ul {
         --ifm-toc-padding-horizontal: 2rem;
-  
+
         & > li {
           margin-inline: 0rem;
           margin-block: 0.8rem;
@@ -728,19 +765,19 @@ html {
 }
 
 .theme-doc-toc-mobile {
-  background-color: #F2F2F2 !important;
+  background-color: #f2f2f2 !important;
   padding-block: 1.2rem;
   padding-inline: 1.6rem;
   margin-top: 1rem !important;
   margin-bottom: 0rem !important;
   border-radius: 1.2rem !important;
   @apply body-short-01 text-text-primary;
-  
+
   & > button {
     padding: 0rem;
 
     &::after {
-      background-image: url("/icon/arrow-ios-up-outline.svg");
+      background-image: url('/icon/arrow-ios-up-outline.svg');
       background-repeat: no-repeat;
       background-position: center;
       height: 2rem;
@@ -772,7 +809,7 @@ html {
 
   & .table-of-contents__link {
     @apply body-short-01 text-text-secondary;
-  
+
     &:hover,
     &:focus-visible {
       @apply text-text-primary;
@@ -847,7 +884,7 @@ html {
 
   &::after {
     right: 2.4rem;
-    background-image: url("/icon/arrow-right-fill.svg");
+    background-image: url('/icon/arrow-right-fill.svg');
   }
 }
 
@@ -856,7 +893,7 @@ html {
 
   &::before {
     left: 2.4rem;
-    background-image: url("/icon/arrow-left-fill.svg");
+    background-image: url('/icon/arrow-left-fill.svg');
   }
 }
 
@@ -869,12 +906,12 @@ html {
 
   padding: 0rem;
   background-color: unset;
-  border-top: 1px solid #EAEAEA;
+  border-top: 1px solid #eaeaea;
 
   & > .container {
     margin-block: 2rem 3.2rem;
     margin-left: auto;
-    @apply  mr-[2.4rem] sm:mr-[4.2rem];
+    @apply mr-[2.4rem] sm:mr-[4.2rem];
     padding: 0rem;
     max-width: fit-content;
   }
@@ -890,7 +927,7 @@ html {
         content: '';
         width: 2rem;
         height: 2rem;
-        background-image: url("/icon/diagonal-arrow-right-up-fill.svg");
+        background-image: url('/icon/diagonal-arrow-right-up-fill.svg');
         background-repeat: no-repeat;
         background-position: center;
         margin-inline-start: 0.4rem;
@@ -903,12 +940,20 @@ html {
   }
 }
 
+[data-theme='dark'] .footer {
+  border-top: 1px solid #222;
+}
+
+.toggleButton_node_modules-\@docusaurus-theme-classic-lib-theme-ColorModeToggle-styles-module:hover {
+  background: none !important;
+}
+
 .markdown {
-  --ifm-link-color: #0065FF;
+  --ifm-link-color: #0065ff;
   --ifm-link-decoration: none;
-  --ifm-link-hover-color: #0065FF; 
+  --ifm-link-hover-color: #0065ff;
   --ifm-link-hover-decoration: underline;
-  --ifm-code-background: #FAFAFA;
+  --ifm-code-background: #fafafa;
   --ifm-code-border-radius: 0.4rem;
   --ifm-code-padding-horizontal: 0.4rem;
   --ifm-alert-border-radius: 1.2rem;
@@ -947,7 +992,7 @@ html {
 
 .markdown pre {
   @apply body-long-01;
-  border: 1px solid #EAEAEA;
+  border: 1px solid #eaeaea;
 }
 
 .markdown pre code {
@@ -977,7 +1022,7 @@ html {
   padding: 2rem;
   padding-block-start: 1.6rem;
   margin-block: 1.2rem;
-  border: 1px solid #EAEAEA;
+  border: 1px solid #eaeaea;
 }
 
 .markdown .alert > div:first-child {

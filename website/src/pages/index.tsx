@@ -7,7 +7,7 @@ import Heading from '@theme/Heading';
 function GetStartedButton() {
   return (
     <Link
-      className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white"
+      className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white dark:bg-[#222]"
       to="/docs/about">
       Get Started
     </Link>
@@ -20,12 +20,12 @@ function HomepageHeader() {
       <div className="max-w-[82.5rem] mx-auto">
         <Heading
           as="h1"
-          className="mb-[3.2rem] mx-auto text-text-primary text-[4.8rem] font-[600] leading-[120%] tracking-[-0.096] sm:text-[6.8rem] sm:leading-[normal] sm:tracking-[-0.136rem]"
-        >
+          className="mb-[3.2rem] mx-auto sm:text-[6.8rem] sm:leading-[normal] sm:tracking-[-0.136rem] font-[600] text-[4.8rem] leading-[120%] tracking-[-0.096rem] text-text-primary dark:text-text-white">
           Empower your Go applications with mgod
         </Heading>
-        <p className="mb-[5.6rem] max-w-[clamp(34.2rem,90%,65.4rem)] mx-auto text-text-secondary text-[1.8rem] font-[400] leading-[3.2rem]">
-          Transform your MongoDB interactions in Go effortlessly with mgod. Simplify database operations, enhance type safety, and build robust applications!
+        <p className="mb-[5.6rem] max-w-[clamp(34.2rem,90%,65.4rem)] mx-auto text-[1.8rem] font-[400] leading-[3.2rem] text-text-secondary">
+          Transform your MongoDB interactions in Go effortlessly with mgod. Simplify database
+          operations, enhance type safety, and build robust applications!
         </p>
       </div>
       <GetStartedButton />
@@ -38,8 +38,7 @@ function HomepageFooter() {
     <footer className="py-[12rem] sm:py-[20rem] px-[2rem] text-center">
       <Heading
         as="h2"
-        className="mb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary text-[3.2rem] font-[600] leading-[120%] tracking-[-0.064] sm:text-[4.8rem] sm:leading-[140%] sm:tracking-[-0.096rem]"
-      >
+        className="mb-[5.6rem] max-w-[59.6rem] mx-auto text-text-primary dark:text-text-white text-[3.2rem] font-[600] leading-[120%] tracking-[-0.064] sm:text-[4.8rem] sm:leading-[140%] sm:tracking-[-0.096rem]">
         Ready to simplify your MongoDB interactions?
       </Heading>
       <GetStartedButton />
@@ -47,12 +46,11 @@ function HomepageFooter() {
   );
 }
 
-export default function Home(): JSX.Element {
+function Home() {
   const { siteConfig } = useDocusaurusContext();
+
   return (
-    <Layout
-      title="mgod - Empower your Go applications"
-      description={siteConfig.tagline}>
+    <Layout title="mgod - Empower your Go applications" description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
         <HomepageFeatures />
@@ -61,3 +59,5 @@ export default function Home(): JSX.Element {
     </Layout>
   );
 }
+
+export default Home;
