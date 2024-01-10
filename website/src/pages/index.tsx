@@ -7,7 +7,7 @@ import Heading from '@theme/Heading';
 function GetStartedButton() {
   return (
     <Link
-      className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white dark:bg-[#222]"
+      className="block w-[14rem] py-[1.2rem] mx-auto rounded-full heading-xs text-white bg-black hover:text-white focus-visible:text-white dark:bg-[#222] dark:hover:bg-[#1b1b1b] dark:active:bg-[#111] dark:hover:text-[#eaeaea] dark:active:text-[#eaeaea]"
       to="/docs/about">
       Get Started
     </Link>

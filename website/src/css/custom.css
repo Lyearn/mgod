@@ -732,16 +732,16 @@ html {
 }
 
 [data-theme='dark'] {
+  .menu__link--sublist.menu__link--active {
+    @apply text-text-secondary;
+  }
+
   .menu__link:hover,
   .menu__link--active,
   .menu__link:focus-visible,
   .menu__link--sublist:hover,
   .menu__link--sublist:focus-visible {
     @apply text-text-white;
-  }
-
-  .menu__link--sublist.menu__link--active {
-    @apply text-text-secondary;
   }
 }
 
@@ -1009,9 +1009,8 @@ html {
         content: '';
         width: 2rem;
         height: 2rem;
-        background-image: url('/icon/diagonal-arrow-right-up-fill.svg');
-        background-repeat: no-repeat;
-        background-position: center;
+        mask-image: url('/icon/diagonal-arrow-right-up-fill.svg');
+        background-color: currentColor;
         margin-inline-start: 0.4rem;
       }
 
@@ -1024,6 +1023,18 @@ html {
 
 [data-theme='dark'] .footer {
   border-top: 1px solid #222;
+
+  .footer-github-discussions-link {
+    color: #2b99ff;
+
+    &:hover {
+      color: #5eb1ff;
+    }
+
+    &:active {
+      color: #66a0d6;
+    }
+  }
 }
 
 button[class*=' toggleButton'],
@@ -1151,6 +1162,33 @@ button[class^='toggleButton'] {
 
   .markdown p {
     color: #eaeaea;
+  }
+
+  .markdown a {
+    color: #2b99ff;
+
+    &:hover {
+      color: #5eb1ff;
+    }
+
+    &:active {
+      color: #66a0d6;
+    }
+  }
+
+  .markdown button {
+    background-color: transparent;
+    color: var(--icon-secondary);
+
+    &:hover {
+      background-color: #111;
+      color: var(--icon-secondary);
+    }
+
+    &:active {
+      background-color: #000;
+      color: var(--icon-placeholder);
+    }
   }
 
   .markdown code {
